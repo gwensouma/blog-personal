@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Source+Sans+3:wght@400;500;600&display=swap">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root {
+      --ink: #241f1a;
+      --paper: #faf6ee;
+      --muted: #8a7f6c;
+      --rule: #e2d8c3;
+      --accent: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</helmet>
+<div style="background: var(--paper); min-height: 100%; font-family: 'Source Sans 3', system-ui, sans-serif; color: var(--ink);">
+
+  <div style="max-width: 640px; margin: 0 auto; padding: 72px 24px 96px;">
+
+    <a href="Main.dc.html" style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; margin-bottom: 40px;">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8H3M7 4L3 8l4 4"/></svg>
+      <span>Back to post list</span>
+    </a>
+
+    <div style="font-size: 13px; letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; margin-bottom: 12px;">August 10, 2026</div>
+    <h1 style="font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 38px; line-height: 1.15; margin: 0 0 28px;">Server Components run on the server</h1>
+
+    <p style="font-size: 18px; line-height: 1.75; color: var(--ink); margin: 0 0 40px;">
+      A Server Component is a new kind of React component that only renders on the server.
+      It is never sent down to the client as JS, so it can directly access a database, the
+      file system, or any other server-only resource without worrying about security or
+      bundle size.
+    </p>
+
+    <div style="border-top: 1px solid var(--rule); padding-top: 32px; display: flex; align-items: center; gap: 16px;">
+      <button style="font-family: inherit; font-size: 15px; font-weight: 600; color: var(--ink); background: #fff; border: 1px solid var(--rule); border-radius: 999px; padding: 10px 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13.5s-5.5-3.3-5.5-7.2C2.5 4 4.2 2.5 6.1 2.5 7.2 2.5 8 3 8 3s.8-.5 1.9-.5c1.9 0 3.6 1.5 3.6 3.8 0 3.9-5.5 7.2-5.5 7.2z"/></svg>
+        <span>Like (0)</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

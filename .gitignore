@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# env files (keep .env.example committed)
+.env*.local
+.env
+
+# logs
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Playwright MCP screenshots/snapshots
+.playwright-mcp/
+
+# Local JSON data store (lib/data/store.ts)
+.data/
+
+# Third-party Claude Code skills (installed locally, not redistributed)
+.claude/skills/
