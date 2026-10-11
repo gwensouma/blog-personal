@@ -92,3 +92,11 @@ export type Paginated<T> = {
 
 /** Minimal post entry for the client-side command palette (kept small: it ships in the RSC payload). */
 export type PostIndexItem = Pick<PostSummary, "slug" | "title" | "tags">;
+
+/** One page of the archive, with what the year headings need beyond the page itself. */
+export type ArchivePage = Paginated<PostSummary> & {
+  /** Posts per year across the whole archive (not just this page), keyed by "2026". */
+  yearCounts: Record<string, number>;
+  /** The year of this page's first post when that year already started on the previous page, else null. */
+  continuedYear: string | null;
+};

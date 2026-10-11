@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { PostArchive } from "@/components/posts/post-archive";
 import { PostList } from "@/components/posts/post-list";
 import { PostPagination } from "@/components/posts/post-pagination";
-import { getPaginatedPosts } from "@/lib/data/posts";
+import { getArchivePage } from "@/lib/data/posts";
 
 type ArchiveProps = { searchParams: Promise<{ page?: string | string[] }> };
 
@@ -29,7 +29,7 @@ export default async function ArchivePage({ searchParams }: ArchiveProps) {
   const page = parsePage((await searchParams).page);
   if (page === null) notFound();
 
-  const result = await getPaginatedPosts(page);
+  const result = await getArchivePage(page);
   // Page 1 may legitimately be empty (no posts yet); any later empty page is a 404.
   if (page > result.totalPages) notFound();
 
@@ -42,7 +42,11 @@ export default async function ArchivePage({ searchParams }: ArchiveProps) {
         }`}
         className="pb-0"
       />
-      {result.items.length > 0 ? <PostArchive posts={result.items} /> : <PostList posts={[]} />}
+      {result.items.length > 0 ? (
+        <PostArchive posts={result.items} yearCounts={result.yearCounts} continuedYear={result.continuedYear} />
+      ) : (
+        <PostList posts={[]} />
+      )}
       <PostPagination page={page} totalPages={result.totalPages} />
     </ReadingColumn>
   );

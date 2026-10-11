@@ -3,6 +3,14 @@ import { PostListItem } from "@/components/posts/post-list-item";
 import { yearOf } from "@/lib/format";
 import type { PostSummary } from "@/types/post";
 
+type PostArchiveProps = {
+  posts: PostSummary[];
+  /** Posts per year across the whole archive, so a heading shows the year's full total. */
+  yearCounts: Record<string, number>;
+  /** Year that began on the previous page; its heading is marked as continued. */
+  continuedYear: string | null;
+};
+
 function groupByYear(posts: PostSummary[]): [string, PostSummary[]][] {
   const groups = new Map<string, PostSummary[]>();
   for (const post of posts) {
@@ -13,22 +21,46 @@ function groupByYear(posts: PostSummary[]): [string, PostSummary[]][] {
   return [...groups.entries()];
 }
 
-// Archive body: posts grouped under a year heading.
-export function PostArchive({ posts }: { posts: PostSummary[] }) {
+function postCount(count: number): string {
+  return `${count} ${count === 1 ? "post" : "posts"}`;
+}
+
+// Archive body: posts grouped under a year heading. The heading carries the
+// year's total (across all pages) and, on a page that picks up mid-year, a
+// "continued" note. Visually the year stays large and the extras sit quiet on
+// the same baseline; screen readers hear "2026, continued, 6 posts" thanks to
+// the sr-only commas between the parts.
+export function PostArchive({ posts, yearCounts, continuedYear }: PostArchiveProps) {
   return (
     <div className="flex flex-col gap-12">
-      {groupByYear(posts).map(([year, yearPosts]) => (
-        <section key={year} aria-labelledby={`year-${year}`} className="flex flex-col gap-4">
-          <h2 id={`year-${year}`} className="font-heading text-2xl font-semibold tabular-nums text-muted-foreground">
-            {year}
-          </h2>
-          <StaggerList className="flex flex-col border-t border-border">
-            {yearPosts.map((post, index) => (
-              <PostListItem key={post.slug} post={post} headingLevel="h3" index={index} />
-            ))}
-          </StaggerList>
-        </section>
-      ))}
+      {groupByYear(posts).map(([year, yearPosts]) => {
+        const continued = year === continuedYear;
+        const total = yearCounts[year] ?? yearPosts.length;
+        return (
+          <section key={year} aria-labelledby={`year-${year}`} className="flex flex-col gap-4">
+            <h2
+              id={`year-${year}`}
+              className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-heading text-2xl font-semibold tabular-nums text-muted-foreground"
+            >
+              <span>{year}</span>
+              {continued ? (
+                <span className="font-sans text-sm font-normal">
+                  <span className="sr-only">, </span>continued
+                </span>
+              ) : null}
+              <span className="ml-auto font-sans text-sm font-normal tabular-nums">
+                <span className="sr-only">, </span>
+                {postCount(total)}
+              </span>
+            </h2>
+            <StaggerList className="flex flex-col border-t border-border">
+              {yearPosts.map((post, index) => (
+                <PostListItem key={post.slug} post={post} headingLevel="h3" index={index} />
+              ))}
+            </StaggerList>
+          </section>
+        );
+      })}
     </div>
   );
 }
