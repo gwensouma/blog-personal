@@ -100,3 +100,20 @@ export type ArchivePage = Paginated<PostSummary> & {
   /** The year of this page's first post when that year already started on the previous page, else null. */
   continuedYear: string | null;
 };
+
+/** One /search hit: the post plus a body snippet when the match is only in the post text. */
+export type SearchHit = {
+  post: PostSummary;
+  /** Plain text around the first body match; absent when the title, excerpt or a tag already matches. */
+  snippet?: string;
+};
+
+/** Everything /search renders: the hits after the tag filter, and tag chips counted before it. */
+export type SearchOutcome = {
+  query: string;
+  /** Tag slug of the active filter, or null. Unknown slugs are dropped, not errors. */
+  tag: Tag | null;
+  hits: SearchHit[];
+  /** Tags among the query's matches (before the tag filter), most frequent first. */
+  facets: Tag[];
+};

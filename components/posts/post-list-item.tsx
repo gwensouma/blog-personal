@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StaggerItem } from "@/components/motion/stagger";
+import { HighlightedText } from "@/components/posts/highlighted-text";
 import { PostCover } from "@/components/posts/post-cover";
 import { PostMeta } from "@/components/posts/post-meta";
 import {
@@ -20,6 +21,10 @@ type PostListItemProps = {
   headingLevel?: "h2" | "h3";
   /** Position in the list: staggers the CSS first-load entrance. */
   index?: number;
+  /** Search query to mark in the title and excerpt (used by /search). */
+  highlight?: string;
+  /** Body text around a match, shown under the excerpt with the query marked (used by /search). */
+  snippet?: string;
 };
 
 // Only the title is a link; its ::after stretches over the whole row (cover
@@ -31,7 +36,7 @@ type PostListItemProps = {
 // inner div because motion owns the <li>'s transform.
 // On first load the inner div also plays a CSS staggered entrance (before hydration),
 // so rows already on screen get the same energy as rows revealed on scroll.
-export function PostListItem({ post, headingLevel: Heading = "h2", index = 0 }: PostListItemProps) {
+export function PostListItem({ post, headingLevel: Heading = "h2", index = 0, highlight, snippet }: PostListItemProps) {
   return (
     <StaggerItem className="border-b border-border">
       <div
@@ -43,10 +48,18 @@ export function PostListItem({ post, headingLevel: Heading = "h2", index = 0 }: 
           <PostMeta post={post}>{hasSeriesMarker(post.series) ? <PostSeriesMarker series={post.series} /> : null}</PostMeta>
           <Heading className="pr-8 font-heading text-2xl leading-snug font-semibold text-balance [overflow-wrap:anywhere]">
             <Link href={`/posts/${post.slug}`} className={postRowLinkClassName}>
-              {post.title}
+              <HighlightedText text={post.title} query={highlight} />
             </Link>
           </Heading>
-          <p className="max-w-[58ch] text-base leading-relaxed text-muted-foreground">{post.excerpt}</p>
+          <p className="max-w-[58ch] text-base leading-relaxed text-muted-foreground">
+            <HighlightedText text={post.excerpt} query={highlight} />
+          </p>
+          {snippet ? (
+            <p className="max-w-[58ch] border-l-2 border-border pl-3 text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+              <span className="sr-only">Matched in the post: </span>
+              <HighlightedText text={snippet} query={highlight} className="text-foreground" />
+            </p>
+          ) : null}
           <PostTags tags={post.tags} className="mt-1" />
         </div>
         <PostCover

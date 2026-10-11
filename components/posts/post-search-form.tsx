@@ -3,12 +3,15 @@ import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { MAX_QUERY_LENGTH } from "@/lib/highlight";
 
 // A plain GET form to /search: works without JavaScript, and next/form adds
-// client-side navigation once JS has loaded.
-export function PostSearchForm({ defaultValue = "" }: { defaultValue?: string }) {
+// client-side navigation once JS has loaded. `tag` keeps an active topic filter
+// across a new query (a hidden field); the "All" chip under the form drops it.
+export function PostSearchForm({ defaultValue = "", tag }: { defaultValue?: string; tag?: string }) {
   return (
     <Form action="/search" role="search" className="flex w-full flex-col gap-3 sm:flex-row sm:items-end">
+      {tag ? <input type="hidden" name="tag" value={tag} /> : null}
       <Field className="flex-1">
         <FieldLabel htmlFor="search-query" className="sr-only">
           Search posts
@@ -21,15 +24,14 @@ export function PostSearchForm({ defaultValue = "" }: { defaultValue?: string })
             defaultValue={defaultValue}
             placeholder="Search posts, e.g. Suspense"
             autoComplete="off"
+            maxLength={MAX_QUERY_LENGTH}
           />
           <InputGroupAddon>
             <SearchIcon aria-hidden="true" />
           </InputGroupAddon>
         </InputGroup>
       </Field>
-      <Button type="submit">
-        Search
-      </Button>
+      <Button type="submit">Search</Button>
     </Form>
   );
 }
