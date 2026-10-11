@@ -94,7 +94,7 @@ Each line is one branch and one PR. The lead merges.
 | 3 ✅ | `feat/post-series` | B: `series` + `seriesOrder` frontmatter, series box, series nav. First series "RSC Fundamentals": server-components-run-on-the-server (1) → client-components-render-twice (2) → rsc-shrinks-your-bundle (3) | — |
 | 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post) | sprint 3 |
 | 5 ✅ | `feat/archive-by-year` | E: `/posts` grouped by year, pagination kept | — |
-| 6 | `feat/popular-posts` | E: top posts by views, streamed in `<Suspense>` | — |
+| 6 ✅ | `feat/popular-posts` | E: top posts by views on home (ISR 5m, rendered inline, no `<Suspense>`) | — |
 | 7 | `feat/search-filters` | E: tag chips + match highlight, URL params only | — |
 
 Deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
