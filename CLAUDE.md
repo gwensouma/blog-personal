@@ -15,10 +15,12 @@ This project is a personal blog, built as a learning vehicle for React Server Co
 
 ## Commands
 
-- `npm run dev` — start the Next.js dev server
+- `npm run dev` — start the Next.js dev server (loads `.env.local` via Node's `--env-file-if-exists`, so `PORT` there is honored)
 - `npm run build` — production build
-- `npm run start` — run the production build
-- No test suite or lint script is configured.
+- `npm run start` — run the production build (same `.env.local` loading)
+- `npm run typecheck` — `tsc --noEmit`
+- `npm run lint` — ESLint flat config ([eslint.config.mjs](eslint.config.mjs), `next/core-web-vitals` + `next/typescript`)
+- No test suite is configured. Before a PR: `typecheck`, `lint` and `build` must all pass.
 
 ## Architecture
 

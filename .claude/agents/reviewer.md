@@ -23,7 +23,7 @@ Read `CLAUDE.md` first, then any design notes in `.design/` that relate to the c
 7. **Project rules** — TypeScript only, English-only comments and copy, no unrequested libraries.
 8. **File placement** — every new or moved file sits where CLAUDE.md's "Where does a new file go?" says; `app/` files stay thin; named exports except Next special files; `@/` imports.
 
-You may run `npm run build` to confirm the change compiles.
+Run `npm run typecheck`, `npm run lint` and `npm run build`; any failure is a must-fix.
 
 ## Checking in a real browser (Playwright)
 

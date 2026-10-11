@@ -22,7 +22,7 @@ Read `CLAUDE.md` first. Its rules override any skill guidance when they conflict
    - Animate with `motion` (`motion/react`): `m.*` inside the existing `LazyMotion`, never the full `motion` component; presets from `lib/motion.ts`; wrappers in `components/motion/` take Server Component `children`. Use CSS (Tailwind, `tw-animate-css`) for above-the-fold entrances. Content must be visible without JS, animate only `transform`/`opacity`, and respect `prefers-reduced-motion`.
    - Apply `frontend-ui-engineering` for accessibility (semantic HTML, labels, focus states, contrast) and responsive layout (mobile first).
 3. **Respect RSC boundaries.** Pages and components are Server Components by default. Put `"use client"` only on the smallest interactive leaf (see `components/posts/like-button.tsx`). Data comes from `lib/data/`; pages only call it, never implement fetching. Place every new file according to "Where does a new file go?" in CLAUDE.md.
-4. **Verify.** Run `npm run build` and fix any type or build error before reporting.
+4. **Verify.** Run `npm run typecheck`, `npm run lint` and `npm run build`, and fix every error before reporting.
 
 ## Rules
 

@@ -254,6 +254,7 @@ export function OgCard({ siteName, title, description, meta, cover }: OgCardProp
       </div>
       {cover?.kind === "image" ? (
         // Satori renders plain <img> only (no next/image).
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={cover.src}
           alt=""

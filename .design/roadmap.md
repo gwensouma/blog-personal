@@ -2,7 +2,7 @@
 
 Owner: planner (lead). Execution: orchestrator → builder ⇄ reviewer, per CLAUDE.md "Agent workflow".
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
-Last updated: 2026-10-10.
+Last updated: 2026-10-11.
 
 ## Out of scope for now
 - **AI features** (`lib/ai/`): postponed by the user. Keep the data layer extensible; build nothing yet.
@@ -33,18 +33,20 @@ Last updated: 2026-10-10.
 Each feature names the RSC concept it teaches, because that is the point of the project.
 
 ## Phase A: Stabilize (do first)
-1. **Version control.** Add `origin` → the repo above, rename `master` → `main`, and commit the full baseline once the
+1. ✅ **Version control.** Add `origin` → the repo above, rename `master` → `main`, and commit the full baseline once the
    tree builds. Keep `.data/`, `.next/`, `.env` and `.playwright-mcp/` out of it (`.gitignore` already does this).
    After that, one commit per finished, reviewed task.
 2. ✅ **Re-verify the store** (`lib/data/store.ts`): like ×3 then GET and check `.data/postStats.json`, then 20 parallel
    GETs + 20 parallel likes. Also check that the newsletter `role="alert"` is announced on Enter-submit.
-3. **Agent definitions.** In `reviewer.md`, replace "editorial restraint" with the bold-motion direction and add a motion
+3. ✅ **Agent definitions.** In `reviewer.md`, replace "editorial restraint" with the bold-motion direction and add a motion
    checklist: reduced motion, `transform`/`opacity` only, content visible without JS, `LazyMotion` + `m`. Mirror the
    motion rules in `builder.md` if anything is missing.
-4. **TypeScript-only.** `next.config.js` → `next.config.ts`. Check whether `scripts/with-env.js` is still needed
-   (Next loads `.env*` itself). Drop it, or make it TS.
-5. **Quality gate.** Add a `typecheck` script (`tsc --noEmit`) and an ESLint flat config with a `lint` script
-   (`next lint` is deprecated as of 15.5). The reviewer then runs typecheck, lint and build.
+4. ✅ **TypeScript-only.** `next.config.js` → `next.config.ts`. `scripts/with-env.js` only exists so `PORT` from
+   `.env.local` reaches the Next CLI. Node 22.14 is installed, so replace it with
+   `node --env-file-if-exists=.env.local node_modules/next/dist/bin/next dev|start` and delete the script.
+5. ✅ **Quality gate.** Add a `typecheck` script (`tsc --noEmit`) and an ESLint flat config with a `lint` script
+   (`next lint` is deprecated as of 15.5). The reviewer then runs typecheck, lint and build. Update the "Commands"
+   section of CLAUDE.md. Baseline on 2026-10-11: `tsc --noEmit` passes with no errors.
 6. ✅ **OG leftovers.** Fraunces in `ImageResponse`, and the Phase 2 cover variations in the OG card.
 
 ## Phase B: Reading experience
@@ -82,7 +84,26 @@ A (all) → B (series, callouts/footnotes, up next, image zoom) → E (popular, 
 C (seam, validation, preview). C goes last because the data layer is parked, but its seam is cheap and can move earlier
 if a feature needs it.
 
+## Sprints (from 2026-10-11)
+Each line is one branch and one PR. The user merges.
+
+| # | Branch | Scope | Blocked by |
+|---|---|---|---|
+| 1 ✅ | `chore/stabilize` | A4 + A5, and update CLAUDE.md Commands | — |
+| 2 | `feat/markdown-callouts-footnotes` | B: `> [!NOTE]/[!TIP]/[!WARNING]` callouts + styled GFM footnotes | — |
+| 3 | `feat/post-series` | B: `series` + `seriesOrder` frontmatter, series box, series nav. First series "RSC Fundamentals": server-components-run-on-the-server (1) → client-components-render-twice (2) → rsc-shrinks-your-bundle (3) | — |
+| 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post) | sprint 3 |
+| 5 | `feat/archive-by-year` | E: `/posts` grouped by year, pagination kept | — |
+| 6 | `feat/popular-posts` | E: top posts by views, streamed in `<Suspense>` | — |
+| 7 | `feat/search-filters` | E: tag chips + match highlight, URL params only | — |
+
+Deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
+the user's own content). Re-plan after sprint 7: D (comments) next, then C.
+
 ## Working rules
-- One feature = one brief → builder → reviewer loop → build/typecheck/lint pass → commit → tick it here.
+- One feature = one branch (`feat/…`, `fix/…`, `chore/…` off `main`) → brief → builder ⇄ reviewer loop →
+  typecheck/lint/build pass → push → `gh pr create` → the reviewer reviews the PR diff → tick it here. Never commit
+  feature work to `main`, and never merge (merging is the user's call).
+- Branch the next sprint off `main` only after the previous PR is merged, unless the two don't touch the same files.
 - Every UI feature records its design decisions in `.design/blog-refactor.md` (or a new `.design/<feature>.md` when long).
 - Ask the user before adding any dependency (zod, MDX, test runner).
