@@ -21,15 +21,20 @@ function groupByYear(posts: PostSummary[]): [string, PostSummary[]][] {
   return [...groups.entries()];
 }
 
-function postCount(count: number): string {
-  return `${count} ${count === 1 ? "post" : "posts"}`;
+/** "2 posts" when the whole year is on this page, "5 of 6 posts" when it is split across pages. */
+function postCount(onPage: number, total: number): string {
+  const noun = total === 1 ? "post" : "posts";
+  return onPage < total ? `${onPage} of ${total} ${noun}` : `${total} ${noun}`;
 }
 
 // Archive body: posts grouped under a year heading. The heading carries the
-// year's total (across all pages) and, on a page that picks up mid-year, a
-// "continued" note. Visually the year stays large and the extras sit quiet on
-// the same baseline; screen readers hear "2026, continued, 6 posts" thanks to
-// the sr-only commas between the parts.
+// post count ("5 of 6 posts" when the year is split across pages) and, on a
+// page that picks up mid-year, a "continued" note. Visually the year stays
+// large and the extras sit quiet on the same baseline. Screen readers hear
+// "2026, continued, 1 of 6 posts": each comma sits at the END of the preceding
+// flex item and is hidden with a zero font size, NOT sr-only. sr-only is
+// position:absolute, which makes the comma a block, so Chrome puts a space
+// before it ("2026 , continued"); a zero-size inline comma keeps it attached.
 export function PostArchive({ posts, yearCounts, continuedYear }: PostArchiveProps) {
   return (
     <div className="flex flex-col gap-12">
@@ -42,15 +47,18 @@ export function PostArchive({ posts, yearCounts, continuedYear }: PostArchivePro
               id={`year-${year}`}
               className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-heading text-2xl font-semibold tabular-nums text-muted-foreground"
             >
-              <span>{year}</span>
+              <span>
+                {year}
+                <span className="text-[length:0px]">,</span>
+              </span>
               {continued ? (
                 <span className="font-sans text-sm font-normal">
-                  <span className="sr-only">, </span>continued
+                  continued
+                  <span className="text-[length:0px]">,</span>
                 </span>
               ) : null}
               <span className="ml-auto font-sans text-sm font-normal tabular-nums">
-                <span className="sr-only">, </span>
-                {postCount(total)}
+                {postCount(yearPosts.length, total)}
               </span>
             </h2>
             <StaggerList className="flex flex-col border-t border-border">

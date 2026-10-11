@@ -198,11 +198,12 @@ export async function getPaginatedPosts(page: number, perPage: number = site.pos
 
 /** One archive page (1-based) plus per-year totals and whether its first year continues from the previous page. */
 export async function getArchivePage(page: number, perPage: number = site.postsPerPage): Promise<ArchivePage> {
-  const all = await getPosts();
-  const totalPages = Math.max(1, Math.ceil(all.length / perPage));
+  // Both calls read the same per-request cached post list.
+  const [pageResult, all] = await Promise.all([getPaginatedPosts(page, perPage), getPosts()]);
+  const { items } = pageResult;
   const start = (page - 1) * perPage;
-  const items = all.slice(start, start + perPage);
 
+  // A real database would answer this with one GROUP BY instead of a scan.
   const yearCounts: Record<string, number> = {};
   for (const post of all) {
     const year = yearOf(post.date);
@@ -214,7 +215,7 @@ export async function getArchivePage(page: number, perPage: number = site.postsP
   const firstYear = items[0] ? yearOf(items[0].date) : null;
   const continuedYear = before && firstYear && yearOf(before.date) === firstYear ? firstYear : null;
 
-  return { items, page, totalPages, totalItems: all.length, yearCounts, continuedYear };
+  return { ...pageResult, yearCounts, continuedYear };
 }
 
 export async function getFeaturedPost(): Promise<PostSummary | null> {
