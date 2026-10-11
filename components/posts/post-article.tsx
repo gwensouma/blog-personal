@@ -39,8 +39,8 @@ export function PostArticle({ post, adjacent, related, series }: PostArticleProp
   const hasToc = post.toc.length > 0;
   // A one-part "series" has nothing to navigate to yet.
   const shownSeries = series && series.parts.length > 1 ? series : null;
-  // The series nav already links the previous/next part, so the chronological cards and
-  // Related posts skip series parts instead of repeating them. Sprint 4 reworks this end block.
+  // The series nav already links the previous/next part, so the chronological cards skip
+  // series parts instead of repeating them. Sprint 4 reworks this end block.
   const seriesSlugs = new Set(shownSeries?.parts.map((part) => part.slug));
   const endAdjacent: AdjacentPosts = shownSeries
     ? {
@@ -48,7 +48,7 @@ export function PostArticle({ post, adjacent, related, series }: PostArticleProp
         next: adjacent.next && !seriesSlugs.has(adjacent.next.slug) ? adjacent.next : null,
       }
     : adjacent;
-  const endRelated = shownSeries ? related.filter((item) => !seriesSlugs.has(item.slug)) : related;
+  // Related posts already exclude series parts (getRelatedPosts).
 
   return (
     <div className="flex flex-col gap-16">
@@ -138,7 +138,7 @@ export function PostArticle({ post, adjacent, related, series }: PostArticleProp
             <PostAdjacentNav adjacent={endAdjacent} />
           </Reveal>
         ) : null}
-        <RelatedPosts posts={endRelated} />
+        <RelatedPosts posts={related} />
       </ReadingColumn>
     </div>
   );

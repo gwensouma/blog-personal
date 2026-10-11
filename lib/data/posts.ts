@@ -207,15 +207,17 @@ export async function getAdjacentPosts(slug: string): Promise<AdjacentPosts> {
   return { next: posts[index - 1] ?? null, previous: posts[index + 1] ?? null };
 }
 
-/** Posts sharing the most tags with the given one, excluding itself. */
+/** Posts sharing the most tags with the given one, excluding itself and the other parts of its series. */
 export async function getRelatedPosts(slug: string, limit = 3): Promise<PostSummary[]> {
   const posts = (await loadAllPosts()).map((post) => post.summary);
   const current = posts.find((post) => post.slug === slug);
   if (!current) return [];
   const currentTags = new Set(current.tags.map(tagSlug));
+  // Other parts of a real series are already linked by the series box, so leave room for different posts.
+  const seriesSlug = current.series && (current.series.total ?? 0) > 1 ? current.series.slug : null;
 
   return posts
-    .filter((post) => post.slug !== slug)
+    .filter((post) => post.slug !== slug && (!seriesSlug || post.series?.slug !== seriesSlug))
     .map((post) => ({ post, shared: post.tags.filter((tag) => currentTags.has(tagSlug(tag))).length }))
     .filter(({ shared }) => shared > 0)
     .sort((a, b) => b.shared - a.shared)
