@@ -2,10 +2,15 @@
   "name": "rsc-demo",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.9"
+  },
   "scripts": {
-    "dev": "node scripts/with-env.js next dev",
+    "dev": "node --env-file-if-exists=.env.local node_modules/next/dist/bin/next dev",
     "build": "next build",
-    "start": "node scripts/with-env.js next start"
+    "start": "node --env-file-if-exists=.env.local node_modules/next/dist/bin/next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -35,11 +40,14 @@
     "unified": "^11.0.5"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/hast": "^3.0.5",
     "@types/node": "^20.19.43",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.27",
     "postcss": "^8.5.29",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"

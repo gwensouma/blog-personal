@@ -24,6 +24,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
               Try again
             </Button>
             {/* A full page load, not client navigation: the app shell itself failed. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- intentional full reload */}
             <Button variant="link" size="lg" nativeButton={false} render={<a href="/" />}>
               Go to the home page
             </Button>

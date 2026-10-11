@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SearchIcon } from "lucide-react";
 import { PostList } from "@/components/posts/post-list";
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { searchPosts } from "@/lib/data/posts";
 import { cn } from "@/lib/utils";
 import type { PostSummary } from "@/types/post";
