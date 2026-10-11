@@ -139,8 +139,28 @@ const loadAllPosts = cache(async (): Promise<RawPost[]> => {
   const sorted = posts
     .filter((post): post is RawPost => post !== null)
     .sort((a, b) => b.summary.date.localeCompare(a.summary.date) || a.summary.slug.localeCompare(b.summary.slug));
-  return assignIssues(sorted);
+  return withSeriesTotals(assignIssues(sorted));
 });
+
+// Stamps each series ref with its part count, so lists can tell a real series from a one-part one, and
+// with the name spelled as in the lowest-numbered part, so every part shows the same series title.
+function withSeriesTotals(posts: RawPost[]): RawPost[] {
+  const totals = new Map<string, number>();
+  const first = new Map<string, PostSeriesRef>();
+  for (const { summary } of posts) {
+    const { series } = summary;
+    if (!series) continue;
+    totals.set(series.slug, (totals.get(series.slug) ?? 0) + 1);
+    const current = first.get(series.slug);
+    if (!current || series.order < current.order) first.set(series.slug, series);
+  }
+  return posts.map((post) => {
+    const series = post.summary.series;
+    if (!series) return post;
+    const name = first.get(series.slug)?.name ?? series.name;
+    return { ...post, summary: { ...post.summary, series: { ...series, name, total: totals.get(series.slug) } } };
+  });
+}
 
 /** All published posts, newest first. Optionally filtered by tag slug. */
 export async function getPosts(options: { tag?: string } = {}): Promise<PostSummary[]> {
@@ -214,10 +234,19 @@ export async function getPostSeries(slug: string): Promise<PostSeries | null> {
     .sort((a, b) => a.series!.order - b.series!.order || a.date.localeCompare(b.date));
   const orders = parts.map((post) => post.series!.order);
   if (new Set(orders).size !== orders.length) {
-    console.warn(`[posts] series "${current.name}" has duplicate seriesOrder values: ${orders.join(", ")}.`);
+    warnOnce(`series:${current.slug}`, `[posts] series "${current.name}" has duplicate seriesOrder values: ${orders.join(", ")}.`);
   }
 
+  // `current.name` is already normalized to part 1's spelling by withSeriesTotals.
   return { name: current.name, slug: current.slug, parts, position: parts.findIndex((post) => post.slug === slug) + 1 };
+}
+
+// Content warnings fire on every request for dynamic routes; log each one once per process.
+const warned = new Set<string>();
+function warnOnce(key: string, message: string) {
+  if (warned.has(key)) return;
+  warned.add(key);
+  console.warn(message);
 }
 
 /** Every tag with its post count, most used first. */

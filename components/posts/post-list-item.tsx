@@ -8,7 +8,7 @@ import {
   postRowCoverClassName,
   postRowLinkClassName,
 } from "@/components/posts/post-row-accent";
-import { PostSeriesMarker } from "@/components/posts/post-series";
+import { hasSeriesMarker, PostSeriesMarker } from "@/components/posts/post-series";
 import { PostTags } from "@/components/posts/post-tags";
 import { enterStaggerClassName, enterStaggerStyle } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -40,7 +40,7 @@ export function PostListItem({ post, headingLevel: Heading = "h2", index = 0 }: 
       >
         <PostRowAccent arrowClassName="top-9 sm:right-48" />
         <div className="flex min-w-0 flex-col gap-2.5">
-          <PostMeta post={post}>{post.series ? <PostSeriesMarker series={post.series} /> : null}</PostMeta>
+          <PostMeta post={post}>{hasSeriesMarker(post.series) ? <PostSeriesMarker series={post.series} /> : null}</PostMeta>
           <Heading className="pr-8 font-heading text-2xl leading-snug font-semibold text-balance [overflow-wrap:anywhere]">
             <Link href={`/posts/${post.slug}`} className={postRowLinkClassName}>
               {post.title}

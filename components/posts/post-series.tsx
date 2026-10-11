@@ -16,12 +16,12 @@ const partLinkClassName =
  */
 export function PostSeriesBox({ series, className }: { series: PostSeries; className?: string }) {
   return (
-    <nav aria-labelledby="series-heading" className={cn("flex flex-col gap-4 rounded-lg border border-border p-5 sm:p-6", className)}>
+    <nav aria-label={`${series.name}: all parts`} className={cn("flex flex-col gap-4 rounded-lg border border-border p-5 sm:p-6", className)}>
       <div className="flex flex-col gap-1">
         <p className="text-sm text-muted-foreground">
           Part {series.position} of {series.parts.length} in a series
         </p>
-        <h2 id="series-heading" className="font-heading text-xl leading-snug font-semibold text-balance">
+        <h2 className="font-heading text-xl leading-snug font-semibold text-balance">
           {series.name}
         </h2>
       </div>
@@ -60,6 +60,8 @@ export function PostSeriesBox({ series, className }: { series: PostSeries; class
   );
 }
 
+const arrowClassName = "size-3.5 transition-transform duration-300 ease-out-expo motion-reduce:transition-none";
+
 function SeriesStep({ part, direction }: { part: PostSeries["parts"][number]; direction: "previous" | "next" }) {
   const isNext = direction === "next";
   const Arrow = isNext ? ArrowRightIcon : ArrowLeftIcon;
@@ -71,17 +73,12 @@ function SeriesStep({ part, direction }: { part: PostSeries["parts"][number]; di
         isNext && "sm:items-end sm:text-right",
       )}
     >
-      <span className={cn("inline-flex items-center gap-1.5 text-sm text-muted-foreground", isNext && "flex-row-reverse")}>
-        <Arrow
-          aria-hidden="true"
-          className={cn(
-            "size-3.5 transition-transform duration-300 ease-out-expo motion-reduce:transition-none",
-            isNext
-              ? "motion-safe:group-hover:translate-x-1 motion-safe:group-focus-visible:translate-x-1"
-              : "motion-safe:group-hover:-translate-x-1 motion-safe:group-focus-visible:-translate-x-1",
-          )}
-        />
+      {/* Arrow before "Previous", after "Next" (DOM order, like post-adjacent-nav), so the label
+          lines up with the title at every width. */}
+      <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+        {isNext ? null : <Arrow aria-hidden="true" className={cn(arrowClassName, "motion-safe:group-hover:-translate-x-1 motion-safe:group-focus-visible:-translate-x-1")} />}
         {isNext ? "Next in series" : "Previous in series"}
+        {isNext ? <Arrow aria-hidden="true" className={cn(arrowClassName, "motion-safe:group-hover:translate-x-1 motion-safe:group-focus-visible:translate-x-1")} /> : null}
       </span>
       <span className="font-heading text-lg leading-snug font-semibold text-balance [overflow-wrap:anywhere] transition-colors group-hover:text-primary motion-reduce:transition-none">
         {part.title}
@@ -101,10 +98,11 @@ export function PostSeriesNav({ series, className }: { series: PostSeries; class
   const isLast = !next;
 
   return (
-    <nav aria-label={`${series.name} series`} className={cn("flex flex-col gap-5 border-t border-border pt-8", className)}>
+    <nav aria-label={`${series.name}: previous and next part`} className={cn("flex flex-col gap-5 border-t border-border pt-8", className)}>
       <p className="text-sm text-muted-foreground">
-        {series.name}, part {series.position} of {series.parts.length}
-        {isLast ? ". That's the final part." : null}
+        {isLast
+          ? `${series.name}, final part (${series.position} of ${series.parts.length})`
+          : `${series.name}, part ${series.position} of ${series.parts.length}`}
       </p>
       <div className="grid gap-6 sm:grid-cols-2">
         {previous ? <SeriesStep part={previous} direction="previous" /> : null}
@@ -118,7 +116,12 @@ export function PostSeriesNav({ series, className }: { series: PostSeries; class
   );
 }
 
-/** Quiet "Series name, part n" item for a post's meta line in lists. */
+/** True when the post belongs to a series with 2+ parts (a one-part series shows no UI). */
+export function hasSeriesMarker(series: PostSeriesRef | undefined): series is PostSeriesRef {
+  return (series?.total ?? 0) > 1;
+}
+
+/** Quiet "Series name, part n" item for a post's meta line in lists. Guard with hasSeriesMarker. */
 export function PostSeriesMarker({ series }: { series: PostSeriesRef }) {
   return (
     <span>

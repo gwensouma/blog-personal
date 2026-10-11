@@ -43,6 +43,8 @@ export type PostSeriesRef = {
   /** URL-safe slug of the series name. */
   slug: string;
   order: number;
+  /** Number of parts in the series, set once every post is loaded. */
+  total?: number;
 };
 
 /** A whole series as seen from one of its posts. */

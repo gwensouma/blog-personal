@@ -485,13 +485,20 @@ Frontmatter `series` + `seriesOrder` (data: `getPostSeries` in `lib/data/posts.t
   "Part 2 of 3 in a series" line above the series name in Fraunces (`h2`). The ordered list sits on a 1px left rail;
   the current part has a 2px primary bar on the rail (echoing the TOC marker), a primary number and semibold text,
   and is a `<span aria-current="page">`, not a link. Earlier parts are muted links, later parts full-strength links
-  (what's still ahead reads strongest); position, not colour alone, separates them. `<nav aria-labelledby>` on the
-  series name. No `<details>`: three short rows are compact enough on mobile. Revisit if a series passes ~5 parts.
+  (what's still ahead reads strongest); position, not colour alone, separates them.
+  `<nav aria-label="<name>: all parts">` (the visible `h2` stays). No `<details>`: three short rows are compact enough on mobile. Revisit if a series passes ~5 parts.
 - **Series nav** (`PostSeriesNav`): after the body, before the like/share footer, wrapped in the existing `Reveal`.
   Text links only on a hairline ("Previous in series" / "Next in series" + title in Fraunces, arrows nudge on hover
-  like the adjacent cards), plus a muted "RSC Fundamentals, part 2 of 3" line ("That's the final part." on the last).
-  Deliberately not a card, so it doesn't compete with the chronological adjacent-post cards and leaves the end-of-post
-  card to sprint 4 ("Up next"), which may absorb or replace it. `<nav aria-label="<name> series">`.
+  like the adjacent cards), plus a muted "RSC Fundamentals, part 2 of 3" line ("RSC Fundamentals, final part (3 of 3)"
+  on the last). The arrow follows "Next" in DOM order (no `flex-row-reverse`), so below `sm` the label lines up with
+  the left-aligned title. Deliberately not a card, so it leaves the end-of-post card to sprint 4 ("Up next"), which
+  may absorb or replace it. `<nav aria-label="<name>: previous and next part">`.
+- **No duplicate links at the end:** on a series post, `PostArticle` drops series parts from the chronological
+  adjacent cards (an empty slot is nulled; with both empty the block isn't rendered) and from Related posts, since the
+  box and the series nav already link every part. A stopgap until sprint 4 reworks the end of the post.
 - **List marker** (`PostSeriesMarker`): "RSC Fundamentals, part 2" as the last item of the meta line on post rows
   (`post-list-item`) and the featured block. Same quiet meta style, so no new visual element. Not on related posts.
+  `PostMeta` wraps its separator and trailing item in one inline-flex item, so on narrow screens the dot wraps with
+  "RSC Fundamentals, part 3" instead of hanging at the line end. Shown only when `hasSeriesMarker` (the series has 2+
+  parts, from `series.total`, which `loadAllPosts` stamps on each ref).
 - A one-part series renders nothing (nothing to navigate). No `/series/<slug>` page yet; `series.slug` is unused by UI.
