@@ -13,22 +13,31 @@ export function splitMatches(text: string, query: string): TextSegment[] {
   const q = query.trim();
   if (!q) return [{ text, match: false }];
   const pattern = new RegExp(`(${escapeRegExp(q)})`, "gi");
+  // With one capture group, split() puts the matches at the odd indexes.
   return text
     .split(pattern)
-    .filter((part) => part !== "")
-    .map((part) => ({ text: part, match: part.toLowerCase() === q.toLowerCase() }));
+    .map((part, index) => ({ text: part, match: index % 2 === 1 }))
+    .filter((segment) => segment.text !== "");
+}
+
+/** Trims, drops invisible format characters (bidi overrides, zero-width marks) and caps the length. */
+export function normalizeQuery(raw: string): string {
+  return raw.replace(/\p{Cf}/gu, "").trim().slice(0, MAX_QUERY_LENGTH).trim();
 }
 
 /** Rough Markdown → plain text, good enough for a search snippet (not for rendering). */
 export function markdownToPlainText(markdown: string): string {
   return markdown
-    .replace(/```[\s\S]*?```/g, " ")
+    // Keep code content (it's searchable on a dev blog), drop only the fences.
+    .replace(/^```.*$/gm, " ")
     .replace(/`([^`]*)`/g, "$1")
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
     .replace(/\[![A-Z]+\]/g, "")
-    .replace(/[*_~]+/g, "")
+    .replace(/\[\^[^\]]+\]:?/g, "")
+    // Emphasis delimiters only, so snake_case and 2*3 survive.
+    .replace(/(\*{1,3}|_{1,3}|~~)(\S(?:.*?\S)?)\1/g, "$2")
     .replace(/\s+/g, " ")
     .trim();
 }

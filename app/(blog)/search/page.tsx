@@ -5,13 +5,14 @@ import { PostSearchForm } from "@/components/posts/post-search-form";
 import { SearchFilters } from "@/components/posts/search-filters";
 import { SearchResults } from "@/components/posts/search-results";
 import { searchPostsWithFacets } from "@/lib/data/posts";
-import { MAX_QUERY_LENGTH } from "@/lib/highlight";
+import { normalizeQuery } from "@/lib/highlight";
 
 type SearchParam = string | string[] | undefined;
 type SearchPageProps = { searchParams: Promise<{ q?: SearchParam; tag?: SearchParam }> };
 
 const first = (value: SearchParam) => (Array.isArray(value) ? value[0] : value) ?? "";
-const readQuery = (value: SearchParam) => first(value).trim().slice(0, MAX_QUERY_LENGTH);
+// Same normalization as the data layer, so the input, the <title> and the results agree.
+const readQuery = (value: SearchParam) => normalizeQuery(first(value));
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const query = readQuery((await searchParams).q);

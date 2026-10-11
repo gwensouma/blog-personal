@@ -18,6 +18,8 @@ export function PostSearchForm({ defaultValue = "", tag }: { defaultValue?: stri
         </FieldLabel>
         <InputGroup>
           <InputGroupInput
+            // Uncontrolled: re-mount when the query changes so client navigation and Back show the current query.
+            key={defaultValue}
             id="search-query"
             name="q"
             type="search"

@@ -13,7 +13,7 @@ import type { SearchOutcome } from "@/types/post";
 // query matches marked. Rendered inline (not behind <Suspense>) so results are in
 // the initial HTML and work without JavaScript; see .design/search.md.
 export function SearchResults({ outcome }: { outcome: SearchOutcome }) {
-  const { query, tag, hits } = outcome;
+  const { query, tag, hits, facets } = outcome;
 
   if (!query && !tag) {
     return (
@@ -50,19 +50,26 @@ export function SearchResults({ outcome }: { outcome: SearchOutcome }) {
           ))}
         </StaggerList>
       ) : (
-        // An empty PostList renders the shared empty state.
+        // An empty PostList renders the shared empty state. Offer to clear the topic only when the
+        // query matches elsewhere (facets are counted before the topic filter).
         <PostList
           posts={[]}
           emptyTitle={query ? `Nothing matches “${query}”${scope}` : `No posts${scope} yet`}
           emptyDescription={
-            tag
+            tag && facets.length > 0
               ? "The topic filter may be too narrow. Clear it to search every post."
               : "Try a shorter or more general term, or browse the archive instead."
           }
           emptyAction={
-            <Button variant="outline" nativeButton={false} render={<Link href={tag ? searchHref(query) : "/posts"} />}>
-              {tag ? "Clear the topic filter" : "Browse the archive"}
-            </Button>
+            tag && facets.length > 0 ? (
+              <Button variant="outline" nativeButton={false} render={<Link href={searchHref(query)} />}>
+                Clear the topic filter
+              </Button>
+            ) : (
+              <Button variant="outline" nativeButton={false} render={<Link href="/posts" />}>
+                Browse the archive
+              </Button>
+            )
           }
         />
       )}

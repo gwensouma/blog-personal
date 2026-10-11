@@ -17,8 +17,9 @@ script swaps in. Without JavaScript only the fallback is ever visible. So:
 
 ## Query and tag
 
-- `q`: first value if repeated, trimmed, capped at `MAX_QUERY_LENGTH` (100, `lib/highlight.ts`) in the page
-  (metadata title too), in the data function, and via `maxLength` on the input.
+- `q`: first value if repeated, then `normalizeQuery` (`lib/highlight.ts`: strips `\p{Cf}` format characters,
+  trims, caps at `MAX_QUERY_LENGTH` = 100) in the page, the metadata title and the data function; `maxLength`
+  on the input. The input is uncontrolled and keyed by the query, so it re-mounts after client navigation/Back.
 - `tag`: first value; unknown slugs resolve to `null` and are ignored. An active tag is preserved across a
   new query by a hidden `<input name="tag">` in `PostSearchForm`.
 
@@ -32,7 +33,13 @@ script swaps in. Without JavaScript only the fallback is ever visible. So:
 - Each chip is `/search?q=<q>&tag=<slug>` built with `URLSearchParams` (`lib/search.ts`). "All" drops the tag.
 - The chip whose URL is the current page has `aria-current="page"` (links, so not `aria-pressed`). Counts are
   facet counts before the tag filter, with an sr-only "results" suffix.
-- If the active tag has no matches for the query, it is still listed (count 0) so the state stays visible.
+- Facets are real counts (every topic in tag-only mode), so the active tag is only missing when the query
+  has no matches in it; then it is still listed with a true count of 0 so the state stays visible.
+- Chip wall height: only the top 6 topics (facet order, most frequent first) show up front, plus the active
+  one if it ranks lower. The rest sit in a native `<details>` ("More topics (N)", ghost pill summary, chevron
+  rotates, works without JS). Chose `<details>` over a "/tags" link so the extra chips keep the query.
+- Accessible names: chips carry `aria-label="Performance, 3 results"` (starts with the visible text). An
+  sr-only comma is positioned absolutely, which adds a stray space ("Performance , 3 results").
 
 ## Highlighting (`components/posts/highlighted-text.tsx`)
 
@@ -49,5 +56,5 @@ script swaps in. Without JavaScript only the fallback is ever visible. So:
 
 - `role="status"` line: "3 results for “suspense” in Server Components"; tag only: "2 posts in Server Components".
 - No query and no (known) tag: the "Search the journal" prompt.
-- No results: shared empty state; with an active tag the action is "Clear the topic filter" (same query, no
-  tag), otherwise "Browse the archive".
+- No results: shared empty state. "Clear the topic filter" (same query, no tag) only when a tag is active and
+  the query matches elsewhere (`facets.length > 0`); otherwise the no-tag copy and "Browse the archive".

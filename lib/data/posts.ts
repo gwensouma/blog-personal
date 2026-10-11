@@ -8,7 +8,7 @@ import { estimateReadingTime, extractToc, renderMarkdown } from "@/lib/markdown"
 import { site } from "@/lib/site";
 import { tagSlug } from "@/lib/tags";
 import { yearOf } from "@/lib/format";
-import { MAX_QUERY_LENGTH, markdownToPlainText, snippetAround } from "@/lib/highlight";
+import { markdownToPlainText, normalizeQuery, snippetAround } from "@/lib/highlight";
 import type {
   AdjacentPosts,
   ArchivePage,
@@ -311,18 +311,20 @@ export async function getTag(slug: string): Promise<Tag | null> {
  * query, a known tag alone lists that tag's posts.
  */
 export async function searchPostsWithFacets(rawQuery: string, rawTag?: string): Promise<SearchOutcome> {
-  const query = rawQuery.trim().slice(0, MAX_QUERY_LENGTH);
+  const query = normalizeQuery(rawQuery);
   const q = query.toLowerCase();
   await delay();
   const all = await loadAllPosts();
   const tag = rawTag ? ((await getAllTags()).find((t) => t.slug === rawTag) ?? null) : null;
   if (!q && !tag) return { query, tag, hits: [], facets: [] };
 
+  // Match only text a reader can see in the result (title, excerpt, one tag, the body as plain text),
+  // so every hit can show why it matched.
+  const has = (text: string) => text.toLowerCase().includes(q);
+  const candidates = all.map((post) => ({ ...post, plain: markdownToPlainText(post.body) }));
   const matches = q
-    ? all.filter(({ summary, body }) =>
-        [summary.title, summary.excerpt, summary.tags.join(" "), body].some((text) => text.toLowerCase().includes(q)),
-      )
-    : all;
+    ? candidates.filter(({ summary, plain }) => has(summary.title) || has(summary.excerpt) || summary.tags.some(has) || has(plain))
+    : candidates;
 
   const counts = new Map<string, Tag>();
   for (const { summary } of matches) {
@@ -331,13 +333,13 @@ export async function searchPostsWithFacets(rawQuery: string, rawTag?: string): 
       counts.set(slug, { slug, name, count: (counts.get(slug)?.count ?? 0) + 1 });
     }
   }
-  const facets = q ? [...counts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)) : [];
+  const facets = [...counts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   const hits: SearchHit[] = matches
     .filter(({ summary }) => !tag || summary.tags.some((name) => tagSlug(name) === tag.slug))
-    .map(({ summary, body }) => {
-      const inSummary = [summary.title, summary.excerpt, ...summary.tags].some((text) => text.toLowerCase().includes(q));
-      const snippet = q && !inSummary ? (snippetAround(markdownToPlainText(body), query) ?? undefined) : undefined;
+    .map(({ summary, plain }) => {
+      const inSummary = has(summary.title) || has(summary.excerpt) || summary.tags.some(has);
+      const snippet = q && !inSummary ? (snippetAround(plain, query) ?? undefined) : undefined;
       return { post: summary, snippet };
     });
 
