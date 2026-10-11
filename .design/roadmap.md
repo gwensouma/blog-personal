@@ -90,7 +90,7 @@ Each line is one branch and one PR. The user merges.
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
 | 1 ✅ | `chore/stabilize` | A4 + A5, and update CLAUDE.md Commands | — |
-| 2 | `feat/markdown-callouts-footnotes` | B: `> [!NOTE]/[!TIP]/[!WARNING]` callouts + styled GFM footnotes | — |
+| 2 ✅ | `feat/markdown-callouts-footnotes` | B: `> [!NOTE]/[!TIP]/[!WARNING]` callouts + styled GFM footnotes | — |
 | 3 | `feat/post-series` | B: `series` + `seriesOrder` frontmatter, series box, series nav. First series "RSC Fundamentals": server-components-run-on-the-server (1) → client-components-render-twice (2) → rsc-shrinks-your-bundle (3) | — |
 | 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post) | sprint 3 |
 | 5 | `feat/archive-by-year` | E: `/posts` grouped by year, pagination kept | — |

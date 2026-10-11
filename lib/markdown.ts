@@ -74,6 +74,65 @@ function rehypeFigures() {
   };
 }
 
+/** GitHub-style alerts. A blockquote whose first line is `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`,
+ * `[!WARNING]` or `[!CAUTION]` becomes `div[data-callout][role=note]` with a title paragraph
+ * (`p[data-callout-title] > strong`) and a `div[data-callout-body]` holding the rest.
+ * post-body.tsx maps the title to CalloutTitle (adds the icon); the plain HTML string still
+ * reads well (a bold "Note" line, then the content) where the React mapping doesn't apply. */
+const CALLOUT_KINDS = { NOTE: "Note", TIP: "Tip", IMPORTANT: "Important", WARNING: "Warning", CAUTION: "Caution" } as const;
+const CALLOUT_MARKER = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*(?:\r?\n|$)/i;
+
+function rehypeCallouts() {
+  return (tree: HastNode) => {
+    let count = 0;
+    const toCallout = (node: HastNode): HastNode | null => {
+      const firstIndex = node.children?.findIndex((c) => !isBlank(c)) ?? -1;
+      const first = node.children?.[firstIndex];
+      const firstText = first?.tagName === "p" ? first.children?.[0] : undefined;
+      if (firstText?.type !== "text") return null;
+      const match = CALLOUT_MARKER.exec(firstText.value ?? "");
+      if (!match || !first) return null;
+
+      const kind = match[1].toUpperCase() as keyof typeof CALLOUT_KINDS;
+      const label = CALLOUT_KINDS[kind];
+      // Strip the marker, then any leading whitespace or hard break (`> [!NOTE]` followed by two
+      // spaces leaves a <br>); drop the paragraph if the marker was all it held.
+      firstText.value = (firstText.value ?? "").slice(match[0].length);
+      const inline = first.children ?? [];
+      while (inline[0] && (inline[0].tagName === "br" || (inline[0].type === "text" && !inline[0].value?.trim()))) inline.shift();
+      if (inline[0]?.type === "text") inline[0].value = inline[0].value?.trimStart();
+      first.children = inline;
+      const rest = (node.children ?? []).slice(firstIndex + 1);
+      const body = [...(first.children?.some((c) => !isBlank(c)) ? [first] : []), ...rest].filter((c) => !isBlank(c));
+
+      // Same prefix as footnote ids, so it can't collide with heading slugs.
+      const id = `user-content-callout-${++count}`;
+      return {
+        type: "element",
+        tagName: "div",
+        properties: { dataCallout: kind.toLowerCase(), role: "note", ariaLabelledBy: id },
+        children: [
+          {
+            type: "element",
+            tagName: "p",
+            properties: { id, dataCalloutTitle: kind.toLowerCase() },
+            children: [{ type: "element", tagName: "strong", properties: {}, children: [{ type: "text", value: label }] }],
+          },
+          { type: "element", tagName: "div", properties: { dataCalloutBody: "" }, children: body },
+        ],
+      };
+    };
+    const walk = (node: HastNode) => {
+      if (!node.children) return;
+      node.children = node.children.map((child) => {
+        walk(child);
+        return child.tagName === "blockquote" ? (toCallout(child) ?? child) : child;
+      });
+    };
+    walk(tree);
+  };
+}
+
 /** Wraps each fenced code block (`pre > code`) in `<div data-code-block data-language="tsx">`.
  * components/posts/post-body.tsx maps that wrapper to the CodeBlock Server Component,
  * which adds the toolbar (language label + copy button). Runs before Shiki, which still
@@ -107,13 +166,19 @@ function rehypeCodeBlocks() {
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
-  .use(remarkRehype)
+  // GFM footnotes: the "Footnotes" heading is visible (a small ruled endnote section, styled in
+  // post-body.tsx) instead of the default sr-only. Ids keep the `user-content-` prefix so they
+  // can't collide with heading slugs; U+FE0E keeps the back arrow from rendering as an emoji.
+  .use(remarkRehype, { footnoteLabelProperties: {}, footnoteBackContent: "↩︎" })
+  .use(rehypeCallouts)
   .use(rehypeWrapTables)
   .use(rehypeFigures)
   .use(rehypeCodeBlocks)
   .use(rehypeSlug)
   .use(rehypeAutolinkHeadings, {
     behavior: "append",
+    // The footnotes heading is an endnote label, not a section to link to.
+    test: (node: { properties?: Record<string, unknown> }) => node.properties?.id !== "footnote-label",
     properties: { className: ["heading-anchor"], ariaHidden: "true", tabIndex: -1 },
     content: { type: "text", value: "#" },
   })

@@ -45,6 +45,13 @@
   /* Pale tone of the same hue, with deep-blue type on it. */
   --brand-soft: oklch(0.93 0.035 262);
   --brand-soft-foreground: oklch(0.36 0.17 266);
+  /* Markdown callouts (GitHub alerts): one tone per kind, used for the rule, the label and a
+     faint tint. Each clears 4.5:1 as text on the background and on its own 6% tint. */
+  --callout-note: var(--primary);
+  --callout-tip: oklch(0.5 0.12 155);
+  --callout-important: oklch(0.5 0.19 295);
+  --callout-warning: oklch(0.52 0.12 65);
+  --callout-caution: oklch(0.52 0.19 27);
 }
 
 @theme inline {
@@ -94,6 +101,11 @@
   --color-brand-ink: var(--brand-ink);
   --color-brand-soft: var(--brand-soft);
   --color-brand-soft-foreground: var(--brand-soft-foreground);
+  --color-callout-note: var(--callout-note);
+  --color-callout-tip: var(--callout-tip);
+  --color-callout-important: var(--callout-important);
+  --color-callout-warning: var(--callout-warning);
+  --color-callout-caution: var(--callout-caution);
 }
 
 /* Motion tokens (mirrored as JS presets in lib/motion.ts). See .design/blog-refactor.md "Motion". */
@@ -163,6 +175,11 @@
   --brand-ink: oklch(0.13 0.035 264);
   --brand-soft: oklch(0.55 0.1 260);
   --brand-soft-foreground: oklch(0.15 0.04 264);
+  /* Callout tones lifted for the navy background (>= 4.5:1 as text). Note follows --primary. */
+  --callout-tip: oklch(0.76 0.13 155);
+  --callout-important: oklch(0.74 0.14 300);
+  --callout-warning: oklch(0.8 0.13 75);
+  --callout-caution: oklch(0.72 0.16 25);
 }
 
 @layer base {
