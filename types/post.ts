@@ -33,6 +33,26 @@ export type PostSummary = {
   readingTime: number;
   featured: boolean;
   cover?: PostCover;
+  /** Set when frontmatter has `series:`; `order` comes from `seriesOrder:` (1-based). */
+  series?: PostSeriesRef;
+};
+
+/** A post's membership in a series, as stored on the post itself. */
+export type PostSeriesRef = {
+  name: string;
+  /** URL-safe slug of the series name. */
+  slug: string;
+  order: number;
+};
+
+/** A whole series as seen from one of its posts. */
+export type PostSeries = {
+  name: string;
+  slug: string;
+  /** Every part, in reading order (seriesOrder ascending). */
+  parts: PostSummary[];
+  /** 1-based position of the current post in `parts`. */
+  position: number;
 };
 
 export type TocItem = {

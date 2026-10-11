@@ -10,6 +10,7 @@ import { PostBody } from "@/components/posts/post-body";
 import { PostCover } from "@/components/posts/post-cover";
 import { PostLike, PostLikeSkeleton, PostViews, PostViewsSkeleton } from "@/components/posts/post-engagement";
 import { PostMeta } from "@/components/posts/post-meta";
+import { PostSeriesBox, PostSeriesNav } from "@/components/posts/post-series";
 import { PostShare } from "@/components/posts/post-share";
 import { PostTags } from "@/components/posts/post-tags";
 import { PostToc } from "@/components/posts/post-toc";
@@ -17,12 +18,15 @@ import { RelatedPosts } from "@/components/posts/related-posts";
 import { Button } from "@/components/ui/button";
 import { linkSweepClassName } from "@/lib/motion";
 import { absoluteUrl, site } from "@/lib/site";
-import type { AdjacentPosts, Post, PostSummary } from "@/types/post";
+import { cn } from "@/lib/utils";
+import type { AdjacentPosts, Post, PostSeries, PostSummary } from "@/types/post";
 
 type PostArticleProps = {
   post: Post;
   adjacent: AdjacentPosts;
   related: PostSummary[];
+  /** The series this post belongs to, or null. */
+  series: PostSeries | null;
 };
 
 // Server Component: renders a full post. Client leaves: LikeButton, the
@@ -31,8 +35,10 @@ type PostArticleProps = {
 // server-rendered children through).
 // The view count and the like button are per-visitor data behind their own
 // <Suspense>: the article streams first and they fill in (see post-engagement.tsx).
-export function PostArticle({ post, adjacent, related }: PostArticleProps) {
+export function PostArticle({ post, adjacent, related, series }: PostArticleProps) {
   const hasToc = post.toc.length > 0;
+  // A one-part "series" has nothing to navigate to yet.
+  const shownSeries = series && series.parts.length > 1 ? series : null;
 
   return (
     <div className="flex flex-col gap-16">
@@ -84,9 +90,18 @@ export function PostArticle({ post, adjacent, related }: PostArticleProps) {
             <PostCover post={post} aspect="3/1" size="hero" priority className="mt-10" />
           )}
 
-          {hasToc ? <PostToc toc={post.toc} variant="inline" className="mt-10 xl:hidden" /> : null}
+          {/* Orientation before reading: where this post sits in its series. */}
+          {shownSeries ? <PostSeriesBox series={shownSeries} className="mt-10" /> : null}
+
+          {hasToc ? <PostToc toc={post.toc} variant="inline" className={cn("xl:hidden", shownSeries ? "mt-4" : "mt-10")} /> : null}
 
           <PostBody content={post.content} className="mt-10" />
+
+          {shownSeries ? (
+            <Reveal className="mt-16">
+              <PostSeriesNav series={shownSeries} />
+            </Reveal>
+          ) : null}
 
           <footer className="mt-16 flex flex-col gap-8 border-t border-border pt-8 sm:flex-row sm:items-end sm:justify-between">
             {/* The interactive part is isolated in a small Client Component; its server

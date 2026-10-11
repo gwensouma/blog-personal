@@ -7,7 +7,7 @@ import { getImageMeta, isRemoteImage } from "@/lib/data/images";
 import { estimateReadingTime, extractToc, renderMarkdown } from "@/lib/markdown";
 import { site } from "@/lib/site";
 import { tagSlug } from "@/lib/tags";
-import type { AdjacentPosts, Paginated, Post, PostCover, PostIndexItem, PostSummary, Tag } from "@/types/post";
+import type { AdjacentPosts, Paginated, Post, PostCover, PostIndexItem, PostSeries, PostSeriesRef, PostSummary, Tag } from "@/types/post";
 
 // Server-only data access. Posts are Markdown files with frontmatter in
 // content/posts; swapping this for a database/CMS only changes this file.
@@ -67,6 +67,19 @@ async function parseCover(value: unknown, slug: string): Promise<PostCover | und
   }
 }
 
+// Series membership: `series: RSC Fundamentals` plus `seriesOrder: 2` in frontmatter.
+// A series without a valid order is ignored (with a warning) rather than guessed.
+function parseSeries(name: unknown, order: unknown, slug: string): PostSeriesRef | undefined {
+  const seriesName = optionalString(name);
+  if (!seriesName) return undefined;
+  const seriesOrder = optionalNumber(order);
+  if (!seriesOrder || !Number.isInteger(seriesOrder)) {
+    console.warn(`[posts] "${slug}": series "${seriesName}" needs a positive integer seriesOrder; ignoring the series.`);
+    return undefined;
+  }
+  return { name: seriesName, slug: tagSlug(seriesName), order: seriesOrder };
+}
+
 // Issue numbers: posts without a frontmatter `issue` are numbered in publication
 // order (oldest = 1), skipping numbers already pinned by an override. Pin `issue`
 // on a back-dated post so it doesn't renumber the posts published after it.
@@ -116,6 +129,7 @@ const loadAllPosts = cache(async (): Promise<RawPost[]> => {
           readingTime: estimateReadingTime(content),
           featured: Boolean(data.featured),
           cover: await parseCover(data.cover, slug),
+          series: parseSeries(data.series, data.seriesOrder, slug),
         },
       };
     }),
@@ -187,6 +201,23 @@ export async function getRelatedPosts(slug: string, limit = 3): Promise<PostSumm
     .sort((a, b) => b.shared - a.shared)
     .slice(0, limit)
     .map(({ post }) => post);
+}
+
+/** The series the given post belongs to, with every part in reading order, or null. */
+export async function getPostSeries(slug: string): Promise<PostSeries | null> {
+  const posts = (await loadAllPosts()).map((post) => post.summary);
+  const current = posts.find((post) => post.slug === slug)?.series;
+  if (!current) return null;
+
+  const parts = posts
+    .filter((post) => post.series?.slug === current.slug)
+    .sort((a, b) => a.series!.order - b.series!.order || a.date.localeCompare(b.date));
+  const orders = parts.map((post) => post.series!.order);
+  if (new Set(orders).size !== orders.length) {
+    console.warn(`[posts] series "${current.name}" has duplicate seriesOrder values: ${orders.join(", ")}.`);
+  }
+
+  return { name: current.name, slug: current.slug, parts, position: parts.findIndex((post) => post.slug === slug) + 1 };
 }
 
 /** Every tag with its post count, most used first. */

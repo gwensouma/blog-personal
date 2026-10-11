@@ -407,7 +407,7 @@ motion), then focus moves to `#main`. Reduced motion: fade only.
 The palette (Base UI Dialog + cmdk) is a separate 64 kB chunk (22.5 kB gzip), loaded only when opened.
 
 ### Open
-- **Post series:** not built (optional). No posts form an obvious series.
+- **Post series:** built later, see "Post series" below.
 
 ### Post page has no route-level loading.tsx
 Reading the like cookie renders `/posts/[slug]` per request. With a route-level `loading.tsx`, the whole article then
@@ -474,3 +474,24 @@ styled with arbitrary variants in `components/posts/post-body.tsx`.
 ### Where to see them
 `content/posts/server-actions-for-mutations.md` (NOTE, WARNING, TIP, two footnotes) and
 `content/posts/caching-in-the-app-router.md` (IMPORTANT, CAUTION, one footnote).
+
+## Post series
+Frontmatter `series` + `seriesOrder` (data: `getPostSeries` in `lib/data/posts.ts`). First series: "RSC Fundamentals"
+(3 parts). All UI is in `components/posts/post-series.tsx`, Server Components only, no client JS added.
+
+- **Series box** (`PostSeriesBox`): after the cover, before the inline TOC and the body, at every width. It is
+  orientation ("where am I in this?"), so it belongs before reading starts, and in the reading column rather than the
+  xl aside, which is sticky and already holds the TOC. Hairline-bordered `rounded-lg` box matching the inline TOC; muted
+  "Part 2 of 3 in a series" line above the series name in Fraunces (`h2`). The ordered list sits on a 1px left rail;
+  the current part has a 2px primary bar on the rail (echoing the TOC marker), a primary number and semibold text,
+  and is a `<span aria-current="page">`, not a link. Earlier parts are muted links, later parts full-strength links
+  (what's still ahead reads strongest); position, not colour alone, separates them. `<nav aria-labelledby>` on the
+  series name. No `<details>`: three short rows are compact enough on mobile. Revisit if a series passes ~5 parts.
+- **Series nav** (`PostSeriesNav`): after the body, before the like/share footer, wrapped in the existing `Reveal`.
+  Text links only on a hairline ("Previous in series" / "Next in series" + title in Fraunces, arrows nudge on hover
+  like the adjacent cards), plus a muted "RSC Fundamentals, part 2 of 3" line ("That's the final part." on the last).
+  Deliberately not a card, so it doesn't compete with the chronological adjacent-post cards and leaves the end-of-post
+  card to sprint 4 ("Up next"), which may absorb or replace it. `<nav aria-label="<name> series">`.
+- **List marker** (`PostSeriesMarker`): "RSC Fundamentals, part 2" as the last item of the meta line on post rows
+  (`post-list-item`) and the featured block. Same quiet meta style, so no new visual element. Not on related posts.
+- A one-part series renders nothing (nothing to navigate). No `/series/<slug>` page yet; `series.slug` is unused by UI.

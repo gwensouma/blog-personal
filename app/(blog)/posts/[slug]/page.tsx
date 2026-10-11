@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { PostArticle } from "@/components/posts/post-article";
-import { getAdjacentPosts, getPost, getPosts, getRelatedPosts } from "@/lib/data/posts";
+import { getAdjacentPosts, getPost, getPostSeries, getPosts, getRelatedPosts } from "@/lib/data/posts";
 import { site } from "@/lib/site";
 import { blogPostingJsonLd } from "@/lib/structured-data";
 
@@ -46,14 +46,19 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 // Server Component: fetches the post and its neighbours on the server, in parallel.
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
-  const [post, adjacent, related] = await Promise.all([getPost(slug), getAdjacentPosts(slug), getRelatedPosts(slug)]);
+  const [post, adjacent, related, series] = await Promise.all([
+    getPost(slug),
+    getAdjacentPosts(slug),
+    getRelatedPosts(slug),
+    getPostSeries(slug),
+  ]);
 
   if (!post) notFound();
 
   return (
     <>
       <JsonLd data={blogPostingJsonLd(post)} />
-      <PostArticle post={post} adjacent={adjacent} related={related} />
+      <PostArticle post={post} adjacent={adjacent} related={related} series={series} />
     </>
   );
 }

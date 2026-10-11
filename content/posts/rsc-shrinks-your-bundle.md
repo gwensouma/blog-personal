@@ -3,6 +3,8 @@ title: RSC helps shrink the JavaScript sent to the browser
 date: 2026-08-20
 excerpt: Only the Client Component parts ship JavaScript. Here is how to measure the difference.
 tags: [Performance, Server Components]
+series: RSC Fundamentals
+seriesOrder: 3
 ---
 
 Every Server Component is a component whose JavaScript never reaches the user. On a content-heavy site that adds up quickly.
