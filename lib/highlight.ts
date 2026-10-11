@@ -20,9 +20,10 @@ export function splitMatches(text: string, query: string): TextSegment[] {
     .filter((segment) => segment.text !== "");
 }
 
-/** Trims, drops invisible format characters (bidi overrides, zero-width marks) and caps the length. */
+/** Trims, drops bidi controls and zero-width spaces, and caps the length. */
 export function normalizeQuery(raw: string): string {
-  return raw.replace(/\p{Cf}/gu, "").trim().slice(0, MAX_QUERY_LENGTH).trim();
+  // Bidi controls and zero-width space only; keep U+200D so emoji sequences still match.
+  return raw.replace(/[\u200B\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "").trim().slice(0, MAX_QUERY_LENGTH).trim();
 }
 
 /** Rough Markdown → plain text, good enough for a search snippet (not for rendering). */
@@ -36,8 +37,8 @@ export function markdownToPlainText(markdown: string): string {
     .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
     .replace(/\[![A-Z]+\]/g, "")
     .replace(/\[\^[^\]]+\]:?/g, "")
-    // Emphasis delimiters only, so snake_case and 2*3 survive.
-    .replace(/(\*{1,3}|_{1,3}|~~)(\S(?:.*?\S)?)\1/g, "$2")
+    // Emphasis delimiters only (opening at a line start or after a non-word char), so snake_case and 2*3*4 survive.
+    .replace(/(^|[^\w])(\*{1,3}|_{1,3}|~~)(\S(?:.*?\S)?)\2/gm, "$1$3")
     .replace(/\s+/g, " ")
     .trim();
 }
