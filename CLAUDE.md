@@ -20,7 +20,7 @@ This project is a personal blog, built as a learning vehicle for React Server Co
 - `npm run start` — run the production build (same `.env.local` loading)
 - `npm run typecheck` — `tsc --noEmit`
 - `npm run lint` — ESLint flat config ([eslint.config.mjs](eslint.config.mjs), `next/core-web-vitals` + `next/typescript`)
-- No test suite is configured. Before a PR: `typecheck`, `lint` and `build` must all pass.
+- No test suite is configured. Before a PR: `typecheck`, `lint` and `build` must all pass (`next build` also runs ESLint, so a lint error fails the build too).
 
 ## Architecture
 
