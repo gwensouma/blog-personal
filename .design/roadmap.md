@@ -95,7 +95,7 @@ Each line is one branch and one PR. The lead merges.
 | 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post) | sprint 3 |
 | 5 ✅ | `feat/archive-by-year` | E: `/posts` grouped by year, pagination kept | — |
 | 6 ✅ | `feat/popular-posts` | E: top posts by views on home (ISR 5m, rendered inline, no `<Suspense>`) | — |
-| 7 | `feat/search-filters` | E: tag chips + match highlight, URL params only | — |
+| 7 ✅ | `feat/search-filters` | E: tag chips + match highlight, URL params only | — |
 | 8 | `fix/home-no-js` | Render essential home sections inline (no `<Suspense>` on ISR `/`); add the "Suspense only around non-essential or JS-dependent content" principle to CLAUDE.md; reviewer checks routes with JS disabled | — |
 
 Deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
