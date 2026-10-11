@@ -434,20 +434,23 @@ styled with arbitrary variants in `components/posts/post-body.tsx`.
 - **Syntax:** a blockquote whose first line is `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]` or `[!CAUTION]`
   (marker alone on its line, as on GitHub). Any other blockquote stays a pull quote (Fraunces, primary rule).
 - **Markup:** `rehypeCallouts` (runs right after remark-rehype) rewrites it to
-  `div[data-callout=<kind>][role=note][aria-labelledby]` > `p[data-callout-title] > strong` ("Note") +
+  `div[data-callout=<kind>][role=note][aria-labelledby=user-content-callout-N]` > `p[data-callout-title] > strong` ("Note") +
   `div[data-callout-body]`. `role="note"` (not `alert`: it's static content and must not be announced) and the
   visible label names the region. The label text is in the tree, so the HTML string (feeds, if ever) degrades to
   a bold "Note" line followed by the content.
 - **Why not shadcn `Alert`:** the markup has to come out of the Markdown tree (so it survives as an HTML string),
   and `Alert` defaults to `role="alert"`. Only the label row is a component: `post-body.tsx` maps
   `p[data-callout-title]` to `CalloutTitle` (`components/posts/callout-title.tsx`, Server Component), which
-  prepends the lucide icon (`aria-hidden`): Info, Lightbulb, CircleAlert, TriangleAlert, OctagonAlert.
+  prepends the lucide icon (`aria-hidden`): Info, Lightbulb, MessageSquareWarning, TriangleAlert, OctagonAlert
+  (Important and Caution must not look alike at 16px). A leading `<br>`/whitespace after the marker is dropped.
 - **Look:** editorial, not a card. A 2px left rule, a 6% tint of the kind's tone, `rounded-r-md`, `px-5 py-4`;
   label in Fraunces 16px semibold in the tone; body Source Sans 16/28 (one step below the 18px body text).
-  `mt-10` above and below so callouts read as asides in the column.
+  `mt-10` above and below so callouts read as asides in the column, except next to `h2`/`h3` (they keep their own
+  `mt-14`/`mt-10` after and `mt-4` before a callout) and the footnotes section (keeps `mt-16`). Done by `:not()`
+  exclusion so it doesn't depend on CSS order.
 - **Tokens:** `--callout-note|tip|important|warning|caution` in `:root` and `.dark`, exposed as
   `--color-callout-*`. Light tones sit at OKLCH L 0.50-0.52 (>= 4.5:1 as text on white and on the tint); dark tones
-  at L 0.72-0.80. Note reuses the primary blue. Each callout sets `--callout` from its kind; the rule, label and
+  at L 0.72-0.80. Note is `var(--primary)` (no separate dark value). Each callout sets `--callout` from its kind; the rule, label and
   tint all read it, so a new kind is one token plus one variant.
 
 ### Footnotes (GFM)
@@ -463,7 +466,8 @@ styled with arbitrary variants in `components/posts/post-body.tsx`.
 - **Section:** `mt-16`, hairline `border-t`, `pt-8`, 16/28 muted text; label 18px Fraunces in foreground.
   Each note is `rounded-md px-2 py-1`; the back link (`aria-label="Back to reference N"`) gets a focus ring and a
   primary/10 hover fill.
-- **`:target`:** the jumped-to note (and, on the way back, the reference) gets a `primary/10` fill, the note text
+- **`:target`:** the returned-to reference gets a `primary/20` fill and a 2px primary ring (a small numeral needs
+  more than a tint); the jumped-to note gets a `primary/10` fill, the note text
   turns foreground and its marker primary. Pure CSS, instant (no transition), so nothing to reduce. `scroll-mt-24`
   clears the sticky header. No `scroll-behavior` change.
 

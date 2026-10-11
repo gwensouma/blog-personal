@@ -95,13 +95,18 @@ function rehypeCallouts() {
 
       const kind = match[1].toUpperCase() as keyof typeof CALLOUT_KINDS;
       const label = CALLOUT_KINDS[kind];
-      // Strip the marker; drop the paragraph if the marker was all it held.
+      // Strip the marker, then any leading whitespace or hard break (`> [!NOTE]` followed by two
+      // spaces leaves a <br>); drop the paragraph if the marker was all it held.
       firstText.value = (firstText.value ?? "").slice(match[0].length);
-      if (!firstText.value) first.children = first.children?.slice(1);
+      const inline = first.children ?? [];
+      while (inline[0] && (inline[0].tagName === "br" || (inline[0].type === "text" && !inline[0].value?.trim()))) inline.shift();
+      if (inline[0]?.type === "text") inline[0].value = inline[0].value?.trimStart();
+      first.children = inline;
       const rest = (node.children ?? []).slice(firstIndex + 1);
       const body = [...(first.children?.some((c) => !isBlank(c)) ? [first] : []), ...rest].filter((c) => !isBlank(c));
 
-      const id = `callout-title-${++count}`;
+      // Same prefix as footnote ids, so it can't collide with heading slugs.
+      const id = `user-content-callout-${++count}`;
       return {
         type: "element",
         tagName: "div",

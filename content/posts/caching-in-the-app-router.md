@@ -19,12 +19,12 @@ export const getPost = cache(async (slug: string) => {
 });
 ```
 
+> [!IMPORTANT]
+> `cache()` only lasts for one server request. It deduplicates work inside a render; it does not keep data between visitors. Persisting data across requests is the job of the data cache.
+
 ## Full route cache
 
 Routes without dynamic inputs are rendered at build time. `generateStaticParams` extends that to dynamic segments such as `/posts/[slug]`.
-
-> [!IMPORTANT]
-> `cache()` only lasts for one server request. It deduplicates work inside a render; it does not keep data between visitors. Persisting data across requests is the job of the data cache.
 
 ## Opting out
 

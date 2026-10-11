@@ -1,9 +1,9 @@
-import { CircleAlert, Info, Lightbulb, OctagonAlert, TriangleAlert, type LucideIcon } from "lucide-react";
+import { Info, Lightbulb, MessageSquareWarning, OctagonAlert, TriangleAlert, type LucideIcon } from "lucide-react";
 
 const icons: Record<string, LucideIcon> = {
   note: Info,
   tip: Lightbulb,
-  important: CircleAlert,
+  important: MessageSquareWarning,
   warning: TriangleAlert,
   caution: OctagonAlert,
 };

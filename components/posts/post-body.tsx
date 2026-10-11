@@ -48,7 +48,9 @@ const proseClasses = [
   // drives a hairline rule, the label color and a faint tint. Extra room above and below.
   "[&_[data-callout=note]]:[--callout:var(--color-callout-note)] [&_[data-callout=tip]]:[--callout:var(--color-callout-tip)] [&_[data-callout=important]]:[--callout:var(--color-callout-important)]",
   "[&_[data-callout=warning]]:[--callout:var(--color-callout-warning)] [&_[data-callout=caution]]:[--callout:var(--color-callout-caution)]",
-  "[&>*+[data-callout]]:mt-10 [&>[data-callout]+*]:mt-10",
+  // Headings keep their own top margin after a callout and their mt-4 before one; the footnotes
+  // section keeps its mt-16 (by exclusion, not by CSS order).
+  "[&>:not(h2,h3)+[data-callout]]:mt-10 [&>[data-callout]+:not(h2,h3,[data-footnotes])]:mt-10",
   "[&_[data-callout]]:flex [&_[data-callout]]:flex-col [&_[data-callout]]:gap-2 [&_[data-callout]]:rounded-r-md [&_[data-callout]]:border-l-2 [&_[data-callout]]:border-(--callout) [&_[data-callout]]:bg-(--callout)/6 [&_[data-callout]]:px-5 [&_[data-callout]]:py-4",
   "[&_[data-callout-title]]:flex [&_[data-callout-title]]:items-center [&_[data-callout-title]]:gap-2 [&_[data-callout-title]]:font-heading [&_[data-callout-title]]:text-base [&_[data-callout-title]]:text-(--callout) [&_[data-callout-title]_svg]:size-4 [&_[data-callout-title]_svg]:shrink-0",
   "[&_[data-callout-body]]:flex [&_[data-callout-body]]:flex-col [&_[data-callout-body]]:gap-3 [&_[data-callout-body]]:text-base/7",
@@ -67,7 +69,7 @@ const proseClasses = [
   // no anchor link in lib/markdown.ts). The jumped-to reference or note is tinted via :target,
   // CSS only. scroll-mt clears the sticky header.
   "[&_[data-footnote-ref]]:scroll-mt-24 [&_[data-footnote-ref]]:rounded-sm [&_[data-footnote-ref]]:px-0.5 [&_[data-footnote-ref]]:font-semibold [&_[data-footnote-ref]]:text-primary [&_[data-footnote-ref]]:tabular-nums [&_[data-footnote-ref]]:no-underline [&_[data-footnote-ref]]:outline-none",
-  "[&_[data-footnote-ref]:hover]:underline [&_[data-footnote-ref]:focus-visible]:ring-3 [&_[data-footnote-ref]:focus-visible]:ring-ring/50 [&_[data-footnote-ref]:target]:bg-primary/10",
+  "[&_[data-footnote-ref]:hover]:underline [&_[data-footnote-ref]:focus-visible]:ring-3 [&_[data-footnote-ref]:focus-visible]:ring-ring/50 [&_[data-footnote-ref]:target]:bg-primary/20 [&_[data-footnote-ref]:target]:ring-2 [&_[data-footnote-ref]:target]:ring-primary",
   "[&>[data-footnotes]]:mt-16 [&_[data-footnotes]]:border-t [&_[data-footnotes]]:border-border [&_[data-footnotes]]:pt-8 [&_[data-footnotes]]:text-base/7 [&_[data-footnotes]]:text-muted-foreground",
   "[&_[data-footnotes]>h2]:mt-0 [&_[data-footnotes]>h2]:text-lg [&_[data-footnotes]>h2]:text-foreground",
   "[&_[data-footnotes]_li]:scroll-mt-24 [&_[data-footnotes]_li]:rounded-md [&_[data-footnotes]_li]:px-2 [&_[data-footnotes]_li]:py-1",

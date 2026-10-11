@@ -24,7 +24,7 @@ Pass it to a form's `action` prop and the form works even before JavaScript load
 > Every exported function in a `"use server"` file becomes a public HTTP endpoint. Anyone can call it with any payload, not just your form, so treat its arguments like the body of an API request.
 
 > [!WARNING]
-> `FormData` values are untrusted strings. Validate and normalize them (trim, check length, parse the email) before they reach your data layer, and check that the user is allowed to make the change.
+> `FormData` values are untrusted input (strings, files or null). Validate and normalize them (trim, check length, parse the email) before they reach your data layer, and check that the user is allowed to make the change.
 
 ## Pending state
 
@@ -39,4 +39,4 @@ After a mutation, call `revalidatePath` or `revalidateTag` so cached Server Comp
 
 [^progressive]: Without JavaScript the browser submits the form as a regular POST and the server responds with the re-rendered page. Once the client has hydrated, React intercepts the submit and calls the action without a full reload.
 
-[^revalidate]: When the action is called from a Server Component form, Next.js sends the updated RSC payload back in the same response, so the page updates in one round trip.
+[^revalidate]: When the action calls `revalidatePath` or `revalidateTag`, Next.js sends the updated RSC payload back in the same response as the action result, so the page updates in one round trip.
