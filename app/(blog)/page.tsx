@@ -15,8 +15,8 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 // ISR: view counts (PopularPosts) change at runtime, so regenerate the static page in the background every 5 minutes.
 export const revalidate = 300;
 
-// Server Component. The intro renders immediately; each data-driven section
-// is an async component behind its own <Suspense>, so they stream in independently.
+// Server Component. The intro renders immediately; the data-driven sections are
+// async components, most behind their own <Suspense> (PopularPosts isn't, see below).
 export default function Home() {
   return (
     <ReadingColumn className="flex flex-col gap-16">
@@ -32,10 +32,10 @@ export default function Home() {
         <LatestPosts />
       </Suspense>
 
-      {/* null fallback: the list renders nothing when no post has views yet, so a skeleton could flash for nothing. */}
-      <Suspense fallback={null}>
-        <PopularPosts />
-      </Suspense>
+      {/* No <Suspense> on purpose: in prerendered (ISR) HTML a boundary becomes a hidden
+          template revealed by an inline script, so the section would be invisible without JS
+          and wouldn't stream anyway. Renders nothing until a post has views. */}
+      <PopularPosts />
 
       <Suspense fallback={null}>
         <TopicsSection />
