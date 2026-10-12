@@ -13,8 +13,8 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 ## 0. Resuming in a new session
 
 1. Read this file in full. It does not depend on chat history.
-2. Do the work on its own branch: `git switch main && git pull && git switch -c chore/agent-harness`. Don't put it on
-   a feature branch (this file was first written on `feat/up-next`, sprint 4, and must not ship in that PR).
+2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–3 are merged
+   (PRs #11, #12 and the `chore/agent-single-source` PR); next is Step 4.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
@@ -245,14 +245,17 @@ Keywords: Claude Code hooks `PreToolUse`, `permissions.deny`, per-agent `hooks` 
       outside the allowed paths (the hook can't see files written from a shell).
 
 ### Step 3: one source of truth per concern (AS-18, AS-23, AS-8, AS-9, AS-12)
+Done on branch `chore/agent-single-source`. ESLint now rejects relative imports and palette/hex class strings;
+kebab-case names and no barrels are checked by `tests/unit/conventions.test.ts` (no new dependency, so
+`eslint-plugin-check-file` was not added). `CLAUDE.md` went from 115 to 62 lines.
 Keywords: progressive disclosure, path-scoped rules, context budget, single source of truth.
-- [ ] Delete the "Agent workflow" section from `CLAUDE.md` (one pointer line stays) and "Working rules" from the
+- [x] Delete the "Agent workflow" section from `CLAUDE.md` (one pointer line stays) and "Working rules" from the
       roadmap; move anything in them that `SKILL.md` lacks into `SKILL.md`. Fix `roadmap.md:3`.
-- [ ] Split `CLAUDE.md` per §6 into `.claude/rules/{ui,data,tests}.md`; move the lint-checkable rules to ESLint.
-- [ ] Remove "Read `CLAUDE.md` first" from the four agent prompts (keep "its rules win over skills"). Drop
+- [x] Split `CLAUDE.md` per §6 into `.claude/rules/{ui,data,tests}.md`; move the lint-checkable rules to ESLint.
+- [x] Remove "Read `CLAUDE.md` first" from the four agent prompts (keep "its rules win over skills"). Drop
       `frontend-design` from builder's preloaded skills.
-- [ ] Move finished sprints and plans to `.design/roadmap-archive.md`.
-- [ ] AS-12: page structure and data wiring in `app/` → developer; JSX in `components/` → builder. Write this in both
+- [x] Move finished sprints and plans to `.design/roadmap-archive.md`.
+- [x] AS-12: page structure and data wiring in `app/` → developer; JSX in `components/` → builder. Write this in both
       agent descriptions and in `SKILL.md`'s routing table.
 
 ### Step 4: persisted handoff, lighter lead (AS-4, AS-19, AS-6, AS-17)

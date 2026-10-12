@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import "./globals.css";
+import "@/app/globals.css";
 
 // Replaces the root layout when it fails, so it renders its own <html> and <body>.
 // Kept dependency-light: the regular header, footer and fonts may be what broke.

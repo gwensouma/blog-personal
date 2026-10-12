@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectShown } from "./helpers";
+import { expectShown } from "@/tests/e2e/helpers";
 
 // Every test here runs in the `no-js` project (javaScriptEnabled: false): essential content must
 // be in the server HTML and visible, and forms must work as plain GETs.
