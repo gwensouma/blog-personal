@@ -1,0 +1,23 @@
+# Popular posts ("Most read") — Sprint 6
+
+## Decision
+
+- **Component:** `components/posts/popular-posts.tsx`, an async Server Component. It calls `getPopularPosts(4)` and `getFeaturedPost()`, drops the featured post (it's shown right above, and LatestPosts drops it the same way), and keeps the top 3. It returns `null` when nothing is left, so there's no heading and no empty box. The extra fetched row keeps the list at 3 when the featured post ranks in the top 3. No change to `lib/data` was needed.
+- **Accepted overlap:** a post can appear in both Latest posts and Most read. The two lists answer different questions (new vs. most read), so the repetition is accepted.
+- **Look:** a compact ranked list that's lighter than the full post row. It has no excerpt, tags or cover. Each row has a large Fraunces numeral (`font-heading`, `text-primary`, `tabular-nums`), the title as an `h3`, and one muted line with the view count (`1,234 views`, `toLocaleString("en-US")`, `tabular-nums`, singular "view" for 1). Rows sit between hairline `border-border` rules, like Related posts. The numeral column is `2rem` below `sm` (to recover gutter width at 320px) and `3rem` from `sm` up. The hover arrow is set to `top-8` / `sm:top-9.5` because the numeral's baseline pushes the title down; it was measured in headless Chrome at 320, 375, 640 and 1024px and is centred on the title's first line within 1.5px. It reuses `postRowClassName`, `postRowLinkClassName` and `PostRowAccent`, so hover and focus match every other post row: the row shifts, an accent bar appears, an arrow slides in, and the title link stretches over the row. `PostMeta` isn't used because date and reading time would compete with the one number this list is about.
+- **Numbering is real information.** The list is a ranking, so it's an `<ol role="list">`. The visible numeral is `aria-hidden` because the `<ol>` already tells screen readers the order.
+- **Outline:** the section is `aria-labelledby="popular-heading"`. "Most read" is an `h2`, the same level as Latest posts and Browse by topic under the hero `h1`. The post titles are `h3`.
+- **Position:** after Latest posts and before Browse by topic. The reader goes from recency to popularity, then to topics.
+- **No `<Suspense>`:** `PopularPosts` renders inline in the page. See caveat 1.
+- **Rhythm and motion:** `gap-6` between heading and list, like Latest posts. The heading uses `Reveal` and the rows use `StaggerList as="ol"` / `StaggerItem`, like Related posts. `StaggerList` gained an `as?: "ul" | "ol"` prop (default `ul`) and a `role="list"` passthrough for this. It animates only blocks below the fold at hydration, uses opacity and transform only, respects reduced motion, and leaves content visible without JS. Hover and focus are CSS only, through the shared row classes.
+
+## Rendering mode: ISR
+
+`app/(blog)/page.tsx` exports `revalidate = 300`. `getPopularPosts` reads no cookies, so `/` would otherwise be prerendered once at build time and the list would freeze. With ISR the page stays static and Next regenerates it in the background at most every 5 minutes. The build output shows `○ /` with Revalidate `5m`, and the response has `Cache-Control: s-maxage=300, stale-while-revalidate`.
+
+## Caveats
+
+1. **No Suspense around PopularPosts, on purpose.** Prerendered (ISR) HTML keeps every Suspense boundary: the fallback is rendered in place, and the resolved content is put in a `<div hidden id="S:n">`, then swapped in by an inline `$RC()` script. On a prerendered page a boundary therefore makes the section invisible without JS, and it doesn't stream in production because the document is generated ahead of time. So `PopularPosts` renders inline, and its markup is in the HTML outside any hidden element (checked with curl against `next start`). The trade-off: in dev, where the page renders per request, the shell waits briefly for this section.
+   - **Known follow-up (not fixed in this PR):** Featured, Latest posts and Topics on `/` are still wrapped in `<Suspense>`, so they have the same no-JS visibility problem in the prerendered HTML.
+2. **An empty `.data/` at build time ships no section.** If the build runs with no recorded views, the prerendered `/` has no "Most read" section. The section appears at the first regeneration after views exist, which needs a request more than 5 minutes after the last generation.
+3. **Revalidation is time-based on purpose.** `recordView` runs on every post view, so calling `revalidatePath("/")` from it would regenerate the home page on nearly every visit. There's no on-demand revalidation, and none should be added for view counts.

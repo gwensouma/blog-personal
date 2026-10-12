@@ -1,3 +1,5 @@
+import type { PostSummary } from "@/types/post";
+
 export type PostStats = {
   likes: number;
   views: number;
@@ -11,3 +13,9 @@ export type NewsletterState =
   | { status: "success"; message: string }
   /** `field: "email"` marks the address itself as invalid; without it the error is about the form as a whole. */
   | { status: "error"; message: string; email?: string; field?: "email" };
+
+/** A post ranked by views, for "Popular" lists. */
+export type PopularPost = {
+  post: PostSummary;
+  views: number;
+};

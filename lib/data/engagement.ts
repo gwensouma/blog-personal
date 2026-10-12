@@ -1,8 +1,9 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { cache } from "react";
+import { getPosts } from "@/lib/data/posts";
 import { readStore, updateStore } from "@/lib/data/store";
-import type { PostStats } from "@/types/engagement";
+import type { PopularPost, PostStats } from "@/types/engagement";
 
 // Likes and views per post, keyed by slug. Which posts *this* visitor liked is
 // remembered in a cookie, so there are no accounts and no client-side storage.
@@ -33,6 +34,19 @@ export const getPostStats = cache(async (slug: string): Promise<PostStats> => {
   const stats = table[slug] ?? empty;
   return { ...stats, liked: liked.includes(slug) };
 });
+
+/**
+ * The most viewed published posts, most views first (ties: newest first). Posts with no views are left out,
+ * so a fresh store returns []. Reads no cookies, so it doesn't force the caller to render dynamically.
+ */
+export async function getPopularPosts(limit = 3): Promise<PopularPost[]> {
+  const [table, posts] = await Promise.all([readStore<StatsTable>(STATS_KEY, {}), getPosts()]);
+  return posts
+    .map((post) => ({ post, views: table[post.slug]?.views ?? 0 }))
+    .filter(({ views }) => views > 0)
+    .sort((a, b) => b.views - a.views || b.post.date.localeCompare(a.post.date))
+    .slice(0, limit);
+}
 
 /** Counts one view. Call it from `after()` so it never delays the response. */
 export async function recordView(slug: string): Promise<void> {

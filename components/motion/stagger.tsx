@@ -21,20 +21,25 @@ const itemVariants: Variants = {
 
 type StaggerListProps = {
   children: React.ReactNode;
+  /** "ol" for ranked lists, where the order is meaningful. */
+  as?: "ul" | "ol";
   className?: string;
   "aria-label"?: string;
+  /** role="list" keeps list semantics in Safari when list-style is none. */
+  role?: "list";
 };
 
 // Client wrapper for a list whose rows reveal one after another on scroll.
 // The <li> rows (StaggerItem) wrap server-rendered content passed as children.
-export function StaggerList({ children, className, ...props }: StaggerListProps) {
-  const ref = useRef<HTMLUListElement>(null);
+export function StaggerList({ children, as = "ul", className, ...props }: StaggerListProps) {
+  const ref = useRef<HTMLUListElement & HTMLOListElement>(null);
   const state = useReveal(ref);
+  const List = as === "ol" ? m.ol : m.ul;
 
   return (
-    <m.ul ref={ref} initial={false} animate={state} variants={listVariants} className={className} {...props}>
+    <List ref={ref} initial={false} animate={state} variants={listVariants} className={className} {...props}>
       {children}
-    </m.ul>
+    </List>
   );
 }
 

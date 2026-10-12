@@ -6,13 +6,17 @@ import { ReadingColumn } from "@/components/reading-column";
 import { NewsletterSection } from "@/components/newsletter/newsletter-section";
 import { FeaturedPost, FeaturedPostSkeleton } from "@/components/posts/featured-post";
 import { LatestPosts, LatestPostsSkeleton } from "@/components/posts/latest-posts";
+import { PopularPosts } from "@/components/posts/popular-posts";
 import { TopicsSection } from "@/components/tags/topics-section";
 import { personJsonLd, websiteJsonLd } from "@/lib/structured-data";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
-// Server Component. The intro renders immediately; each data-driven section
-// is an async component behind its own <Suspense>, so they stream in independently.
+// ISR: view counts (PopularPosts) change at runtime, so regenerate the static page in the background every 5 minutes.
+export const revalidate = 300;
+
+// Server Component. The intro renders immediately; the data-driven sections are
+// async components, most behind their own <Suspense> (PopularPosts isn't, see below).
 export default function Home() {
   return (
     <ReadingColumn className="flex flex-col gap-16">
@@ -27,6 +31,11 @@ export default function Home() {
       <Suspense fallback={<LatestPostsSkeleton />}>
         <LatestPosts />
       </Suspense>
+
+      {/* No <Suspense> on purpose: in prerendered (ISR) HTML a boundary becomes a hidden
+          template revealed by an inline script, so the section would be invisible without JS
+          and wouldn't stream anyway. Renders nothing until a post has views. */}
+      <PopularPosts />
 
       <Suspense fallback={null}>
         <TopicsSection />
