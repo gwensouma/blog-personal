@@ -7,7 +7,19 @@ import { getImageMeta, isRemoteImage } from "@/lib/data/images";
 import { estimateReadingTime, extractToc, renderMarkdown } from "@/lib/markdown";
 import { site } from "@/lib/site";
 import { tagSlug } from "@/lib/tags";
-import type { AdjacentPosts, Paginated, Post, PostCover, PostIndexItem, PostSeries, PostSeriesRef, PostSummary, Tag } from "@/types/post";
+import { yearOf } from "@/lib/format";
+import type {
+  AdjacentPosts,
+  ArchivePage,
+  Paginated,
+  Post,
+  PostCover,
+  PostIndexItem,
+  PostSeries,
+  PostSeriesRef,
+  PostSummary,
+  Tag,
+} from "@/types/post";
 
 // Server-only data access. Posts are Markdown files with frontmatter in
 // content/posts; swapping this for a database/CMS only changes this file.
@@ -182,6 +194,28 @@ export async function getPaginatedPosts(page: number, perPage: number = site.pos
   const totalPages = Math.max(1, Math.ceil(all.length / perPage));
   const start = (page - 1) * perPage;
   return { items: all.slice(start, start + perPage), page, totalPages, totalItems: all.length };
+}
+
+/** One archive page (1-based) plus per-year totals and whether its first year continues from the previous page. */
+export async function getArchivePage(page: number, perPage: number = site.postsPerPage): Promise<ArchivePage> {
+  // Both calls read the same per-request cached post list.
+  const [pageResult, all] = await Promise.all([getPaginatedPosts(page, perPage), getPosts()]);
+  const { items } = pageResult;
+  const start = (page - 1) * perPage;
+
+  // A real database would answer this with one GROUP BY instead of a scan.
+  const yearCounts: Record<string, number> = {};
+  for (const post of all) {
+    const year = yearOf(post.date);
+    yearCounts[year] = (yearCounts[year] ?? 0) + 1;
+  }
+
+  // Newest first: the previous page's last post is the one right before this page's first.
+  const before = start > 0 ? all[start - 1] : undefined;
+  const firstYear = items[0] ? yearOf(items[0].date) : null;
+  const continuedYear = before && firstYear && yearOf(before.date) === firstYear ? firstYear : null;
+
+  return { ...pageResult, yearCounts, continuedYear };
 }
 
 export async function getFeaturedPost(): Promise<PostSummary | null> {
