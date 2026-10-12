@@ -24,7 +24,7 @@ Read `CLAUDE.md` first, then any design notes in `.design/` that relate to the c
 8. **Project rules** — TypeScript only, English-only comments and copy, no unrequested libraries.
 9. **File placement** — every new or moved file sits where CLAUDE.md's "Where does a new file go?" says; `app/` files stay thin; named exports except Next special files; `@/` imports.
 
-Run `npm run typecheck`, `npm run lint`, `npm run build`, and `npm test` once a test suite exists; any failure is a must-fix.
+Run `npm run gate` (typecheck, lint, unit tests, build); any failure is a must-fix. Report the exit code.
 
 ## Checking in a real browser (Playwright)
 

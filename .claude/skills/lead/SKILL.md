@@ -60,12 +60,16 @@ Per sprint, in roadmap order:
    that *same* agent with `SendMessage` so it keeps context, then re-run the tester until no must-fix defect remains.
 4. **Review.** Run the reviewer on the branch diff, tests included. Route must-fix findings the same way and
    re-review until none remain.
-5. **Gate.** `npm run typecheck`, `npm run lint`, `npm run build` and `npm test` (once it exists) all pass.
+5. **Gate.** `npm run gate` passes locally (and `npm run test:e2e` for any UI or route change). Every agent report
+   states the command it ran and its exit code; "it passes" without an exit code is not a gate result.
 6. **Ship.** Tick the sprint row in the roadmap on the same branch, commit, push and run `gh pr create`.
-7. **Lead check** on the PR diff (`gh pr diff`): every intended file is in it (check ignored paths), RSC boundaries
+7. **Lead check** on the PR diff (`gh pr diff`): `gh pr diff <n> --name-only` matches the files the agents reported
+   (an ignored path silently drops a file, as happened in PR #7), RSC boundaries
    (no `"use client"` creep), essential content renders without JS, files sit where `CLAUDE.md` says, no new runtime
    dependency, scope matches the row, and the acceptance criteria have tests.
-8. **Merge** with `gh pr merge <n> --merge` once the PR is rebased on `main` and green. Then fast-forward local
+8. **Merge** with `gh pr merge <n> --merge` only when the PR is rebased on `main` and CI is green
+   (`gh pr checks <n> --watch`: both `gate` and `e2e` pass). Never merge on a local run or an agent's report alone; a
+   red or pending check is not mergeable. Then fast-forward local
    `main`, and rebase any other open PR before its own merge.
 
 Done per sprint when the PR is merged, its row is ✅ on `main`, and `main` builds.
