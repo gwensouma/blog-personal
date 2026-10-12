@@ -60,6 +60,13 @@ Per sprint, in roadmap order:
    that *same* agent with `SendMessage` so it keeps context, then re-run the tester until no must-fix defect remains.
 4. **Review.** Run the reviewer on the branch diff, tests included. Route must-fix findings the same way and
    re-review until none remain.
+
+   Ownership is enforced by the `PreToolUse` hook in `.claude/hooks/guard-paths.mjs` (tester writes only `tests/`,
+   reviewer writes nothing, developer/builder stay out of `tests/`, subagents don't push/switch/merge, nobody kills
+   processes by image name). The hook sees the Write/Edit tools, not files written from a shell, so after every
+   tester or reviewer turn run `git status --porcelain`: a tester change outside `tests/`, or any reviewer change, is
+   a defect to revert and report. If the hook blocks something an agent legitimately needs, decide it yourself;
+   don't loosen the hook to get past one sprint.
 5. **Gate.** `npm run gate` passes locally (and `npm run test:e2e` for any UI or route change). Every agent report
    states the command it ran and its exit code; "it passes" without an exit code is not a gate result.
 6. **Ship.** Tick the sprint row in the roadmap on the same branch, commit, push and run `gh pr create`.

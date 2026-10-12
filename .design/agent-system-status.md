@@ -218,25 +218,31 @@ Keywords: GitHub Actions, required status checks, branch protection, `gh pr chec
 - [x] Add `"gate": "npm run typecheck && npm run lint && npm test && npm run build"` to `package.json`.
 - [x] `.github/workflows/ci.yml`: Node 22, `npm ci`, `npm run gate`. A second job: `npx playwright install --with-deps
       chromium` and `npm run test:e2e`.
-- [ ] Protect `main`: require the `gate` and `e2e` checks, no direct pushes. Waiting on the user (it changes repo
-      settings), after CI has passed once on the Step 1 PR.
+- [ ] ~~Protect `main`~~: skipped by the user on 2026-10-12 (the Claude Code permission classifier blocked the
+      `gh api` call, and the user chose not to enable it by hand). CI still runs on every PR; the lead merges only on
+      green checks (`SKILL.md` step 8). Revisit if a red PR ever gets merged.
 - [x] `SKILL.md`: agents run `npm run gate` and paste the exit code; the lead merges only when `gh pr checks <n>` is
       green, and compares `gh pr diff <n> --name-only` with the files the agents reported. Agent prompts and
       `CLAUDE.md` "Commands" now point at `npm run gate`.
 
 ### Step 2: hard guardrails (AS-2, AS-3, AS-20)
 Keywords: Claude Code hooks `PreToolUse`, `permissions.deny`, per-agent `hooks` frontmatter, least privilege.
-- [ ] `permissions.deny` in `.claude/settings.json`, for example
-      `["Bash(taskkill /IM *)", "Bash(git push --force *)", "Bash(git push -f *)", "Bash(git reset --hard *)"]`.
-      Deny wins over allow; compound commands are matched part by part.
-- [ ] `.claude/hooks/guard-paths.mjs` (Node, so it runs the same on Windows) as a `PreToolUse` hook on `Write|Edit`,
-      using `agent_type` from the hook input:
-      - tester: block paths outside `tests/`;
+- [x] `permissions.deny` in `.claude/settings.json`: force pushes, `git reset --hard`, `git clean -fd(x)`. Deny wins
+      over allow; compound commands are matched part by part. Killing by image name lives in the hook instead,
+      because a regex catches every flag order and case (`/F /IM`, `/im`), which prefix rules can't.
+- [x] `.claude/hooks/guard-paths.mjs` (Node, so it runs the same on Windows) as a `PreToolUse` hook on
+      `Write|Edit|MultiEdit|NotebookEdit|Bash|PowerShell`, using `agent_type` from the hook input:
+      - tester: block paths in the project outside `tests/`;
       - reviewer: block every write;
       - developer, builder: block paths under `tests/`;
-      - anyone but tester: block new `test.fixme(`, `test.skip(`, `.only(`.
-- [ ] Backstop in `SKILL.md`: after each tester or reviewer turn, `git status --porcelain` must show no change outside
-      the allowed paths.
+      - anyone but the tester: block new `test.fixme(` / `.skip(`; everyone: block new `.only(`;
+      - subagents: block `git push|switch|checkout|rebase|merge|reset --hard` and `gh pr create|merge|close|ready`;
+      - everyone: block killing processes by image name (any case, any flag order), in command position only.
+      Covered by `tests/unit/guard-hook.test.ts` (black-box over stdin and exit codes) and confirmed live in a session.
+      Known false positive: the kill check fires when a shell command's *text* puts the word right after `(`, `;`, `&`
+      or `|`, e.g. a heredoc that quotes a permission rule. Edit such docs with the Edit tool, not through the shell.
+- [x] Backstop in `SKILL.md` step 4: after each tester or reviewer turn, `git status --porcelain` must show no change
+      outside the allowed paths (the hook can't see files written from a shell).
 
 ### Step 3: one source of truth per concern (AS-18, AS-23, AS-8, AS-9, AS-12)
 Keywords: progressive disclosure, path-scoped rules, context budget, single source of truth.
