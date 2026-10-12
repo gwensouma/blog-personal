@@ -26,5 +26,6 @@ Thumbs.db
 # Local JSON data store (lib/data/store.ts)
 .data/
 
-# Third-party Claude Code skills (installed locally, not redistributed)
-.claude/skills/
+# Third-party Claude Code skills (installed locally, not redistributed). Project-owned skills are re-included.
+.claude/skills/*
+!.claude/skills/lead/

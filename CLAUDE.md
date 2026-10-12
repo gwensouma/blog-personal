@@ -94,11 +94,13 @@ There is no `.cursorrules` or Copilot instructions in this repo.
 
 ## Agent workflow
 
-Start a working session with **`/lead`** ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)). The main session is then the **lead**: it plans from [.design/roadmap.md](.design/roadmap.md) (the single source of truth for what is decided, queued and done), delegates UI work to subagents in [.claude/agents/](.claude/agents/), and merges.
+Start a working session with **`/lead`** ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)). The main session is then the **lead**: it plans from [.design/roadmap.md](.design/roadmap.md) (the single source of truth for what is decided, queued and done), briefs the subagents in [.claude/agents/](.claude/agents/), routes their findings, and merges.
 
-1. **Lead (main session)** — clarifies the request, decides scope, and writes a precise brief for the builder (goal, files in scope, constraints). Non-UI work (data layer, `lib/ai/`, types, config) and trivial one-line fixes it does directly.
-2. **[builder](.claude/agents/builder.md)** — designs and implements UI. Skills: `hallmark` (primary design guide, editorial genre), `frontend-design` (secondary), `frontend-ui-engineering`, `shadcn`. Writes design decisions that change direction to `.design/`, runs the gates.
-3. **[reviewer](.claude/agents/reviewer.md)** — read-only. Skills: `frontend-ui-engineering`, `shadcn`. Checks RSC boundaries, token/shadcn usage, a11y, responsiveness, design consistency; reports must-fix vs. suggestion.
-4. **Loop** — the lead sends must-fix findings back to the builder (continue the same builder agent so it keeps context) and re-reviews until there are none.
+1. **Lead (main session)** — clarifies the request, decides scope, writes precise briefs (goal, branch, files in scope, acceptance criteria). Edits directly only for one-line fixes and docs.
+2. **[developer](.claude/agents/developer.md)** — senior fullstack: data layer, Server Actions, types, routes and their wiring, config, security-sensitive server code.
+3. **[builder](.claude/agents/builder.md)** — designs and implements UI. Skills: `hallmark` (primary design guide, editorial genre), `frontend-design` (secondary), `frontend-ui-engineering`, `shadcn`. Writes design decisions that change direction to `.design/`.
+4. **[tester](.claude/agents/tester.md)** — writes and runs automated tests in `tests/` (Vitest for `lib/`, Playwright Test end to end, including with JS disabled) against the acceptance criteria; reports defects, never edits source.
+5. **[reviewer](.claude/agents/reviewer.md)** — read-only. Skills: `hallmark`, `frontend-ui-engineering`, `shadcn`. Checks RSC boundaries, server-side security, token/shadcn usage, a11y, responsiveness, design consistency; reports must-fix vs. suggestion.
+6. **Loop** — build → test → review. The lead sends each defect or must-fix finding back to the agent that owns the file (continuing the same agent so it keeps context) and re-runs the tester/reviewer until none remain.
 
 **Git:** one branch per feature off `main` (`feat/<name>`, `fix/<name>`, `chore/<name>`). The lead creates the branch, commits, pushes to `origin`, opens a PR with `gh pr create`, and merges it (`gh pr merge --merge`) once the review loop is clean and typecheck, lint and build pass. Feature work always lands on `main` through a PR. The user delegated merging to the lead and can take it back at any time.
