@@ -96,12 +96,13 @@ Each line is one branch and one PR. The lead merges. Order: T → 4 → 8 → 9 
 | 5 ✅ | `feat/archive-by-year` | E: `/posts` grouped by year, pagination kept | — |
 | 6 ✅ | `feat/popular-posts` | E: top posts by views on home (ISR 5m, rendered inline, no `<Suspense>`) | — |
 | 7 ✅ | `feat/search-filters` | E: tag chips + match highlight, URL params only | — |
-| T | `chore/test-setup` | **Next.** Vitest + Playwright Test, first regression tests (see "Next up: test infrastructure") | — |
-| 8 | `fix/home-no-js` | Render essential home sections inline (no `<Suspense>` on ISR `/`); add the "Suspense only around non-essential or JS-dependent content" principle to CLAUDE.md; reviewer checks routes with JS disabled | — |
+| T ✅ | `chore/test-setup` | Vitest + Playwright Test (`js` / `no-js` projects), 81 unit + 18 e2e regression tests (see "Next up: test infrastructure") | — |
+| 8 | `fix/home-no-js` | Remove `test.fixme` from the home no-JS test in `tests/e2e/no-js.spec.ts`. Render essential home sections inline (no `<Suspense>` on ISR `/`); add the "Suspense only around non-essential or JS-dependent content" principle to CLAUDE.md; reviewer checks routes with JS disabled | — |
 | 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint T, sprint 4 |
 | 10 | `feat/comments-admin` | D: /admin with password, hide/unhide comments | sprint 9 |
 
-Deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
+Deferred: the `/search` empty-state title is a `<div>`, not a heading (a11y suggestion from the sprint T tester; fix it
+with the next search touch). Also deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
 the user's own content). Re-plan after sprint 7: D (comments) next, then C.
 
 ## Working rules
