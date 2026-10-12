@@ -29,3 +29,10 @@ Thumbs.db
 # Third-party Claude Code skills (installed locally, not redistributed). Project-owned skills are re-included.
 .claude/skills/*
 !.claude/skills/lead/
+
+# Test output (Vitest / Playwright) and the e2e server's throwaway store
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.data-e2e/

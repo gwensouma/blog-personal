@@ -20,7 +20,10 @@ This project is a personal blog, built as a learning vehicle for React Server Co
 - `npm run start` — run the production build (same `.env.local` loading)
 - `npm run typecheck` — `tsc --noEmit`
 - `npm run lint` — ESLint flat config ([eslint.config.mjs](eslint.config.mjs), `next/core-web-vitals` + `next/typescript`)
-- No test suite is configured. Before a PR: `typecheck`, `lint` and `build` must all pass (`next build` also runs ESLint, so a lint error fails the build too).
+- `npm test` — Vitest unit tests (`tests/unit/**/*.test.ts`, Node environment; config in [vitest.config.mts](vitest.config.mts))
+- `npm run test:watch` — Vitest in watch mode
+- `npm run test:e2e` — Playwright Test (`tests/e2e/`, Chromium; config in [playwright.config.ts](playwright.config.ts)). Always builds and starts its own server on port 3200 (never reuses one; the run fails if 3200 is busy) with `BLOG_DATA_DIR=.data-e2e`, so the real `.data/` is never touched; it rebuilds `.next/`, so don't run it alongside `npm run dev`. Projects: `js` (default) and `no-js` (JavaScript disabled, runs only tests tagged `@no-js`).
+- Before a PR: `typecheck`, `lint`, `build` and `npm test` must all pass (`next build` also runs ESLint, so a lint error fails the build too). Also run `npm run test:e2e` for any UI or route change.
 
 ## Architecture
 
@@ -57,6 +60,9 @@ lib/
   format.ts, tags.ts, rss.ts, structured-data.ts, theme.ts   pure helpers
   utils.ts                     cn() — re-exports the `cn` package, used by shadcn
 types/<entity>.ts              shared domain types; global.d.ts for ambient declarations
+tests/
+  unit/**/*.test.ts            Vitest (Node); imports lib/ directly. `server-only` is stubbed (tests/stubs/)
+  e2e/**/*.spec.ts             Playwright against a production build; tag `@no-js` for the JavaScript-disabled project
 ```
 
 - `app/` — **routing only**. In Next 15, dynamic route `params` is a `Promise` and must be awaited. Pages are Server Components that `await` calls into `lib/data/` and render one or a few `components/`. Don't put business logic, data fetching implementation, or large JSX here.
@@ -78,6 +84,7 @@ Answer these in order; the first "yes" decides.
 6. **Does it read/write data or talk to an external service?** → `lib/data/<entity>.ts` (or `lib/ai/` for LLM work). Server-only. A mutation the client triggers gets a thin Server Action in `lib/actions/<entity>.ts` that validates input and calls `lib/data/`.
 7. **Is it a pure helper with no React and no I/O?** → `lib/<topic>.ts` (e.g. `lib/format.ts`). Don't grow `lib/utils.ts` beyond `cn()`.
 8. **Is it a type used by 2+ files?** → `types/<entity>.ts`. Props types used by one component stay inline in that component.
+9. **Is it a test?** → unit tests (pure helpers, `lib/data/`, `lib/actions/`) go in `tests/unit/<topic>.test.ts`; browser tests of routes go in `tests/e2e/<route-or-feature>.spec.ts`. Never colocate tests in `app/`, `components/` or `lib/`. Tests that use the store set `process.env.BLOG_DATA_DIR` to their own temp dir and call `resetStoreForTests()` from `lib/data/store.ts`.
 
 Conventions:
 - File names are kebab-case (`post-list-item.tsx`); components are PascalCase **named exports**. Only Next.js special files in `app/` use `export default`.

@@ -9,10 +9,17 @@ import path from "node:path";
 // changes this file. Note: serverless hosts have a read-only filesystem, so
 // replace this adapter before deploying there.
 //
-// Each key lives in its own file (.data/<key>.json), so a large table never
+// Each key lives in its own file (<data dir>/<key>.json), so a large table never
 // slows writes to another. After the first read, an in-memory copy is the
 // source of truth for this process; disk is only written, never re-read.
-const STORE_DIR = path.join(process.cwd(), ".data");
+//
+// The data dir is `.data/` under the project root unless BLOG_DATA_DIR is set
+// (absolute, or relative to the cwd). Tests and the e2e server use it to keep
+// the real `.data/` untouched. It is read on every access rather than once at
+// import, so a test file can set it before its first store call.
+function storeDir(): string {
+  return path.resolve(process.cwd(), process.env.BLOG_DATA_DIR || ".data");
+}
 const KEY_PATTERN = /^[a-zA-Z0-9-]+$/;
 
 // Next bundles this module more than once (page renders and Server Actions get
@@ -30,7 +37,7 @@ const { memory, queues } = globalStore.__rscJournalStore;
 
 function fileFor(key: string): string {
   if (!KEY_PATTERN.test(key)) throw new Error(`Invalid store key: ${key}`);
-  return path.join(STORE_DIR, `${key}.json`);
+  return path.join(storeDir(), `${key}.json`);
 }
 
 async function load<T>(key: string, fallback: T): Promise<T> {
@@ -60,7 +67,7 @@ async function persist(key: string, value: unknown): Promise<void> {
   const file = fileFor(key);
   // Unique per write, so two writers can never rename each other's temp file away.
   const temp = `${file}.${process.pid}.${randomUUID()}.tmp`;
-  await mkdir(STORE_DIR, { recursive: true });
+  await mkdir(path.dirname(file), { recursive: true });
   await writeFile(temp, JSON.stringify(value, null, 2));
   for (let attempt = 0; ; attempt++) {
     try {
@@ -95,4 +102,15 @@ export function updateStore<T>(key: string, fallback: T, update: (value: T) => T
     run.catch(() => undefined),
   );
   return run;
+}
+
+// TEST-ONLY: forgets the in-memory copy and write queues so the next read goes
+// back to disk (in whatever BLOG_DATA_DIR now points at). The state lives on
+// globalThis, so it survives module re-imports; this is the only way to start
+// clean. Await every pending updateStore() call before resetting. Never call
+// this from app code: in a running server it would drop in-flight serialization.
+export function resetStoreForTests(): void {
+  if (!process.env.VITEST) throw new Error("resetStoreForTests is test-only");
+  memory.clear();
+  queues.clear();
 }
