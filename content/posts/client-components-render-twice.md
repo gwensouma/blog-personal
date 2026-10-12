@@ -3,6 +3,8 @@ title: Client Components render on both server and client
 date: 2026-08-15
 excerpt: A "use client" component is still rendered to HTML on the server first, then hydrated in the browser.
 tags: [Client Components, Fundamentals, Hydration]
+series: RSC Fundamentals
+seriesOrder: 2
 ---
 
 The name is misleading. A Client Component, marked with `"use client"`, is **also rendered on the server**. The difference is that its code is shipped to the browser so it can be hydrated and become interactive.

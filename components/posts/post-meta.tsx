@@ -28,11 +28,12 @@ export function PostMeta({ post, showUpdated = false, className, children }: Pos
       ) : null}
       <span aria-hidden="true">·</span>
       <span>{formatReadingTime(post.readingTime)}</span>
+      {/* One flex item, so the separator wraps together with the trailing item instead of hanging at a line end. */}
       {children ? (
-        <>
+        <span className="inline-flex items-center gap-x-2">
           <span aria-hidden="true">·</span>
           {children}
-        </>
+        </span>
       ) : null}
     </div>
   );

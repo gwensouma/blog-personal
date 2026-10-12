@@ -3,6 +3,8 @@ title: Server Components run on the server
 date: 2026-08-10
 excerpt: Why a component that never ships to the browser changes how you fetch data, keep secrets and size your bundle.
 tags: [Server Components, Fundamentals]
+series: RSC Fundamentals
+seriesOrder: 1
 featured: true
 ---
 

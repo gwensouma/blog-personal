@@ -4,6 +4,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { PostCover } from "@/components/posts/post-cover";
 import { PostMeta } from "@/components/posts/post-meta";
 import { postRowCoverClassName, postRowLinkClassName } from "@/components/posts/post-row-accent";
+import { hasSeriesMarker, PostSeriesMarker } from "@/components/posts/post-series";
 import { PostTags } from "@/components/posts/post-tags";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFeaturedPost } from "@/lib/data/posts";
@@ -47,7 +48,7 @@ export async function FeaturedPost() {
           </span>
         </div>
         <div className="flex flex-col gap-4">
-          <PostMeta post={post} />
+          <PostMeta post={post}>{hasSeriesMarker(post.series) ? <PostSeriesMarker series={post.series} /> : null}</PostMeta>
           <h3 className="font-heading text-3xl leading-tight font-semibold text-balance [overflow-wrap:anywhere] sm:text-4xl">
             <Link href={`/posts/${post.slug}`} className={postRowLinkClassName}>
               {post.title}

@@ -7,7 +7,7 @@ import { getImageMeta, isRemoteImage } from "@/lib/data/images";
 import { estimateReadingTime, extractToc, renderMarkdown } from "@/lib/markdown";
 import { site } from "@/lib/site";
 import { tagSlug } from "@/lib/tags";
-import type { AdjacentPosts, Paginated, Post, PostCover, PostIndexItem, PostSummary, Tag } from "@/types/post";
+import type { AdjacentPosts, Paginated, Post, PostCover, PostIndexItem, PostSeries, PostSeriesRef, PostSummary, Tag } from "@/types/post";
 
 // Server-only data access. Posts are Markdown files with frontmatter in
 // content/posts; swapping this for a database/CMS only changes this file.
@@ -67,6 +67,19 @@ async function parseCover(value: unknown, slug: string): Promise<PostCover | und
   }
 }
 
+// Series membership: `series: RSC Fundamentals` plus `seriesOrder: 2` in frontmatter.
+// A series without a valid order is ignored (with a warning) rather than guessed.
+function parseSeries(name: unknown, order: unknown, slug: string): PostSeriesRef | undefined {
+  const seriesName = optionalString(name);
+  if (!seriesName) return undefined;
+  const seriesOrder = optionalNumber(order);
+  if (!seriesOrder || !Number.isInteger(seriesOrder)) {
+    console.warn(`[posts] "${slug}": series "${seriesName}" needs a positive integer seriesOrder; ignoring the series.`);
+    return undefined;
+  }
+  return { name: seriesName, slug: tagSlug(seriesName), order: seriesOrder };
+}
+
 // Issue numbers: posts without a frontmatter `issue` are numbered in publication
 // order (oldest = 1), skipping numbers already pinned by an override. Pin `issue`
 // on a back-dated post so it doesn't renumber the posts published after it.
@@ -116,6 +129,7 @@ const loadAllPosts = cache(async (): Promise<RawPost[]> => {
           readingTime: estimateReadingTime(content),
           featured: Boolean(data.featured),
           cover: await parseCover(data.cover, slug),
+          series: parseSeries(data.series, data.seriesOrder, slug),
         },
       };
     }),
@@ -125,8 +139,28 @@ const loadAllPosts = cache(async (): Promise<RawPost[]> => {
   const sorted = posts
     .filter((post): post is RawPost => post !== null)
     .sort((a, b) => b.summary.date.localeCompare(a.summary.date) || a.summary.slug.localeCompare(b.summary.slug));
-  return assignIssues(sorted);
+  return withSeriesTotals(assignIssues(sorted));
 });
+
+// Stamps each series ref with its part count, so lists can tell a real series from a one-part one, and
+// with the name spelled as in the lowest-numbered part, so every part shows the same series title.
+function withSeriesTotals(posts: RawPost[]): RawPost[] {
+  const totals = new Map<string, number>();
+  const first = new Map<string, PostSeriesRef>();
+  for (const { summary } of posts) {
+    const { series } = summary;
+    if (!series) continue;
+    totals.set(series.slug, (totals.get(series.slug) ?? 0) + 1);
+    const current = first.get(series.slug);
+    if (!current || series.order < current.order) first.set(series.slug, series);
+  }
+  return posts.map((post) => {
+    const series = post.summary.series;
+    if (!series) return post;
+    const name = first.get(series.slug)?.name ?? series.name;
+    return { ...post, summary: { ...post.summary, series: { ...series, name, total: totals.get(series.slug) } } };
+  });
+}
 
 /** All published posts, newest first. Optionally filtered by tag slug. */
 export async function getPosts(options: { tag?: string } = {}): Promise<PostSummary[]> {
@@ -173,20 +207,48 @@ export async function getAdjacentPosts(slug: string): Promise<AdjacentPosts> {
   return { next: posts[index - 1] ?? null, previous: posts[index + 1] ?? null };
 }
 
-/** Posts sharing the most tags with the given one, excluding itself. */
+/** Posts sharing the most tags with the given one, excluding itself and the other parts of its series. */
 export async function getRelatedPosts(slug: string, limit = 3): Promise<PostSummary[]> {
   const posts = (await loadAllPosts()).map((post) => post.summary);
   const current = posts.find((post) => post.slug === slug);
   if (!current) return [];
   const currentTags = new Set(current.tags.map(tagSlug));
+  // Other parts of a real series are already linked by the series box, so leave room for different posts.
+  const seriesSlug = current.series && (current.series.total ?? 0) > 1 ? current.series.slug : null;
 
   return posts
-    .filter((post) => post.slug !== slug)
+    .filter((post) => post.slug !== slug && (!seriesSlug || post.series?.slug !== seriesSlug))
     .map((post) => ({ post, shared: post.tags.filter((tag) => currentTags.has(tagSlug(tag))).length }))
     .filter(({ shared }) => shared > 0)
     .sort((a, b) => b.shared - a.shared)
     .slice(0, limit)
     .map(({ post }) => post);
+}
+
+/** The series the given post belongs to, with every part in reading order, or null. */
+export async function getPostSeries(slug: string): Promise<PostSeries | null> {
+  const posts = (await loadAllPosts()).map((post) => post.summary);
+  const current = posts.find((post) => post.slug === slug)?.series;
+  if (!current) return null;
+
+  const parts = posts
+    .filter((post) => post.series?.slug === current.slug)
+    .sort((a, b) => a.series!.order - b.series!.order || a.date.localeCompare(b.date));
+  const orders = parts.map((post) => post.series!.order);
+  if (new Set(orders).size !== orders.length) {
+    warnOnce(`series:${current.slug}`, `[posts] series "${current.name}" has duplicate seriesOrder values: ${orders.join(", ")}.`);
+  }
+
+  // `current.name` is already normalized to part 1's spelling by withSeriesTotals.
+  return { name: current.name, slug: current.slug, parts, position: parts.findIndex((post) => post.slug === slug) + 1 };
+}
+
+// Content warnings fire on every request for dynamic routes; log each one once per process.
+const warned = new Set<string>();
+function warnOnce(key: string, message: string) {
+  if (warned.has(key)) return;
+  warned.add(key);
+  console.warn(message);
 }
 
 /** Every tag with its post count, most used first. */
