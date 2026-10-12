@@ -89,13 +89,16 @@ function SeriesStep({ part, direction }: { part: PostSeries["parts"][number]; di
 
 /**
  * Minimal previous/next within the series, at the end of the post body. Kept to
- * text links on a hairline so it doesn't compete with the chronological
- * adjacent-post cards further down.
+ * text links on a hairline so it doesn't compete with the cards further down.
+ * `hideNext`: the "Up next" card already points at the next part (it is the one
+ * forward step), so the nav keeps only the way back. "final part" still comes from
+ * the series itself, not from what is shown.
  */
-export function PostSeriesNav({ series, className }: { series: PostSeries; className?: string }) {
+export function PostSeriesNav({ series, hideNext = false, className }: { series: PostSeries; hideNext?: boolean; className?: string }) {
   const previous = series.parts[series.position - 2];
-  const next = series.parts[series.position];
-  const isLast = !next;
+  const nextPart = series.parts[series.position];
+  const isLast = !nextPart;
+  const next = hideNext ? undefined : nextPart;
 
   return (
     <nav aria-label={`${series.name}: previous and next part`} className={cn("flex flex-col gap-5 border-t border-border pt-8", className)}>

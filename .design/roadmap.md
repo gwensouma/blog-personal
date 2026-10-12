@@ -2,7 +2,7 @@
 
 Owner: the lead session (start it with `/lead`). Execution: lead → builder ⇄ reviewer, per CLAUDE.md "Agent workflow".
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
-Last updated: 2026-10-11.
+Last updated: 2026-10-12.
 
 ## Out of scope for now
 - **AI features** (`lib/ai/`): postponed by the user. Keep the data layer extensible; build nothing yet.
@@ -92,7 +92,7 @@ Each line is one branch and one PR. The lead merges. Order: T → 4 → 8 → 9 
 | 1 ✅ | `chore/stabilize` | A4 + A5, and update CLAUDE.md Commands | — |
 | 2 ✅ | `feat/markdown-callouts-footnotes` | B: `> [!NOTE]/[!TIP]/[!WARNING]` callouts + styled GFM footnotes | — |
 | 3 ✅ | `feat/post-series` | B: `series` + `seriesOrder` frontmatter, series box, series nav. First series "RSC Fundamentals": server-components-run-on-the-server (1) → client-components-render-twice (2) → rsc-shrinks-your-bundle (3) | — |
-| 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post) | sprint 3 |
+| 4 🚧 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). **In progress, paused 2026-10-12**; see "Sprint 4 status" | sprint 3 |
 | 5 ✅ | `feat/archive-by-year` | E: `/posts` grouped by year, pagination kept | — |
 | 6 ✅ | `feat/popular-posts` | E: top posts by views on home (ISR 5m, rendered inline, no `<Suspense>`) | — |
 | 7 ✅ | `feat/search-filters` | E: tag chips + match highlight, URL params only | — |
@@ -112,6 +112,34 @@ the user's own content). Re-plan after sprint 7: D (comments) next, then C.
 - Branch the next sprint off `main` only after the previous PR is merged, unless the two don't touch the same files.
 - Every UI feature records its design decisions in `.design/blog-refactor.md` (or a new `.design/<feature>.md` when long).
 - Ask the user before adding any dependency (zod, MDX, test runner).
+
+## Sprint 4 status (paused by the user on 2026-10-12)
+Work is on branch `feat/up-next`, pushed as a **draft PR**. Resume with `/lead`: check out the branch and continue from
+"Remaining".
+
+**Done (gates: typecheck, lint, build and `npm test` 81/81 pass)**
+- Developer: `getPostEnding(slug)` in `lib/data/posts.ts` (types `PostEnding`, `UpNext`, `UpNextReason`) decides
+  the whole post ending in one pass. upNext rules, first match wins:
+  1. the next series part;
+  2. else the top related post, which becomes **part 1** when it belongs to another series;
+  3. else the newer neighbour, else the older one.
+  Dedup: a post appears at most once across upNext > adjacent > related, and series parts never appear in
+  adjacent/related. `getAdjacentPosts` was removed; `getRelatedPosts` stays because tests use it.
+- Builder: `components/posts/up-next.tsx` (a Server Component, visible without JS). The end-of-post order is: like/share
+  → Up next → newsletter → prev/next cards → related. The Up next card replaces the series nav's "Next in series"
+  link (`PostSeriesNav hideNext`), and part 1 renders no series nav. Decisions are in `.design/blog-refactor.md` "Up next
+  (sprint 4)".
+
+**Remaining**
+1. Tester:
+   - update `tests/e2e/no-js.spec.ts:67`. It still expects "Next in series" in the series nav; it should expect the
+     link inside the `region` "Up next", and 0 next links in the series nav.
+   - add unit tests for `getPostEnding`: the per-post table and the invariants (no duplicate slug, no own-series part
+     in adjacent/related, related ≤ 3, part-1 rule for streaming/caching/designing);
+   - add an e2e no-JS check of the Up next card.
+2. Decide: rename the series nav aria-label to "<name>: previous part" (more accurate now) together with that test.
+3. Reviewer pass (including the browser check at 320/768/1280; the builder only checked the server HTML), then the
+   full gates including `npm run test:e2e`, then mark the PR ready, tick, and merge.
 
 ## Next up: test infrastructure (decided by the user on 2026-10-12)
 The team gained a **developer** (senior fullstack) and a **tester** agent. The user chose automated tests. This sprint

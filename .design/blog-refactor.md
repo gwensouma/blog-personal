@@ -491,14 +491,41 @@ Frontmatter `series` + `seriesOrder` (data: `getPostSeries` in `lib/data/posts.t
   Text links only on a hairline ("Previous in series" / "Next in series" + title in Fraunces, arrows nudge on hover
   like the adjacent cards), plus a muted "RSC Fundamentals, part 2 of 3" line ("RSC Fundamentals, final part (3 of 3)"
   on the last). The arrow follows "Next" in DOM order (no `flex-row-reverse`), so below `sm` the label lines up with
-  the left-aligned title. Deliberately not a card, so it leaves the end-of-post card to sprint 4 ("Up next"), which
-  may absorb or replace it. `<nav aria-label="<name>: previous and next part">`.
-- **No duplicate links at the end:** on a series post, `PostArticle` drops series parts from the chronological
-  adjacent cards (an empty slot is nulled; with both empty the block isn't rendered) and from Related posts, since the
-  box and the series nav already link every part. A stopgap until sprint 4 reworks the end of the post.
+  the left-aligned title. Deliberately not a card: the end-of-post card is "Up next" (below), which takes over the
+  forward link. `<nav aria-label="<name>: previous and next part">`.
+- **No duplicate links at the end:** series parts never appear in the chronological adjacent cards or in Related
+  posts (`getPostEnding` in `lib/data/posts.ts` dedupes; see "Up next (sprint 4)").
 - **List marker** (`PostSeriesMarker`): "RSC Fundamentals, part 2" as the last item of the meta line on post rows
   (`post-list-item`) and the featured block. Same quiet meta style, so no new visual element. Not on related posts.
   `PostMeta` wraps its separator and trailing item in one inline-flex item, so on narrow screens the dot wraps with
   "RSC Fundamentals, part 3" instead of hanging at the line end. Shown only when `hasSeriesMarker` (the series has 2+
   parts, from `series.total`, which `loadAllPosts` stamps on each ref).
 - A one-part series renders nothing (nothing to navigate). No `/series/<slug>` page yet; `series.slug` is unused by UI.
+
+## Up next (sprint 4)
+The end of a post is one reading path. Data: `getPostEnding` (`lib/data/posts.ts`) returns `upNext`, `adjacent` and
+`related`, deduped so a post appears at most once. UI: `components/posts/up-next.tsx`, a Server Component, no new client JS.
+
+- **Order after the article footer (like/share):** Up next, newsletter, prev/next cards, related posts. The one
+  recommended read comes first, while the reader is still in the flow; the newsletter is the other "I finished"
+  action; the adjacent cards and the related list are the browsing tail.
+- **Card:** the strongest block after the article. `section` labelled by an `h2` "Up next" styled as the primary
+  eyebrow (same as "Featured" on the home page), then a hairline `rounded-xl` card: a flush cover (2/1 band on phones,
+  a full-height left column from `sm`, `grid-cols-[2fr_3fr]`), the reason label (muted, small), the title in Fraunces
+  2xl→3xl (an `h3`), the excerpt, and the reading time with a round arrow chip. Only the title is a link, stretched
+  over the card with `::after` (list-row pattern), with `rel="next"` / `"prev"` where the order is real.
+- **Reason labels:** series → "Next in <series> · Part n of N"; related → "Related reading", or "Start the <series>
+  series" when the pick is part 1 of a real series; newer → "Newer post"; older → "Older post".
+- **Motion (bold, CSS + the existing `Reveal`):** the section reveals on scroll with the `reveal` spring (and is
+  server-rendered visible, so no-JS and above-the-fold readers always see it). Hover/keyboard focus: the card lifts
+  4px and its border turns primary, a 4px primary bar sweeps across the top edge (`scale-x`, 500ms `ease-out-expo`),
+  the cover zooms to 1.06 (700ms), the title turns primary and the arrow chip slides 6px right. All transforms are
+  `motion-safe:` or `motion-reduce:transition-none`.
+- **Focus:** the card has `overflow-hidden` (flush cover corners), which would clip a ring on the link's `::after`, so
+  the card draws the ring itself with `has-focus-visible:ring-3 ring-ring/50` plus the primary border.
+- **Series parts, dedup decision:** the series nav's "Next in series" link and an up-next with reason "series" point
+  to the same post. The Up next card wins: it explains the step ("Next in RSC Fundamentals · Part 3 of 3") and is the
+  one forward CTA. `PostSeriesNav` gets `hideNext` and keeps only "Previous in series" plus the "part n of N" /
+  "final part" line. On part 1 there is no previous part, so the series nav isn't rendered at all (the series box at
+  the top and the Up next label already say where the reader is). The last part is unchanged (no next part, so
+  up-next falls through to related/newer/older).

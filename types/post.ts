@@ -83,6 +83,26 @@ export type AdjacentPosts = {
   next: PostSummary | null;
 };
 
+/** Why a post was picked as the "Up next" recommendation (the first matching rule wins). */
+export type UpNextReason = "series" | "related" | "newer" | "older";
+
+export type UpNext = { post: PostSummary; reason: UpNextReason };
+
+/**
+ * Everything the end of a post links to, decided once by lib/data (getPostEnding). A post appears at most once
+ * across `upNext`, `adjacent` and `related` (priority in that order), and the other parts of a real series
+ * (2+ parts) never appear in `adjacent` or `related`, because the series nav already links them.
+ */
+export type PostEnding = {
+  /** The single recommended next read, or null when there is nothing to recommend. A "related" pick that belongs
+   * to another real series is that series' part 1. */
+  upNext: UpNext | null;
+  /** Chronological neighbours; a slot is null when its post is a series part or already the up-next pick. */
+  adjacent: AdjacentPosts;
+  /** Posts sharing the most tags, without the up-next pick or the adjacent posts. */
+  related: PostSummary[];
+};
+
 export type Paginated<T> = {
   items: T[];
   page: number;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/json-ld";
 import { PostArticle } from "@/components/posts/post-article";
-import { getAdjacentPosts, getPost, getPostSeries, getPosts, getRelatedPosts } from "@/lib/data/posts";
+import { getPost, getPostEnding, getPostSeries, getPosts } from "@/lib/data/posts";
 import { site } from "@/lib/site";
 import { blogPostingJsonLd } from "@/lib/structured-data";
 
@@ -43,22 +43,17 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   };
 }
 
-// Server Component: fetches the post and its neighbours on the server, in parallel.
+// Server Component: fetches the post, its series and its ending (up next, neighbours, related) on the server, in parallel.
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
-  const [post, adjacent, related, series] = await Promise.all([
-    getPost(slug),
-    getAdjacentPosts(slug),
-    getRelatedPosts(slug),
-    getPostSeries(slug),
-  ]);
+  const [post, series, ending] = await Promise.all([getPost(slug), getPostSeries(slug), getPostEnding(slug)]);
 
   if (!post) notFound();
 
   return (
     <>
       <JsonLd data={blogPostingJsonLd(post)} />
-      <PostArticle post={post} adjacent={adjacent} related={related} series={series} />
+      <PostArticle post={post} series={series} ending={ending} />
     </>
   );
 }
