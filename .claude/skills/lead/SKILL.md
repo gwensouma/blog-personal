@@ -10,12 +10,15 @@ You are the **lead** of this project: planner, orchestrator and merger in one se
 
 | Agent | Owns |
 |---|---|
-| [developer](../../agents/developer.md) | senior fullstack: data, Server Actions, types, routes, config, wiring |
-| [builder](../../agents/builder.md) | visual design and UI components |
+| [developer](../../agents/developer.md) | `app/` page structure and data wiring, `lib/`, `types/`, config, security-sensitive server code |
+| [builder](../../agents/builder.md) | visual design and the JSX in `components/` |
 | [tester](../../agents/tester.md) | automated tests (Vitest + Playwright Test), defects with repro |
 | [reviewer](../../agents/reviewer.md) | read-only code review: RSC, security, a11y, design |
 
-You plan, brief, route findings and merge. They write the code and the tests.
+You plan, brief, route findings and merge. They write the code and the tests. You edit directly only for one-line
+fixes and docs. The user delegated merging to you and can take it back at any time.
+
+When a file has no obvious owner, route by folder: `app/` → developer, `components/` → builder, `tests/` → tester.
 
 Arguments, if any, are the user's request for this session. They take priority over the roadmap queue: fold them in
 as a new sprint, or answer them, before you continue the queue.
@@ -24,10 +27,14 @@ as a new sprint, or answer them, before you continue the queue.
 
 A new session has no memory of the last one, so everything that matters is on disk:
 
-- [`.design/roadmap.md`](../../../.design/roadmap.md) — the single source of truth: the sprint table (✅ = merged),
-  decided plans, deferred items and working rules. If it isn't in the roadmap, it isn't decided.
-- `CLAUDE.md` — project rules and the "Where does a new file go?" ladder.
-- `.design/*.md` — design decisions per feature.
+- [`.design/roadmap.md`](../../../.design/roadmap.md) — the single source of truth for *what*: open sprints, decided
+  plans and deferred items. If it isn't in the roadmap, it isn't decided. Finished sprints move to
+  `.design/roadmap-archive.md`.
+- This file — the single source of truth for *how* the team works.
+- `CLAUDE.md` and `.claude/rules/` — project rules and the "Where does a new file go?" ladder. Agents load them
+  automatically; don't paste them into briefs.
+- `.design/*.md` — design decisions per feature. Every UI feature records its decisions in `.design/blog-refactor.md`,
+  or in a new `.design/<feature>.md` when long.
 - Git and GitHub — branches, open PRs, what is merged.
 
 ## 1. Orient
@@ -52,9 +59,8 @@ Per sprint, in roadmap order:
 
 1. **Branch** off fresh `origin/main`: `feat/<name>`, `fix/<name>` or `chore/<name>`, matching the roadmap row.
 2. **Build.** Brief each agent with: goal, branch, files in scope, acceptance criteria and constraints from the roadmap
-   row and `CLAUDE.md`, and the `.design/` file for decisions. The developer takes data, actions, types, routes,
-   config and wiring; the builder takes visual design and UI components. When a sprint needs both, run the developer
-   first so the builder builds on real data. You edit directly only for one-line fixes and docs.
+   row, and the `.design/` file for decisions. Route by the ownership table above. When a sprint needs both, run the
+   developer first so the builder builds on real data.
 3. **Test.** Brief the tester with the acceptance criteria and the edge cases the developer/builder reported. It
    writes tests under `tests/` and runs the full suite. Route each defect to the agent that owns the file, continuing
    that *same* agent with `SendMessage` so it keeps context, then re-run the tester until no must-fix defect remains.
@@ -69,7 +75,8 @@ Per sprint, in roadmap order:
    don't loosen the hook to get past one sprint.
 5. **Gate.** `npm run gate` passes locally (and `npm run test:e2e` for any UI or route change). Every agent report
    states the command it ran and its exit code; "it passes" without an exit code is not a gate result.
-6. **Ship.** Tick the sprint row in the roadmap on the same branch, commit, push and run `gh pr create`.
+6. **Ship.** Tick the sprint row in the roadmap on the same branch (move it to `.design/roadmap-archive.md` with its
+   PR number), commit, push and run `gh pr create`.
 7. **Lead check** on the PR diff (`gh pr diff`): `gh pr diff <n> --name-only` matches the files the agents reported
    (an ignored path silently drops a file, as happened in PR #7), RSC boundaries
    (no `"use client"` creep), essential content renders without JS, files sit where `CLAUDE.md` says, no new runtime
@@ -88,11 +95,11 @@ Independent sprints (no shared files) may run in parallel worktrees. Anything to
 Stop and ask the user (with `AskUserQuestion` when there are clear options) when:
 
 - the queue is empty: propose the next block from the roadmap's deferred items and phases, with choices;
-- a choice is product- or scope-level, or adds a runtime dependency;
+- a choice is product- or scope-level, or adds any dependency (runtime or dev);
 - a gate stays red after two honest fix attempts;
 - an action needs a permission this session doesn't have.
 
 ## 5. Hand-off
 
-Before ending, make the roadmap match reality: ticked rows, new decisions recorded under the phase they belong to,
-and deferred items noted. A future `/lead` reads only what you wrote down.
+Before ending, make the roadmap match reality: finished rows archived, new decisions recorded under the phase they
+belong to, and deferred items noted. A future `/lead` reads only what you wrote down.
