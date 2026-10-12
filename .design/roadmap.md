@@ -85,7 +85,7 @@ C (seam, validation, preview). C goes last because the data layer is parked, but
 if a feature needs it.
 
 ## Sprints (from 2026-10-11)
-Each line is one branch and one PR. The lead merges.
+Each line is one branch and one PR. The lead merges. Order: T → 4 → 8 → 9 → 10.
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
@@ -96,7 +96,10 @@ Each line is one branch and one PR. The lead merges.
 | 5 ✅ | `feat/archive-by-year` | E: `/posts` grouped by year, pagination kept | — |
 | 6 ✅ | `feat/popular-posts` | E: top posts by views on home (ISR 5m, rendered inline, no `<Suspense>`) | — |
 | 7 ✅ | `feat/search-filters` | E: tag chips + match highlight, URL params only | — |
+| T | `chore/test-setup` | **Next.** Vitest + Playwright Test, first regression tests (see "Next up: test infrastructure") | — |
 | 8 | `fix/home-no-js` | Render essential home sections inline (no `<Suspense>` on ISR `/`); add the "Suspense only around non-essential or JS-dependent content" principle to CLAUDE.md; reviewer checks routes with JS disabled | — |
+| 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint T, sprint 4 |
+| 10 | `feat/comments-admin` | D: /admin with password, hide/unhide comments | sprint 9 |
 
 Deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
 the user's own content). Re-plan after sprint 7: D (comments) next, then C.
