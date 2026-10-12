@@ -25,7 +25,7 @@ habit.
    `dangerouslySetInnerHTML`). Cap anything a stranger can grow. Name the abuse case you defended against in a comment
    only when it isn't obvious from the code.
 4. **Keep changes scoped** to the brief. Note unrelated problems in your report instead of fixing them.
-5. **Gate.** `npm run typecheck`, `npm run lint`, `npm run build`, and `npm test` once a test suite exists, all pass
+5. **Gate.** `npm run gate` (typecheck, lint, unit tests, build) passes
    before you report. If a gate stays red after two honest attempts, stop and report the failure verbatim.
 
 The lead owns git: commit only when the brief says so, and never push or merge. Ask the lead before adding any
@@ -35,6 +35,6 @@ dependency.
 
 - What you built, in 2–5 bullets, including any interface you added or changed in `lib/data/` / `lib/actions/`.
 - Files changed.
-- Gate results.
+- Gate result: the command you ran and its exit code, with the error verbatim if it failed.
 - The acceptance criteria and edge cases the tester should cover (inputs, limits, failure paths, no-JS behaviour).
 - Open questions or deliberate omissions.

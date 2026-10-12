@@ -23,7 +23,9 @@ This project is a personal blog, built as a learning vehicle for React Server Co
 - `npm test` — Vitest unit tests (`tests/unit/**/*.test.ts`, Node environment; config in [vitest.config.mts](vitest.config.mts))
 - `npm run test:watch` — Vitest in watch mode
 - `npm run test:e2e` — Playwright Test (`tests/e2e/`, Chromium; config in [playwright.config.ts](playwright.config.ts)). Always builds and starts its own server on port 3200 (never reuses one; the run fails if 3200 is busy) with `BLOG_DATA_DIR=.data-e2e`, so the real `.data/` is never touched; it rebuilds `.next/`, so don't run it alongside `npm run dev`. Projects: `js` (default) and `no-js` (JavaScript disabled, runs only tests tagged `@no-js`).
-- Before a PR: `typecheck`, `lint`, `build` and `npm test` must all pass (`next build` also runs ESLint, so a lint error fails the build too). Also run `npm run test:e2e` for any UI or route change.
+- `npm run gate` — `typecheck`, `lint`, `npm test` and `build` in one command; stops at the first failure.
+- Before a PR: `npm run gate` must pass (`next build` also runs ESLint, so a lint error fails the build too). Also run `npm run test:e2e` for any UI or route change.
+- CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs the `gate` and `e2e` jobs on every PR and push to `main`; a PR merges only when both are green.
 
 ## Architecture
 
