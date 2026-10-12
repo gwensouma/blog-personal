@@ -1,6 +1,6 @@
 # Roadmap
 
-Owner: planner (lead). Execution: orchestrator → builder ⇄ reviewer, per CLAUDE.md "Agent workflow".
+Owner: the lead session (start it with `/lead`). Execution: lead → builder ⇄ reviewer, per CLAUDE.md "Agent workflow".
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
 Last updated: 2026-10-11.
 
@@ -85,7 +85,7 @@ C (seam, validation, preview). C goes last because the data layer is parked, but
 if a feature needs it.
 
 ## Sprints (from 2026-10-11)
-Each line is one branch and one PR. The user merges.
+Each line is one branch and one PR. The lead merges.
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
@@ -102,8 +102,41 @@ the user's own content). Re-plan after sprint 7: D (comments) next, then C.
 
 ## Working rules
 - One feature = one branch (`feat/…`, `fix/…`, `chore/…` off `main`) → brief → builder ⇄ reviewer loop →
-  typecheck/lint/build pass → push → `gh pr create` → the reviewer reviews the PR diff → tick it here. Never commit
-  feature work to `main`, and never merge (merging is the user's call).
+  typecheck/lint/build pass → tick it here → push → `gh pr create` → lead check → the lead merges. Feature work
+  always lands on `main` through a PR.
 - Branch the next sprint off `main` only after the previous PR is merged, unless the two don't touch the same files.
 - Every UI feature records its design decisions in `.design/blog-refactor.md` (or a new `.design/<feature>.md` when long).
 - Ask the user before adding any dependency (zod, MDX, test runner).
+
+## Phase D plan: comments (decided by the user on 2026-10-12)
+Queue after sprint 4 (`feat/up-next`) and sprint 8 (`fix/home-no-js`). Sprint 9 waits for sprint 4, because both edit
+the end of `post-article.tsx`.
+
+User choices: comments are **visible immediately**, and the owner can **hide** them from `/admin`. **Name only**: no
+accounts and no auth library. Admin is protected by a **password in `.env`**. A **flat list**, with no replies.
+
+**Sprint 9: `feat/comments`**
+- `lib/data/comments.ts` on the existing store (key `comments`: `Record<slug, Comment[]>`). `Comment` = {id, slug, name,
+  body, createdAt, hidden} in `types/comment.ts`. Exports `getComments(slug)` (visible only, oldest first) and
+  `addComment()`.
+- Limits: name 1–50 and body 1–2000 chars after trim, a honeypot, a 500-per-post cap, control/bidi characters
+  stripped. Rate limit: with `TRUST_PROXY=1`, per left-most `x-forwarded-for`; otherwise a site-wide flood guard
+  (30 per 10 min). Document the trade-off.
+- `lib/actions/comments.ts` `addCommentAction` for `useActionState`: validates everything, checks that the slug
+  exists, calls `revalidatePath`.
+- The body is plain React text with line breaks kept: no Markdown, no HTML, no auto-links. `CommentList` is an RSC
+  rendered inline (essential content, so no Suspense). `CommentForm` is the only client leaf (`useActionState` +
+  `useOptimistic`), posts without JS, and puts errors in `role="alert"`. Files go in `components/comments/`. Show the
+  count in the post meta. Notes go in `.design/comments.md`.
+
+**Sprint 10: `feat/comments-admin`**
+- `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` (and `TRUST_PROXY`) go in `.env.example`. If either secret is unset,
+  `/admin` returns 404.
+- `lib/data/admin-session.ts`: login through a Server Action with `timingSafeEqual`. The cookie holds a 7-day expiry
+  signed with HMAC-SHA256 (httpOnly, sameSite=lax, secure in prod), plus a logout action. Rotating the secret revokes
+  all sessions.
+- `app/(admin)/admin/login/page.tsx` and `app/(admin)/admin/page.tsx`: noindex, disallowed in `robots.ts`, and left out
+  of the sitemap. The admin page lists recent comments across posts with Hide/Unhide as plain `<form action>` Server
+  Actions (they work without JS). The page and every action re-check the session server-side.
+- Login throttle: 10 failed attempts per 15 min (site-wide unless `TRUST_PROXY`), with a generic error message. A
+  known caveat: someone else can lock the owner out for 15 min.

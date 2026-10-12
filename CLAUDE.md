@@ -94,13 +94,11 @@ There is no `.cursorrules` or Copilot instructions in this repo.
 
 ## Agent workflow
 
-UI work is split across subagents defined in [.claude/agents/](.claude/agents/). The main agent is the orchestrator: it doesn't write UI code for non-trivial UI tasks itself, it delegates and integrates.
+Start a working session with **`/lead`** ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)). The main session is then the **lead**: it plans from [.design/roadmap.md](.design/roadmap.md) (the single source of truth for what is decided, queued and done), delegates UI work to subagents in [.claude/agents/](.claude/agents/), and merges.
 
-1. **Orchestrator (main agent)** — clarifies the request, decides scope, and writes a precise brief for the builder (goal, files in scope, constraints). For a trivial one-line fix it may skip the subagents and edit directly.
-2. **[builder](.claude/agents/builder.md)** — designs and implements. Skills: `hallmark` (primary design guide, editorial genre), `frontend-design` (secondary), `frontend-ui-engineering`, `shadcn`. Writes design decisions that change direction to `.design/`, runs `npm run build`.
+1. **Lead (main session)** — clarifies the request, decides scope, and writes a precise brief for the builder (goal, files in scope, constraints). Non-UI work (data layer, `lib/ai/`, types, config) and trivial one-line fixes it does directly.
+2. **[builder](.claude/agents/builder.md)** — designs and implements UI. Skills: `hallmark` (primary design guide, editorial genre), `frontend-design` (secondary), `frontend-ui-engineering`, `shadcn`. Writes design decisions that change direction to `.design/`, runs the gates.
 3. **[reviewer](.claude/agents/reviewer.md)** — read-only. Skills: `frontend-ui-engineering`, `shadcn`. Checks RSC boundaries, token/shadcn usage, a11y, responsiveness, design consistency; reports must-fix vs. suggestion.
-4. **Loop** — the orchestrator sends must-fix findings back to the builder (continue the same builder agent so it keeps context) and re-reviews until there are none, then reports to the user.
+4. **Loop** — the lead sends must-fix findings back to the builder (continue the same builder agent so it keeps context) and re-reviews until there are none.
 
-**Git:** one branch per feature off `main` (`feat/<name>`, `fix/<name>`, `chore/<name>`). The orchestrator creates the branch, commits, pushes to `origin` and opens a PR with `gh pr create`; the reviewer reviews the PR diff. Never commit feature work directly to `main`; merging is the user's call.
-
-Non-UI work (data layer, `lib/ai/`, types) is done by the orchestrator directly unless the user asks otherwise.
+**Git:** one branch per feature off `main` (`feat/<name>`, `fix/<name>`, `chore/<name>`). The lead creates the branch, commits, pushes to `origin`, opens a PR with `gh pr create`, and merges it (`gh pr merge --merge`) once the review loop is clean and typecheck, lint and build pass. Feature work always lands on `main` through a PR. The user delegated merging to the lead and can take it back at any time.
