@@ -102,15 +102,37 @@ Deferred inside B and E: **image zoom** (no post has body images yet), **/stats*
 the user's own content). Re-plan after sprint 7: D (comments) next, then C.
 
 ## Working rules
-- One feature = one branch (`feat/…`, `fix/…`, `chore/…` off `main`) → brief → builder ⇄ reviewer loop →
-  typecheck/lint/build pass → tick it here → push → `gh pr create` → lead check → the lead merges. Feature work
-  always lands on `main` through a PR.
+- One feature = one branch (`feat/…`, `fix/…`, `chore/…` off `main`) → briefs → developer/builder → tester loop →
+  reviewer loop → typecheck/lint/build/test pass → tick it here → push → `gh pr create` → lead check → the lead
+  merges. Feature work always lands on `main` through a PR. The full procedure is in `/lead`.
 - Branch the next sprint off `main` only after the previous PR is merged, unless the two don't touch the same files.
 - Every UI feature records its design decisions in `.design/blog-refactor.md` (or a new `.design/<feature>.md` when long).
 - Ask the user before adding any dependency (zod, MDX, test runner).
 
+## Next up: test infrastructure (decided by the user on 2026-10-12)
+The team gained a **developer** (senior fullstack) and a **tester** agent. The user chose automated tests. This sprint
+runs **first**, right after #6 merges, so every later sprint ships with tests.
+
+**Sprint T: `chore/test-setup`** (developer for config, tester for the first tests)
+- Dev deps (approved): `vitest`, `@playwright/test` (plus the Chromium browser via `npx playwright install chromium`).
+- `vitest.config.ts`: the `@/` alias, a Node environment, and an alias for the `server-only` import to an empty module
+  so `lib/data/` can be imported. The store must be pointed at a temp dir in tests (add a small, explicit seam in
+  `lib/data/store.ts`, e.g. an env var for the data dir, not test-only branches in app code).
+- `playwright.config.ts`: `webServer` runs `next build && next start` on a free port, Chromium, and a `no-js` project
+  with `javaScriptEnabled: false`.
+- Scripts: `test` (vitest run), `test:e2e` (playwright test). Add `npm test` to the gates in CLAUDE.md "Commands",
+  and gitignore the Playwright reports.
+- First tests, which guard what we already learned the hard way:
+  - unit: the store's serialized concurrent writes, search query normalization + highlight segmentation (an XSS
+    payload stays text), series derivation, archive year counts/continued;
+  - e2e: `/`, `/posts`, a post and `/search?q=…&tag=…` render their essential content with JS off; the like button
+    toggles with JS on.
+- `/` home with JS off is known-broken until sprint 8: mark that test `fixme` and link sprint 8.
+
+Order after this: sprint 4 → sprint 8 → sprint 9 → sprint 10.
+
 ## Phase D plan: comments (decided by the user on 2026-10-12)
-Queue after sprint 4 (`feat/up-next`) and sprint 8 (`fix/home-no-js`). Sprint 9 waits for sprint 4, because both edit
+Queue after sprint T, sprint 4 (`feat/up-next`) and sprint 8 (`fix/home-no-js`). Sprint 9 waits for sprint 4, because both edit
 the end of `post-article.tsx`.
 
 User choices: comments are **visible immediately**, and the owner can **hide** them from `/admin`. **Name only**: no

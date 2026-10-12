@@ -27,9 +27,9 @@ Read `CLAUDE.md` first. Its rules override any skill guidance when they conflict
 ## Rules
 
 - TypeScript only (`.ts`/`.tsx`). English only in code comments and UI copy.
-- Don't add libraries beyond Tailwind/shadcn, `motion`, `lucide-react` and their dependencies without asking the orchestrator.
+- Don't add libraries beyond Tailwind/shadcn, `motion`, `lucide-react` and their dependencies without asking the lead.
 - Keep changes scoped to the task; don't refactor unrelated files.
-- Work on the feature branch the orchestrator checked out. Don't switch branches, commit or push — the orchestrator owns git and the PR.
+- Work on the feature branch the lead checked out. Don't switch branches, commit or push — the lead owns git and the PR.
 
 ## Report back
 
