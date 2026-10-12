@@ -8,6 +8,7 @@ import { estimateReadingTime, extractToc, renderMarkdown } from "@/lib/markdown"
 import { site } from "@/lib/site";
 import { tagSlug } from "@/lib/tags";
 import { yearOf } from "@/lib/format";
+import { markdownToPlainText, normalizeQuery, snippetAround } from "@/lib/highlight";
 import type {
   AdjacentPosts,
   ArchivePage,
@@ -18,6 +19,8 @@ import type {
   PostSeries,
   PostSeriesRef,
   PostSummary,
+  SearchHit,
+  SearchOutcome,
   Tag,
 } from "@/types/post";
 
@@ -302,14 +305,43 @@ export async function getTag(slug: string): Promise<Tag | null> {
   return (await getAllTags()).find((tag) => tag.slug === slug) ?? null;
 }
 
-/** Case-insensitive search over title, excerpt, tags and body. */
-export async function searchPosts(query: string): Promise<PostSummary[]> {
-  const q = query.trim().toLowerCase();
-  if (!q) return [];
+/**
+ * /search with an optional tag filter. The query is trimmed and capped at MAX_QUERY_LENGTH. Facets count the
+ * tags of every query match (before the tag filter), so the chips show where else the query appears. With no
+ * query, a known tag alone lists that tag's posts.
+ */
+export async function searchPostsWithFacets(rawQuery: string, rawTag?: string): Promise<SearchOutcome> {
+  const query = normalizeQuery(rawQuery);
+  const q = query.toLowerCase();
   await delay();
-  return (await loadAllPosts())
-    .filter(({ summary, body }) =>
-      [summary.title, summary.excerpt, summary.tags.join(" "), body].some((text) => text.toLowerCase().includes(q)),
-    )
-    .map((post) => post.summary);
+  const all = await loadAllPosts();
+  const tag = rawTag ? ((await getAllTags()).find((t) => t.slug === rawTag) ?? null) : null;
+  if (!q && !tag) return { query, tag, hits: [], facets: [] };
+
+  // Match only text a reader can see in the result (title, excerpt, one tag, the body as plain text),
+  // so every hit can show why it matched.
+  const has = (text: string) => text.toLowerCase().includes(q);
+  const candidates = all.map((post) => ({ ...post, plain: markdownToPlainText(post.body) }));
+  const matches = q
+    ? candidates.filter(({ summary, plain }) => has(summary.title) || has(summary.excerpt) || summary.tags.some(has) || has(plain))
+    : candidates;
+
+  const counts = new Map<string, Tag>();
+  for (const { summary } of matches) {
+    for (const name of summary.tags) {
+      const slug = tagSlug(name);
+      counts.set(slug, { slug, name, count: (counts.get(slug)?.count ?? 0) + 1 });
+    }
+  }
+  const facets = [...counts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+  const hits: SearchHit[] = matches
+    .filter(({ summary }) => !tag || summary.tags.some((name) => tagSlug(name) === tag.slug))
+    .map(({ summary, plain }) => {
+      const inSummary = has(summary.title) || has(summary.excerpt) || summary.tags.some(has);
+      const snippet = q && !inSummary ? (snippetAround(plain, query) ?? undefined) : undefined;
+      return { post: summary, snippet };
+    });
+
+  return { query, tag, hits, facets };
 }

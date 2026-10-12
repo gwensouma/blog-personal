@@ -1,16 +1,18 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ReadingColumn } from "@/components/reading-column";
 import { PageHeader } from "@/components/page-header";
-import { PostListSkeleton } from "@/components/posts/post-list-skeleton";
 import { PostSearchForm } from "@/components/posts/post-search-form";
-import { SearchResultsLoader } from "@/components/posts/search-results";
+import { SearchFilters } from "@/components/posts/search-filters";
+import { SearchResults } from "@/components/posts/search-results";
+import { searchPostsWithFacets } from "@/lib/data/posts";
+import { normalizeQuery } from "@/lib/highlight";
 
-type SearchPageProps = { searchParams: Promise<{ q?: string | string[] }> };
+type SearchParam = string | string[] | undefined;
+type SearchPageProps = { searchParams: Promise<{ q?: SearchParam; tag?: SearchParam }> };
 
-function readQuery(value: string | string[] | undefined): string {
-  return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
-}
+const first = (value: SearchParam) => (Array.isArray(value) ? value[0] : value) ?? "";
+// Same normalization as the data layer, so the input, the <title> and the results agree.
+const readQuery = (value: SearchParam) => normalizeQuery(first(value));
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const query = readQuery((await searchParams).q);
@@ -21,18 +23,21 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   };
 }
 
-// Server-rendered search: the form is a plain GET, and only the results stream in.
+// Server-rendered search: the form is a plain GET and results render inline, so the
+// whole page works without JavaScript (no <Suspense> around essential content).
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = readQuery((await searchParams).q);
+  const params = await searchParams;
+  const outcome = await searchPostsWithFacets(readQuery(params.q), first(params.tag).trim() || undefined);
 
   return (
     <ReadingColumn className="flex flex-col gap-10">
       <PageHeader title="Search" className="pb-0">
-        <PostSearchForm defaultValue={query} />
+        <PostSearchForm defaultValue={outcome.query} tag={outcome.tag?.slug} />
+        {outcome.query || outcome.tag ? (
+          <SearchFilters query={outcome.query} activeTag={outcome.tag} facets={outcome.facets} />
+        ) : null}
       </PageHeader>
-      <Suspense key={query} fallback={<PostListSkeleton label="Searching…" />}>
-        <SearchResultsLoader query={query} />
-      </Suspense>
+      <SearchResults outcome={outcome} />
     </ReadingColumn>
   );
 }
