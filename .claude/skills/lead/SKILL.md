@@ -166,9 +166,12 @@ dependency of any kind; scope matches the brief; every AC has a test in the test
 
 ### 9. Merge
 
-`gh pr merge <n> --merge` only when the PR is rebased on `main` and CI is green (`gh pr checks <n> --watch`: `gate`
-and `e2e` pass). Never merge on a local run or a report alone. Then fast-forward local `main`. The merge commit is
-the record of the merge; nothing is committed to `main` afterwards.
+`gh pr merge <n> --merge` once CI is green (`gh pr checks <n> --watch`: `gate` and `e2e` pass). GitHub enforces this:
+`main` is protected (set 2026-10-13) with `gate` and `e2e` as required checks in strict mode, admins included, no
+force pushes or deletions. Strict means the PR must be up to date with `main`: if `main` moved, rebase (or
+`gh pr update-branch <n>`), push, and wait for the new checks. No human review is required; the user delegated
+merging to you. Then fast-forward local `main`. The merge commit is the record of the merge; nothing is committed to
+`main` afterwards.
 
 Done per sprint: PR merged, sprint folder complete (brief, every task with its report, close), row archived.
 

@@ -224,9 +224,9 @@ Keywords: GitHub Actions, required status checks, branch protection, `gh pr chec
 - [x] Add `"gate": "npm run typecheck && npm run lint && npm test && npm run build"` to `package.json`.
 - [x] `.github/workflows/ci.yml`: Node 22, `npm ci`, `npm run gate`. A second job: `npx playwright install --with-deps
       chromium` and `npm run test:e2e`.
-- [ ] ~~Protect `main`~~: skipped by the user on 2026-10-12 (the Claude Code permission classifier blocked the
-      `gh api` call, and the user chose not to enable it by hand). CI still runs on every PR; the lead merges only on
-      green checks (`SKILL.md` step 8). Revisit if a red PR ever gets merged.
+- [x] Protect `main`: skipped on 2026-10-12, then enabled by the user's decision on 2026-10-13 (set from session
+      rsc-0b): required checks `gate` + `e2e`, strict (up to date with `main`), `enforce_admins`, no force pushes or
+      deletions, no required reviews. The lead keeps merging on green CI; the user doesn't review PRs.
 - [x] `SKILL.md`: agents run `npm run gate` and paste the exit code; the lead merges only when `gh pr checks <n>` is
       green, and compares `gh pr diff <n> --name-only` with the files the agents reported. Agent prompts and
       `CLAUDE.md` "Commands" now point at `npm run gate`.
@@ -361,9 +361,9 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
 - [x] Peer audit from session rsc-0b (2026-10-13) applied in the same PR: per-agent write areas (developer/builder
       were only kept out of `tests/`), helper agents can't edit the project, git writes caught after global options
       (`git -C . push`) plus `commit`, `gh api` writes blocked, `close.md` waits for every report, SKILL.md no longer
-      overstates the hook, this reading guide added. Left to the user: an independent pre-merge approval (branch
-      protection or a "user approves the PR" stop), and the `gh` token scopes (`repo`, `workflow`) every agent's
-      shell can use.
+      overstates the hook, this reading guide added. The independent pre-merge gate is now branch protection
+      (see Step 1). Still left to the user: the `gh` token scopes (`repo`, `workflow`) every agent's shell can use,
+      and a sandbox (none on native Windows; WSL2 + `/sandbox` is the "Later" item AS-20).
 - [ ] Verify in a new session: the planner's `WebFetch`/`WebSearch` tools load (the agent list shows them), and a
       foreground subagent honors the `SubagentStop` block.
 - [ ] Sprint 4 started before this; on resume the planner writes its spec, brief and tasks from PR #10.
@@ -381,7 +381,8 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
 
 ## 9. Questions for the user
 
-1. **Merging:** keep it delegated to the lead once CI and branch protection exist?
+1. **Merging:** keep it delegated to the lead once CI and branch protection exist? *(Answered 2026-10-13: yes;
+   protection on, no required reviews.)*
 2. **Models:** proposal: developer `opus`, reviewer `opus`, builder `opus` (design quality), tester `sonnet`; compare
    defect counts over two sprints before moving more to `sonnet`. Accept or change? *(Default taken in Step 5; revisit after two sprints.)*
 3. **Loop cap:** 3 rounds per loop, then ask? *(Default taken in Step 4; open to change.)*
