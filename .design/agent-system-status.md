@@ -14,7 +14,7 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 
 1. Read this file in full. It does not depend on chat history.
 2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–6 are merged
-   (PRs #11–#15 and the `chore/agent-setup` PR); next is Step 7, the hosting decision, before sprint 9.
+   (PRs #11–#16). Step 7 (hosting) is deferred by the user; "Later" items are optional.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
@@ -323,6 +323,9 @@ Done on branch `chore/agent-setup`. Memory now holds three files: user profile, 
       keep only facts about the user that the repo doesn't record.
 
 ### Step 7: hosting direction, before sprint 9 (AS-21)
+**Deferred by the user (2026-10-13):** there is no real data source or images yet, so features come first. Revisit
+when the user decides to deploy. Until then sprint 9 keeps the JSON store as planned, and all reads and writes stay
+behind `lib/data/` so only `store.ts` changes later.
 - [ ] The user picks a direction (§9 Q5). Record it in the roadmap and update the Phase D plan: store backend,
       `TRUST_PROXY` default, where secrets live.
 - [ ] If DB/KV: pull Phase C's PostSource seam and a store seam forward, before sprint 9.

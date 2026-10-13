@@ -7,7 +7,8 @@ Last updated: 2026-10-12.
 
 ## Out of scope for now
 - **AI features** (`lib/ai/`): postponed by the user. Keep the data layer extensible; build nothing yet.
-- **Deploy**: postponed. The `.data/` JSON store and `NEXT_PUBLIC_SITE_URL` stay as they are.
+- **Deploy and hosting**: postponed (re-confirmed 2026-10-13: no real data source or images yet, features first). The
+  `.data/` JSON store and `NEXT_PUBLIC_SITE_URL` stay as they are; keep all data access behind `lib/data/`.
 - **Data source migration** (Markdown → DB/CMS): parked. Phase C only adds an internal seam.
 
 ## Feature map
