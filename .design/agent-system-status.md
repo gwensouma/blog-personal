@@ -1,5 +1,9 @@
 # Agent system status
 
+> **Reading guide (2026-10-13).** §2–§4 are the audit snapshot of 2026-10-12, *before* the fixes: statements there
+> such as "no agent sets `model:`" or "`.github/` does not exist" describe that day, not now. The current state is
+> §8 (each step's ticks and notes) and the files themselves; the workflow is `.claude/skills/lead/SKILL.md`.
+
 The multi-agent setup that builds this blog, as of 2026-10-12. It grew piece by piece on top of an existing project
 (planner session → planner + orchestrator sessions → one `/lead` session with four subagents), so it has gaps and
 drift that a from-scratch design would not. This file lists what exists, what is wrong, the target structure, and the
@@ -14,7 +18,8 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 
 1. Read this file in full. It does not depend on chat history.
 2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–6 are merged
-   (PRs #11–#16). Step 7 (hosting) is deferred by the user; "Later" items are optional.
+   (PRs #11–#16). Step 7 (hosting) is deferred by the user. Step 8 (file handoff + planner) is the
+   `chore/agent-file-handoff` PR. "Later" items are optional.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
@@ -42,8 +47,9 @@ user ──/lead──▶ LEAD (main session): plans, briefs, routes findings, r
 Sprint loop (SKILL.md §3): branch → developer → builder → tester ⇄ owner → reviewer ⇄ owner → gates → PR → lead check → merge
 ```
 
-- **Hub and spoke is required, not a flaw.** In Claude Code, subagents can't spawn subagents or message each other, so
-  one session must orchestrate. The flaw is *how much* the hub does (see AS-19).
+- **Hub and spoke is a choice, not a limit.** Subagents *can* spawn subagents (up to three layers; corrected on
+  2026-10-13), but this project keeps one dispatcher: role agents have no `Agent` tool, so every handoff goes through
+  the lead and a file. The flaw is *how much* the hub does (see AS-19).
 - **Framework:** Claude Code alone (subagents, skills, one MCP server, the `gh` CLI, Markdown for state). Right for a
   one-person blog with four agents. LangGraph, CrewAI or the Agent SDK would add overhead without benefit.
 
@@ -218,9 +224,9 @@ Keywords: GitHub Actions, required status checks, branch protection, `gh pr chec
 - [x] Add `"gate": "npm run typecheck && npm run lint && npm test && npm run build"` to `package.json`.
 - [x] `.github/workflows/ci.yml`: Node 22, `npm ci`, `npm run gate`. A second job: `npx playwright install --with-deps
       chromium` and `npm run test:e2e`.
-- [ ] ~~Protect `main`~~: skipped by the user on 2026-10-12 (the Claude Code permission classifier blocked the
-      `gh api` call, and the user chose not to enable it by hand). CI still runs on every PR; the lead merges only on
-      green checks (`SKILL.md` step 8). Revisit if a red PR ever gets merged.
+- [x] Protect `main`: skipped on 2026-10-12, then enabled by the user's decision on 2026-10-13 (set from session
+      rsc-0b): required checks `gate` + `e2e`, strict (up to date with `main`), `enforce_admins`, no force pushes or
+      deletions, no required reviews. The lead keeps merging on green CI; the user doesn't review PRs.
 - [x] `SKILL.md`: agents run `npm run gate` and paste the exit code; the lead merges only when `gh pr checks <n>` is
       green, and compares `gh pr diff <n> --name-only` with the files the agents reported. Agent prompts and
       `CLAUDE.md` "Commands" now point at `npm run gate`.
@@ -330,6 +336,38 @@ behind `lib/data/` so only `store.ts` changes later.
       `TRUST_PROXY` default, where secrets live.
 - [ ] If DB/KV: pull Phase C's PostSource seam and a store seam forward, before sprint 9.
 
+### Step 8: explicit file handoff and a planner (decided by the user on 2026-10-13)
+Done on branch `chore/agent-file-handoff`. The user found delegation was "all verbal": briefs lived only in the
+`Agent` prompt, reports only in chat, and nobody owned research or new features.
+- [x] **planner** agent (`.claude/agents/planner.md`, opus): mode `spec` researches the code and outside sources and
+      writes `.design/specs/<feature>.md` for the user to approve; mode `tasks` turns an approved spec into
+      `brief.md` + one `tasks/<agent>-r1.md` per agent. Writes nothing else; has no `Agent` tool, so it can't delegate.
+- [x] **Templates** in `.claude/templates/`: `spec`, `brief`, `task-{developer,builder,tester,reviewer}`, `task-fix`,
+      `report`, `close`. Agent files say *who* an agent is; templates say *what* it does this time.
+- [x] **Sprint folder** `.design/sprints/<#>-<name>/{brief.md, tasks/, reports/, close.md}` replaces the single
+      sprint file (`_template.md` removed).
+- [x] **Hook enforcement** (`guard-paths.mjs`, 17 tests): spawning a role agent requires an existing task file of its
+      own in the prompt (PreToolUse `Agent`); the **dispatch gate** blocks the next spawn while another task in the
+      sprint has no report; each agent writes only its own report; only the planner (and the lead) write briefs and
+      tasks; only the lead writes `close.md`. A `SubagentStop` block also asks for the report, but see below.
+- [x] **Live checks in this session (2026-10-13):** the `Agent` matcher fires and blocks a spawn without a task file;
+      the dispatch gate blocks; the reviewer (given the `Write` tool, which it lacked) writes its own report. The
+      `SubagentStop` hook fires with the documented input and exits 2, yet a *background* subagent that ends with its
+      hand-back still stops. So the report rule rests on the dispatch gate, not on `SubagentStop`.
+- [x] Role agents read their task file and write their report file; the final chat message is one line.
+- [x] `SKILL.md` rewritten top to bottom: team table, file map, flow 0–9 with a diagram, spec approval stop point.
+- [x] Gaps from the review on 2026-10-13: `close.md` is written before the merge (no commit to `main` after);
+      parallel worktrees off until the hook is verified there; "any dependency" everywhere.
+- [x] Peer audit from session rsc-0b (2026-10-13) applied in the same PR: per-agent write areas (developer/builder
+      were only kept out of `tests/`), helper agents can't edit the project, git writes caught after global options
+      (`git -C . push`) plus `commit`, `gh api` writes blocked, `close.md` waits for every report, SKILL.md no longer
+      overstates the hook, this reading guide added. The independent pre-merge gate is now branch protection
+      (see Step 1). Still left to the user: the `gh` token scopes (`repo`, `workflow`) every agent's shell can use,
+      and a sandbox (none on native Windows; WSL2 + `/sandbox` is the "Later" item AS-20).
+- [ ] Verify in a new session: the planner's `WebFetch`/`WebSearch` tools load (the agent list shows them), and a
+      foreground subagent honors the `SubagentStop` block.
+- [ ] Sprint 4 started before this; on resume the planner writes its spec, brief and tasks from PR #10.
+
 ### Later
 - [ ] AS-20: run Claude Code inside WSL2 and enable `/sandbox` (`sandbox.enabled`, `sandbox.network.allowedDomains`
       for npm and GitHub), if the user wants real isolation.
@@ -343,7 +381,8 @@ behind `lib/data/` so only `store.ts` changes later.
 
 ## 9. Questions for the user
 
-1. **Merging:** keep it delegated to the lead once CI and branch protection exist?
+1. **Merging:** keep it delegated to the lead once CI and branch protection exist? *(Answered 2026-10-13: yes;
+   protection on, no required reviews.)*
 2. **Models:** proposal: developer `opus`, reviewer `opus`, builder `opus` (design quality), tester `sonnet`; compare
    defect counts over two sprints before moving more to `sonnet`. Accept or change? *(Default taken in Step 5; revisit after two sprints.)*
 3. **Loop cap:** 3 rounds per loop, then ask? *(Default taken in Step 4; open to change.)*
@@ -382,8 +421,11 @@ Checked against the Claude Code docs on 2026-10-12. Re-check exact key spellings
   `haiku`, `fable`, a full ID, `inherit`), `effort`, `maxTurns`, `tools`, `disallowedTools`, `skills`, `hooks`,
   `permissionMode`, `memory`, `isolation: worktree`, `omitClaudeMd`, `mcpServers`, `background`. Unknown fields are
   silently ignored. Subagents load `CLAUDE.md` automatically. `skills:` preloads full skill content; skills with
-  `disable-model-invocation: true` can't be preloaded. (Not re-checked in this session: subagents can't spawn
-  subagents or message each other directly. Confirm on the same page before relying on it.)
+  `disable-model-invocation: true` can't be preloaded. Subagents can spawn subagents up to three layers below the
+  main session (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`; checked 2026-10-13). The spawning tool is `Agent` (renamed
+  from `Task` in 2.1.63); its PreToolUse `tool_input` has `prompt`, `description`, `subagent_type`, `model`.
+  `SubagentStop` input has `agent_type`, `agent_transcript_path`, `stop_hook_active`, `last_assistant_message`; exit 2
+  keeps the subagent running with stderr as its next instruction; its matcher is the agent type.
 - **Hooks** (https://code.claude.com/docs/en/hooks.md): input includes `agent_id` and `agent_type` inside a subagent.
   Hooks in agent frontmatter run only while that agent is active; a frontmatter `Stop` becomes `SubagentStop`. Project
   hooks run after the workspace trust prompt is accepted.

@@ -23,7 +23,8 @@ small JSON-file store in `.data/`.
 8. **Trust the workspace** when Claude Code asks: the `PreToolUse` hook in `.claude/hooks/guard-paths.mjs` enforces
    which agent may edit what.
 9. **Start a session with `/lead`.** The lead reads [.design/roadmap.md](.design/roadmap.md) and runs the sprint loop
-   with the developer, builder, tester and reviewer agents ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)).
+   with the planner, developer, builder, tester and reviewer agents; every task and report is a file under
+   `.design/sprints/` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)).
 10. **Spend limit:** agents are bounded by `maxTurns`, not dollars. Set a monthly limit on your account (Console
     workspace limit for an API key, or `/usage-credits` on a subscription).
 

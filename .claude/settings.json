@@ -1,7 +1,11 @@
 {
-  "enabledMcpjsonServers": ["playwright"],
+  "enabledMcpjsonServers": [
+    "playwright"
+  ],
   "permissions": {
-    "allow": ["mcp__playwright"],
+    "allow": [
+      "mcp__playwright"
+    ],
     "deny": [
       "Bash(git push --force *)",
       "Bash(git push -f *)",
@@ -15,7 +19,19 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|PowerShell",
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|PowerShell|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "developer|builder|tester|reviewer",
         "hooks": [
           {
             "type": "command",
