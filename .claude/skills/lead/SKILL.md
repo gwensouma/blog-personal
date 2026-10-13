@@ -1,135 +1,188 @@
 ---
 name: lead
-description: Start or resume the lead workflow for this blog — read the roadmap, report status, then plan, delegate, test, review and merge sprint by sprint.
+description: Start or resume the lead workflow for this blog — read the roadmap, report status, then plan with the planner, dispatch task files, test, review and merge sprint by sprint.
 disable-model-invocation: true
 ---
 
 # Lead
 
-You are the **lead** of this project: planner, orchestrator and merger in one session. Your team is four subagents:
+You are the **lead**: the dispatcher and gatekeeper of this project. The planner thinks up and writes the work, the
+role agents do it, and you move files between them, run the gates and merge. Every handoff is a file; nothing that
+matters lives only in chat.
 
-| Agent | Owns |
-|---|---|
-| [developer](../../agents/developer.md) | `app/` page structure and data wiring, `lib/`, `types/`, config, security-sensitive server code |
-| [builder](../../agents/builder.md) | visual design and the JSX in `components/` |
-| [tester](../../agents/tester.md) | automated tests (Vitest + Playwright Test), defects with repro |
-| [reviewer](../../agents/reviewer.md) | read-only code review: RSC, security, a11y, design |
+## The team
 
-Each agent's `model`, `effort` and `maxTurns` live in its frontmatter: Opus for developer, builder and reviewer,
-Sonnet for the tester. `maxTurns` is the per-run cost ceiling (Claude Code has no per-agent dollar cap). An agent that
-hits it returns unfinished: continue the *same* agent with `SendMessage` once (that is not a new round); if it runs out
-again, the brief is too big, so split it. Don't raise a cap to get past one sprint; change it in its own PR.
+| Agent | Writes | Gets work from | Reports in |
+|---|---|---|---|
+| **lead** (you, main session) | roadmap, `close.md`, fix tasks, one-line fixes and docs; git and PRs | the user | chat, to the user |
+| [planner](../../agents/planner.md) | `.design/specs/`, `brief.md`, `tasks/*.md` | your prompt (mode `spec` or `tasks`) | its final message |
+| [developer](../../agents/developer.md) | `app/`, `lib/`, `types/`, config | `tasks/developer-r<n>.md` | `reports/developer-r<n>.md` |
+| [builder](../../agents/builder.md) | `components/`, `.design/<feature>.md` | `tasks/builder-r<n>.md` | `reports/builder-r<n>.md` |
+| [tester](../../agents/tester.md) | `tests/` | `tasks/tester-r<n>.md` | `reports/tester-r<n>.md` |
+| [reviewer](../../agents/reviewer.md) | nothing but its report | `tasks/reviewer-r<n>.md` | `reports/reviewer-r<n>.md` |
 
-You plan, brief, route findings and merge. They write the code and the tests. You edit directly only for one-line
-fixes and docs. The user delegated merging to you and can take it back at any time.
+Model, effort and `maxTurns` are in each agent's frontmatter. `maxTurns` is the per-run cost ceiling (there is no
+per-agent dollar cap). An agent that hits it returns partial output: continue the *same* agent with `SendMessage` once
+(not a new round); if it runs out again, the task is too big, so have it split. Change caps only in their own PR.
 
-When a file has no obvious owner, route by folder: `app/` → developer, `components/` → builder, `tests/` → tester.
+The user delegated merging to you and can take it back at any time.
 
-Arguments, if any, are the user's request for this session. They take priority over the roadmap queue: fold them in
-as a new sprint, or answer them, before you continue the queue.
+## Files: where everything lives
 
-## State lives in files
+| What | Where | Written by |
+|---|---|---|
+| What is decided, queued and deferred | `.design/roadmap.md` (finished: `roadmap-archive.md`) | lead |
+| How the team works | this file | lead, in its own PR |
+| Project rules | `CLAUDE.md`, `.claude/rules/` (agents load them automatically) | lead |
+| Templates for every handoff | `.claude/templates/` | lead, in its own PR |
+| A feature's research and plan | `.design/specs/<feature>.md` | planner |
+| One sprint | `.design/sprints/<#>-<name>/` | see below |
+| Visual design decisions | `.design/<feature>.md`, `.design/blog-refactor.md` | builder |
 
-A new session has no memory of the last one, so everything that matters is on disk:
+```
+.design/sprints/<#>-<name>/
+  brief.md              planner: goal, AC1..n, files by owner, constraints, task order
+  tasks/<agent>-r<n>.md planner (round 1), lead (fix rounds): what one agent does in one round
+  reports/<agent>-r<n>.md  that agent: status, files, gate exit code, AC → test, findings, open questions
+  close.md              lead, before merging: rounds, gates, PR, CI, deferred findings
+```
 
-- [`.design/roadmap.md`](../../../.design/roadmap.md) — the single source of truth for *what*: open sprints, decided
-  plans and deferred items. If it isn't in the roadmap, it isn't decided. Finished sprints move to
-  `.design/roadmap-archive.md`.
-- This file — the single source of truth for *how* the team works.
-- `CLAUDE.md` and `.claude/rules/` — project rules and the "Where does a new file go?" ladder. Agents load them
-  automatically; don't paste them into briefs.
-- `.design/sprints/<#>-<name>.md` — the live sprint: brief, every agent report, deferred findings and the close-out
-  ([template](../../../.design/sprints/_template.md)). Chat history doesn't survive a session; this file does.
-- `.design/*.md` — design decisions per feature. Every UI feature records its decisions in `.design/blog-refactor.md`,
-  or in a new `.design/<feature>.md` when long.
-- Git and GitHub — branches, open PRs, what is merged.
+## Enforced by the guard hook
 
-## 1. Orient
+`.claude/hooks/guard-paths.mjs` (tests: `tests/unit/guard-hook.test.ts`) blocks, not just asks:
+
+- spawning developer, builder, tester or reviewer without an existing `tasks/<that-agent>-r<n>.md` path in the prompt;
+- spawning the next task while any other task in the same sprint has no report yet (the dispatch gate: a missing
+  report stops the sprint, so continue that agent until it writes one);
+- a foreground role agent finishing before its report exists. Background agents can finish past this block (checked
+  live on 2026-10-13), which is why the dispatch gate exists;
+- writes outside each agent's area (table above); only the tester adds `test.fixme`/`.skip`; nobody adds `.only`;
+- subagents running `git push|switch|checkout|rebase|merge|reset --hard` or `gh pr create|merge|close|ready`;
+- anyone killing processes by image name.
+
+The hook sees the Write/Edit tools, not files written from a shell. After every agent turn run
+`git status --porcelain`: a change outside that agent's area is a defect to revert and report. If the hook blocks
+something an agent legitimately needs, decide it yourself; change the hook only in its own PR.
+
+## The flow, top to bottom
+
+```
+ user idea / roadmap phase
+        │
+ 0. Orient ── 1. Plan (planner: spec) ── STOP: user approves spec
+        │
+ 2. Prepare (planner: brief + tasks) ── branch + roadmap row
+        │
+ 3. Build (developer → builder) ── 4. Test (tester) ⇄ fix rounds ── 5. Review (reviewer) ⇄ fix rounds
+        │                                   (max 3)                          (max 3)
+ 6. Gate ── 7. Ship (close.md, PR) ── 8. Lead check ── 9. Merge on green CI
+```
+
+### 0. Orient
 
 1. Read `.design/roadmap.md` in full.
-2. Run `git fetch --prune`, `git status`, `git worktree list` and `gh pr list --state open`.
-3. Reconcile: every open PR maps to a sprint row, every merged PR has its row ticked, and local changes are understood.
-   Fix roadmap drift in the next PR you open.
-4. Check `ListAgents` for another live session on this repo. If one is mid-sprint, coordinate with it via
-   `SendMessage`: one working tree, one writer.
+2. Run `git fetch --prune`, `git status`, `git worktree list`, `gh pr list --state open`.
+3. Reconcile: every open PR maps to a sprint row, every merged PR's row is archived. Fix drift in your next PR.
+4. For a sprint in progress, list its folder: the newest task without a report is where to pick up.
+5. `ListAgents`: if another live session works on this repo, coordinate with `SendMessage` (one writer per tree).
 
-5. For a sprint already in progress, read its `.design/sprints/` file: the last report says where to pick up.
+Then tell the user, in Vietnamese and briefly: what is merged, what is open and why, and what you'll do next. Carry
+on unless a decision is the user's (see Stop points).
 
-Done when you can name the state of every open PR and the first unticked sprint.
+Arguments to `/lead` are the user's request for this session. They come before the roadmap queue.
 
-## 2. Report
+### 1. Plan: idea → spec
 
-Tell the user, in Vietnamese and briefly: what is merged since the roadmap was last updated, what is open and why,
-and what you will do next. Then carry on. Wait only for a decision that is the user's (see Stop points).
+For anything new (a user idea, the next roadmap phase, a deferred item), call the planner with mode `spec` and the
+idea. It researches the code and outside sources and writes `.design/specs/<feature>.md` (Status: draft).
 
-## 3. Run the sprint loop
+**Stop:** show the user the spec's recommendation, ACs and "Questions for the user". Record their answers in the spec,
+set `Status: approved by the user on <date>`, and add the sprint rows to the roadmap.
 
-Per sprint, in roadmap order:
+A roadmap row that already has a decided plan (e.g. "Phase D plan") still gets a spec: the planner turns the plan into
+one, and the user only confirms it.
 
-1. **Branch** off fresh `origin/main`: `feat/<name>`, `fix/<name>` or `chore/<name>`, matching the roadmap row. Copy
-   `.design/sprints/_template.md` to `.design/sprints/<#>-<name>.md`, write the Brief (numbered `AC1..n`), and link
-   the file from the roadmap row.
-2. **Build.** Brief each agent from the sprint file's Brief: goal, branch, files in scope, acceptance criteria and
-   constraints, and the `.design/` file for decisions. Route by the ownership table above. When a sprint needs both, run the
-   developer first so the builder builds on real data.
-3. **Test.** Brief the tester with the acceptance criteria and the edge cases the developer/builder reported. It
-   writes tests under `tests/` and runs the full suite. Route each defect to the agent that owns the file, continuing
-   that *same* agent with `SendMessage` so it keeps context, then re-run the tester until no must-fix defect remains.
-4. **Review.** Run the reviewer on the branch diff, tests included. Route must-fix findings the same way and
-   re-review until none remain.
+### 2. Prepare: spec → sprint folder
 
-   After every agent turn, paste its report into the sprint file's Reports as `<agent> · round <n> · status`.
+1. Branch off fresh `origin/main`: `feat/<name>`, `fix/<name>` or `chore/<name>`, as in the roadmap row.
+2. Call the planner with mode `tasks`, the approved spec, the sprint number and the branch. It writes `brief.md` and
+   `tasks/<agent>-r1.md` for each agent the sprint needs.
+3. Read the brief and tasks. Check: every AC appears in a task, each task stays in its agent's area, the developer task
+   comes before the builder task when both exist. Send corrections back to the planner, not around it.
+4. Link the sprint folder from the roadmap row.
 
-   **Loop caps.** At most 3 tester rounds and 3 reviewer rounds per sprint. Only a must-fix opens a new round;
-   suggestions go to the sprint file's "Deferred". A finding that comes back after its fix was reported done is
-   escalated to the user, not looped again. Past the cap, stop and ask the user with the open findings listed.
+### 3. Build
 
-   Ownership is enforced by the `PreToolUse` hook in `.claude/hooks/guard-paths.mjs` (tester writes only `tests/`,
-   reviewer writes nothing, developer/builder stay out of `tests/`, subagents don't push/switch/merge, nobody kills
-   processes by image name). The hook sees the Write/Edit tools, not files written from a shell, so after every
-   tester or reviewer turn run `git status --porcelain`: a tester change outside `tests/`, or any reviewer change, is
-   a defect to revert and report. If the hook blocks something an agent legitimately needs, decide it yourself;
-   don't loosen the hook to get past one sprint.
-5. **Gate.** `npm run gate` passes locally (and `npm run test:e2e` for any UI or route change). Every agent report
-   states the command it ran and its exit code; "it passes" without an exit code is not a gate result.
-6. **Ship.** Tick the sprint row in the roadmap on the same branch (move it to `.design/roadmap-archive.md` with its
-   PR number), commit, push and run `gh pr create`.
-7. **Lead check** on the PR diff (`gh pr diff`): `gh pr diff <n> --name-only` matches the files the agents reported
-   (an ignored path silently drops a file, as happened in PR #7), RSC boundaries
-   (no `"use client"` creep), essential content renders without JS, files sit where `CLAUDE.md` says, no new runtime
-   dependency, scope matches the row, and the acceptance criteria have tests.
-8. **Merge** with `gh pr merge <n> --merge` only when the PR is rebased on `main` and CI is green
-   (`gh pr checks <n> --watch`: both `gate` and `e2e` pass). Never merge on a local run or an agent's report alone; a
-   red or pending check is not mergeable. Then fast-forward local
-   `main`, and rebase any other open PR before its own merge.
+Dispatch in the brief's task order, one agent at a time. The prompt is one line:
 
-Record `/usage` (session cost so far) in the sprint file's Close before you merge.
+> `Task: .design/sprints/<#>-<name>/tasks/<agent>-r<n>.md`
 
-Done per sprint when the PR is merged, its row is ✅ on `main`, the sprint file's Close is filled in, and `main`
-builds.
+Read the agent's report file when it returns. `status: blocked` or `failed`: decide (answer, re-scope with the
+planner, or stop and ask the user).
+
+### 4. Test, and 5. Review
+
+Dispatch `tasks/tester-r1.md`, then `tasks/reviewer-r1.md` once the tester reports no must-fix.
+
+For each must-fix finding, write a fix task from `.claude/templates/task-fix.md` for the agent that owns the file
+(`tasks/<agent>-r<n+1>.md`, citing the source report), dispatch it to the *same* agent with `SendMessage` when it is
+still alive (it keeps context), else a fresh one with the task path. Then write the next `tester-r<n+1>.md` or
+`reviewer-r<n+1>.md` and re-run.
+
+**Loop caps.** At most 3 tester rounds and 3 reviewer rounds per sprint. Only a must-fix opens a round; suggestions
+go to `close.md` "Deferred". A finding marked "came back" is escalated to the user, not looped. Past a cap, stop and
+ask the user with the open findings.
+
+### 6. Gate
+
+`npm run gate` exits 0, and `npm run test:e2e` exits 0 for any UI or route change. Every report states the command and
+its exit code; "it passes" without one is not a gate result.
+
+### 7. Ship
+
+1. Write `close.md` from `.claude/templates/close.md`: rounds, local gates, `/usage`, deferred findings.
+2. Move the sprint row from the roadmap to `.design/roadmap-archive.md` (with the PR number once known) and carry any
+   deferred item that is still wanted into the roadmap's "Deferred".
+3. Commit everything (code, tests, the sprint folder, roadmap), push, `gh pr create`, then add the PR number to
+   `close.md` and the archive row in a follow-up commit on the same branch.
+
+### 8. Lead check
+
+On the PR diff: `gh pr diff <n> --name-only` matches the files in the reports (an ignored path silently drops a file,
+as in PR #7); no `"use client"` creep; essential content renders without JS; files sit where `CLAUDE.md` says; no new
+dependency of any kind; scope matches the brief; every AC has a test in the tester's report.
+
+### 9. Merge
+
+`gh pr merge <n> --merge` only when the PR is rebased on `main` and CI is green (`gh pr checks <n> --watch`: `gate`
+and `e2e` pass). Never merge on a local run or a report alone. Then fast-forward local `main`. The merge commit is
+the record of the merge; nothing is committed to `main` afterwards.
+
+Done per sprint: PR merged, sprint folder complete (brief, every task with its report, close), row archived.
+
+Sprints run **one at a time** in the main working tree. Parallel worktrees are off until the guard hook is verified
+there: it resolves paths against the project root, so a worktree path may escape its checks.
 
 ### A bad merge
 
-If something broken reached `main`, revert it the same way it arrived: through a PR.
+Revert it the way it arrived, through a PR:
 
 1. `git switch -c fix/revert-<name> origin/main`, then `git revert -m 1 <merge-sha>` (`-m 1` keeps `main`'s side).
 2. Push, `gh pr create`, wait for green CI, merge. Never push to `main` directly and never force-push.
-3. Note the revert in the sprint file's Close and reopen the row in the roadmap. Redo the work on a new branch; to
-   reuse the reverted commits, revert the revert there first.
+3. Reopen the roadmap row and note the revert in the sprint's `close.md` on the revert branch. Redo the work on a new
+   branch; to reuse the reverted commits, revert the revert there first.
 
-Independent sprints (no shared files) may run in parallel worktrees. Anything touching the same file waits.
-
-## 4. Stop points
+## Stop points
 
 Stop and ask the user (with `AskUserQuestion` when there are clear options) when:
 
-- the queue is empty: propose the next block from the roadmap's deferred items and phases, with choices;
+- a spec is ready for approval, or the queue is empty (have the planner propose the next block first);
 - a choice is product- or scope-level, or adds any dependency (runtime or dev);
 - a gate stays red after two honest fix attempts;
-- a loop passes its cap of 3 rounds, or a fixed finding comes back;
+- a loop passes its cap of 3 rounds, or a finding comes back;
 - an action needs a permission this session doesn't have.
 
-## 5. Hand-off
+## Hand-off
 
-Before ending, make sure the sprint file has every report so far, then make the roadmap match reality: finished rows archived, new decisions recorded under the phase they
-belong to, and deferred items noted. A future `/lead` reads only what you wrote down.
+Before ending a session: every dispatched task has a report or a note in it saying why not, the roadmap matches
+reality, and new decisions are in the spec or roadmap they belong to. A future `/lead` reads only files.

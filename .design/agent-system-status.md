@@ -14,7 +14,8 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 
 1. Read this file in full. It does not depend on chat history.
 2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–6 are merged
-   (PRs #11–#16). Step 7 (hosting) is deferred by the user; "Later" items are optional.
+   (PRs #11–#16). Step 7 (hosting) is deferred by the user. Step 8 (file handoff + planner) is the
+   `chore/agent-file-handoff` PR. "Later" items are optional.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
@@ -42,8 +43,9 @@ user ──/lead──▶ LEAD (main session): plans, briefs, routes findings, r
 Sprint loop (SKILL.md §3): branch → developer → builder → tester ⇄ owner → reviewer ⇄ owner → gates → PR → lead check → merge
 ```
 
-- **Hub and spoke is required, not a flaw.** In Claude Code, subagents can't spawn subagents or message each other, so
-  one session must orchestrate. The flaw is *how much* the hub does (see AS-19).
+- **Hub and spoke is a choice, not a limit.** Subagents *can* spawn subagents (up to three layers; corrected on
+  2026-10-13), but this project keeps one dispatcher: role agents have no `Agent` tool, so every handoff goes through
+  the lead and a file. The flaw is *how much* the hub does (see AS-19).
 - **Framework:** Claude Code alone (subagents, skills, one MCP server, the `gh` CLI, Markdown for state). Right for a
   one-person blog with four agents. LangGraph, CrewAI or the Agent SDK would add overhead without benefit.
 
@@ -330,6 +332,32 @@ behind `lib/data/` so only `store.ts` changes later.
       `TRUST_PROXY` default, where secrets live.
 - [ ] If DB/KV: pull Phase C's PostSource seam and a store seam forward, before sprint 9.
 
+### Step 8: explicit file handoff and a planner (decided by the user on 2026-10-13)
+Done on branch `chore/agent-file-handoff`. The user found delegation was "all verbal": briefs lived only in the
+`Agent` prompt, reports only in chat, and nobody owned research or new features.
+- [x] **planner** agent (`.claude/agents/planner.md`, opus): mode `spec` researches the code and outside sources and
+      writes `.design/specs/<feature>.md` for the user to approve; mode `tasks` turns an approved spec into
+      `brief.md` + one `tasks/<agent>-r1.md` per agent. Writes nothing else; has no `Agent` tool, so it can't delegate.
+- [x] **Templates** in `.claude/templates/`: `spec`, `brief`, `task-{developer,builder,tester,reviewer}`, `task-fix`,
+      `report`, `close`. Agent files say *who* an agent is; templates say *what* it does this time.
+- [x] **Sprint folder** `.design/sprints/<#>-<name>/{brief.md, tasks/, reports/, close.md}` replaces the single
+      sprint file (`_template.md` removed).
+- [x] **Hook enforcement** (`guard-paths.mjs`, 17 tests): spawning a role agent requires an existing task file of its
+      own in the prompt (PreToolUse `Agent`); the **dispatch gate** blocks the next spawn while another task in the
+      sprint has no report; each agent writes only its own report; only the planner (and the lead) write briefs and
+      tasks; only the lead writes `close.md`. A `SubagentStop` block also asks for the report, but see below.
+- [x] **Live checks in this session (2026-10-13):** the `Agent` matcher fires and blocks a spawn without a task file;
+      the dispatch gate blocks; the reviewer (given the `Write` tool, which it lacked) writes its own report. The
+      `SubagentStop` hook fires with the documented input and exits 2, yet a *background* subagent that ends with its
+      hand-back still stops. So the report rule rests on the dispatch gate, not on `SubagentStop`.
+- [x] Role agents read their task file and write their report file; the final chat message is one line.
+- [x] `SKILL.md` rewritten top to bottom: team table, file map, flow 0–9 with a diagram, spec approval stop point.
+- [x] Gaps from the review on 2026-10-13: `close.md` is written before the merge (no commit to `main` after);
+      parallel worktrees off until the hook is verified there; "any dependency" everywhere.
+- [ ] Verify in a new session: the planner's `WebFetch`/`WebSearch` tools load (the agent list shows them), and a
+      foreground subagent honors the `SubagentStop` block.
+- [ ] Sprint 4 started before this; on resume the planner writes its spec, brief and tasks from PR #10.
+
 ### Later
 - [ ] AS-20: run Claude Code inside WSL2 and enable `/sandbox` (`sandbox.enabled`, `sandbox.network.allowedDomains`
       for npm and GitHub), if the user wants real isolation.
@@ -382,8 +410,11 @@ Checked against the Claude Code docs on 2026-10-12. Re-check exact key spellings
   `haiku`, `fable`, a full ID, `inherit`), `effort`, `maxTurns`, `tools`, `disallowedTools`, `skills`, `hooks`,
   `permissionMode`, `memory`, `isolation: worktree`, `omitClaudeMd`, `mcpServers`, `background`. Unknown fields are
   silently ignored. Subagents load `CLAUDE.md` automatically. `skills:` preloads full skill content; skills with
-  `disable-model-invocation: true` can't be preloaded. (Not re-checked in this session: subagents can't spawn
-  subagents or message each other directly. Confirm on the same page before relying on it.)
+  `disable-model-invocation: true` can't be preloaded. Subagents can spawn subagents up to three layers below the
+  main session (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`; checked 2026-10-13). The spawning tool is `Agent` (renamed
+  from `Task` in 2.1.63); its PreToolUse `tool_input` has `prompt`, `description`, `subagent_type`, `model`.
+  `SubagentStop` input has `agent_type`, `agent_transcript_path`, `stop_hook_active`, `last_assistant_message`; exit 2
+  keeps the subagent running with stderr as its next instruction; its matcher is the agent type.
 - **Hooks** (https://code.claude.com/docs/en/hooks.md): input includes `agent_id` and `agent_type` inside a subagent.
   Hooks in agent frontmatter run only while that agent is active; a frontmatter `Stop` becomes `SubagentStop`. Project
   hooks run after the workspace trust prompt is accepted.
