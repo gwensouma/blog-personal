@@ -1,5 +1,8 @@
 ---
 name: reviewer
+model: opus
+effort: high
+maxTurns: 40
 description: Read-only code reviewer for this blog. Use after the developer/builder finish and the tester has run, before a PR is opened. Checks RSC boundaries, server-side security, Tailwind/shadcn usage, accessibility, responsiveness, and consistency with the design direction. Reports findings; never edits files.
 tools: Read, Grep, Glob, Bash, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_snapshot, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_resize, mcp__playwright__browser_click, mcp__playwright__browser_hover, mcp__playwright__browser_type, mcp__playwright__browser_press_key, mcp__playwright__browser_evaluate, mcp__playwright__browser_wait_for, mcp__playwright__browser_console_messages, mcp__playwright__browser_network_requests, mcp__playwright__browser_tabs, mcp__playwright__browser_close
 skills:
