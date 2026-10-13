@@ -25,15 +25,42 @@ const TASK_PATH = /\.design[\\/]+sprints[\\/]+([^\\/\s`'"]+)[\\/]+tasks[\\/]+([a
 const SKIP_PATTERNS = [/\btest\.fixme\s*\(/g, /\b(?:test|describe|it)\.skip\s*\(/g];
 const ONLY_PATTERN = /\b(?:test|describe|it)\.only\s*\(/g;
 
+// git, then any global options (-C <dir>, -c k=v, --no-pager, …), then the subcommand.
+const GIT = String.raw`\bgit(?:\s+(?:-[Cc]\s+\S+|--?[\w-]+(?:=\S+)?))*\s+`;
 const GIT_OWNED_BY_LEAD = [
-  /\bgit\s+push\b/,
-  /\bgit\s+switch\b/,
-  /\bgit\s+checkout\b/,
-  /\bgit\s+rebase\b/,
-  /\bgit\s+reset\s+--hard\b/,
-  /\bgit\s+merge\b/,
-  /\bgh\s+pr\s+(?:create|merge|close|ready)\b/,
+  new RegExp(`${GIT}(?:push|switch|checkout|rebase|merge|commit|cherry-pick|revert|tag)\\b`),
+  new RegExp(`${GIT}reset\\s+--hard\\b`),
+  /\bgh\s+pr\s+(?:create|merge|close|ready|edit|review)\b/,
+  // gh api is read-only only with GET; any other method can push, merge or change settings.
+  /\bgh\s+api\b[^\n;&|]*(?:-X\s*|--method[\s=]+)(?!GET\b)[A-Za-z]+/i,
+  /\bgh\s+api\b[^\n;&|]*\s(?:-f|-F|--field|--raw-field|--input)\s/,
 ];
+
+// Where each writing agent may write (project-relative paths). The lead (main session) is not restricted here.
+const DESIGN_NOTE = /^\.design\/(?!roadmap|agent-system-status)[a-z0-9-]+\.md$/; // e.g. .design/comments.md
+const AREAS = {
+  developer: {
+    prefixes: ["app/", "lib/", "types/", "content/", "public/", "assets/"],
+    files: [
+      "next.config.ts", "tsconfig.json", "eslint.config.mjs", "postcss.config.mjs", "components.json",
+      "package.json", "package-lock.json", ".env.example", "vitest.config.mts", "playwright.config.ts",
+    ],
+    note: "app/, lib/, types/, content/, public/, assets/, root config files and .design/<feature>.md notes",
+  },
+  builder: {
+    prefixes: ["components/", "public/", "assets/"],
+    files: ["app/globals.css"],
+    note: "components/, app/globals.css, public/, assets/ and .design/<feature>.md notes",
+  },
+  tester: { prefixes: ["tests/"], files: [], note: "tests/" },
+};
+
+function inArea(agent, rel) {
+  const area = AREAS[agent];
+  if (!area) return false;
+  if (area.files.includes(rel) || area.prefixes.some((p) => rel.startsWith(p))) return true;
+  return agent !== "tester" && DESIGN_NOTE.test(rel);
+}
 // Only in command position (start of the line or after ; & | or a subshell paren), so text that merely
 // mentions it, e.g. inside an echo or a heredoc sentence, is not blocked.
 const KILL_BY_NAME = /(?:^|[;&|(])\s*(?:taskkill|taskkill\.exe)\b[^\n;&|]*\/im\b/im;
@@ -97,6 +124,9 @@ function decide(event, projectDir) {
   const input = event.tool_input ?? {};
   const agent = event.agent_type;
   const isSubagent = SUBAGENTS.has(agent);
+  // Any other subagent (general-purpose, claude, Explore, …) is a helper for research, never a writer: the team's
+  // ownership and handoff rules would mean nothing if the lead could route code work around them.
+  const isHelper = Boolean(agent) && !isSubagent;
 
   if (tool === "Agent" || tool === "Task") {
     const target = input.subagent_type;
@@ -121,7 +151,7 @@ function decide(event, projectDir) {
     if (KILL_BY_NAME.test(command)) {
       return "Killing processes by image name is forbidden: it kills the user's other Node processes. Stop only the PID you started (taskkill /PID <pid> /F).";
     }
-    if (isSubagent && GIT_OWNED_BY_LEAD.some((re) => re.test(command))) {
+    if ((isSubagent || isHelper) && GIT_OWNED_BY_LEAD.some((re) => re.test(command))) {
       return `The lead owns branches, pushes and PRs; ${agent} must not run this. Report back to the lead instead.`;
     }
     return null;
@@ -137,9 +167,18 @@ function decide(event, projectDir) {
     if (agent === "reviewer") return "The reviewer is read-only. Report the finding to the lead instead of editing.";
     return null; // outside the project (temp files): not ours to police
   }
+  if (isHelper) {
+    return `${agent} is a helper agent and may not edit the project (tried ${rel}). Code work goes to a role agent through a task file.`;
+  }
 
   // Sprint files: briefs and tasks belong to the planner (and the lead), close to the lead, each report to its agent.
   const sprint = sprintFile(rel);
+  // close.md ends a sprint, so it waits for every report (the last agent of a sprint has no later dispatch gate).
+  if (sprint?.kind === "close" && !isSubagent) {
+    const sprintDir = rel.split("/").slice(0, 3).join("/");
+    const waiting = unreportedTasks(projectDir, sprintDir);
+    if (waiting.length > 0) return `Close the sprint after every task has a report. Missing: ${waiting.join(", ")}.`;
+  }
   if (sprint && isSubagent) {
     if (sprint.kind === "report") {
       return sprint.agent === agent ? null : `${agent} may write only its own report (reports/${agent}-r<n>.md), not ${rel}.`;
@@ -155,11 +194,14 @@ function decide(event, projectDir) {
     return "The reviewer is read-only. Write findings to your report file instead of editing.";
   }
 
-  if (agent === "tester" && !isUnderTests(rel)) {
-    return `The tester writes only under tests/ (tried ${rel}). Report the defect to the lead with the suspected file.`;
-  }
-  if ((agent === "developer" || agent === "builder") && isUnderTests(rel)) {
-    return `Tests belong to the tester (tried ${rel}). List the cases the tester should cover in your report instead.`;
+  if (AREAS[agent] && !inArea(agent, rel)) {
+    if (agent === "tester") {
+      return `The tester writes only under tests/ (tried ${rel}). Report the defect to the lead with the suspected file.`;
+    }
+    if (isUnderTests(rel)) {
+      return `Tests belong to the tester (tried ${rel}). List the cases the tester should cover in your report instead.`;
+    }
+    return `${agent} writes only ${AREAS[agent].note} (tried ${rel}). Name the needed change in your report; the lead routes it.`;
   }
 
   const { after, before } = writeTexts(tool, input, path.resolve(projectDir, filePath));

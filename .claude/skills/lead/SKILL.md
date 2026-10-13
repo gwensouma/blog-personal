@@ -54,14 +54,26 @@ The user delegated merging to you and can take it back at any time.
 - spawning developer, builder, tester or reviewer without an existing `tasks/<that-agent>-r<n>.md` path in the prompt;
 - spawning the next task while any other task in the same sprint has no report yet (the dispatch gate: a missing
   report stops the sprint, so continue that agent until it writes one);
+- you writing `close.md` while any task of that sprint has no report (this catches the last agent of a sprint,
+  which no later dispatch would);
 - a foreground role agent finishing before its report exists. Background agents can finish past this block (checked
-  live on 2026-10-13), which is why the dispatch gate exists;
-- writes outside each agent's area (table above); only the tester adds `test.fixme`/`.skip`; nobody adds `.only`;
-- subagents running `git push|switch|checkout|rebase|merge|reset --hard` or `gh pr create|merge|close|ready`;
+  live on 2026-10-13), which is why the two gates above exist;
+- Write/Edit outside each agent's area: developer `app/`, `lib/`, `types/`, `content/`, `public/`, `assets/`, root
+  config files and `.design/<feature>.md`; builder `components/`, `app/globals.css`, `public/`, `assets/` and
+  `.design/<feature>.md`; tester `tests/`; reviewer its report only; planner specs, briefs and tasks. `.github/`,
+  `.claude/`, `CLAUDE.md`, `README.md`, the roadmap and this status doc are yours alone;
+- helper agents (general-purpose, claude, Explore, …) editing anything in the project: they research, they don't
+  write, so code work can't bypass the task files;
+- only the tester adds `test.fixme`/`.skip`; nobody adds `.only`;
+- subagents running git writes (`push`, `commit`, `switch`, `checkout`, `rebase`, `merge`, `cherry-pick`, `revert`,
+  `tag`, `reset --hard`, also after global options like `git -C . push`), `gh pr create|merge|close|ready|edit|review`,
+  or `gh api` with a non-GET method or fields;
 - anyone killing processes by image name.
 
-The hook sees the Write/Edit tools, not files written from a shell. After every agent turn run
-`git status --porcelain`: a change outside that agent's area is a defect to revert and report. If the hook blocks
+What it can't see: files written from a shell (`echo > file`, a script) and the gate's exit codes. So the backstops
+stay manual. After every agent turn run
+`git status --porcelain`: a change outside that agent's area is a defect to revert and report. Read the gate line in
+every report before you dispatch the next task. If the hook blocks
 something an agent legitimately needs, decide it yourself; change the hook only in its own PR.
 
 ## The flow, top to bottom

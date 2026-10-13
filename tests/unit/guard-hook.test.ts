@@ -110,6 +110,44 @@ describe("guard-paths hook: shell commands", () => {
   });
 });
 
+describe("guard-paths hook: areas and helpers", () => {
+  it("keeps the developer in app/, lib/, types/, content/ and root config", () => {
+    expect(write("developer", "app/(blog)/page.tsx").code).toBe(0);
+    expect(write("developer", "next.config.ts").code).toBe(0);
+    expect(write("developer", ".design/comments.md").code).toBe(0);
+    expect(write("developer", "components/posts/up-next.tsx").code).toBe(2);
+    expect(write("developer", ".github/workflows/ci.yml").code).toBe(2);
+    expect(write("developer", ".claude/hooks/guard-paths.mjs").code).toBe(2);
+    expect(write("developer", ".design/roadmap.md").code).toBe(2);
+  });
+
+  it("keeps the builder in components/, globals.css and design notes", () => {
+    expect(write("builder", "app/globals.css").code).toBe(0);
+    expect(write("builder", ".design/blog-refactor.md").code).toBe(0);
+    expect(write("builder", "app/(blog)/page.tsx").code).toBe(2);
+    expect(write("builder", "lib/data/posts.ts").code).toBe(2);
+    expect(write("builder", "CLAUDE.md").code).toBe(2);
+  });
+
+  it("doesn't let helper agents edit the project", () => {
+    expect(write("general-purpose", "lib/data/posts.ts").code).toBe(2);
+    expect(write("claude", "components/x.tsx").code).toBe(2);
+    expect(write("general-purpose", path.join(path.dirname(root), "elsewhere", "notes.md")).code).toBe(0);
+    expect(bash("general-purpose", "git push origin main").code).toBe(2);
+  });
+
+  it("catches git and gh writes in their less common spellings", () => {
+    expect(bash("developer", "git -C . push").code).toBe(2);
+    expect(bash("developer", "git --no-pager -c user.name=x commit -m wip").code).toBe(2);
+    expect(bash("developer", "git commit -am wip").code).toBe(2);
+    expect(bash("tester", "gh api -X PUT repos/o/r/pulls/1/merge").code).toBe(2);
+    expect(bash("tester", "gh api --method=POST repos/o/r/git/refs -f ref=x").code).toBe(2);
+    expect(bash("tester", "gh api repos/o/r/pulls/1").code).toBe(0);
+    expect(bash("tester", "gh api -X GET repos/o/r/pulls").code).toBe(0);
+    expect(bash("developer", "git -C . log --oneline").code).toBe(0);
+  });
+});
+
 describe("guard-paths hook: file handoff", () => {
   // A throwaway project with one sprint, so task and report files can exist or not.
   const project = mkdtempSync(path.join(tmpdir(), "guard-hook-"));
@@ -149,6 +187,16 @@ describe("guard-paths hook: file handoff", () => {
     expect(spawn("tester", `Task: ${testerTask}`).code).toBe(0);
     rmSync(path.join(project, report));
     rmSync(path.join(project, testerTask));
+  });
+
+  it("lets the lead write close.md only after every task has a report", () => {
+    const close = `${sprint}/close.md`;
+    const blocked = run({ tool_name: "Write", tool_input: { file_path: close, content: "x" } }, project);
+    expect(blocked.code).toBe(2);
+    expect(blocked.stderr).toContain(task);
+    writeFileSync(path.join(project, report), "# Report\n");
+    expect(run({ tool_name: "Write", tool_input: { file_path: close, content: "x" } }, project).code).toBe(0);
+    rmSync(path.join(project, report));
   });
 
   it("leaves other agents (planner, built-ins) free to spawn", () => {

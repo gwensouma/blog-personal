@@ -3,7 +3,7 @@
 Owner: the lead session (start it with `/lead`). How the team works lives in `.claude/skills/lead/SKILL.md`; this file
 says only *what* is decided, queued and deferred. Finished sprints and plans: [roadmap-archive.md](roadmap-archive.md).
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
-Last updated: 2026-10-12.
+Last updated: 2026-10-13.
 
 ## Out of scope for now
 - **AI features** (`lib/ai/`): postponed by the user. Keep the data layer extensible; build nothing yet.
@@ -75,9 +75,9 @@ Open sprints only; merged ones move to the archive. Order: 4 → 8 → 9 → 10.
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
-| 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). Draft PR #10 predates the file handoff: the planner writes its spec, brief and tasks from the PR before work resumes | sprint 3 |
+| 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). Draft PR #10 predates the file handoff: the planner writes its spec, brief and tasks from the PR before work resumes | — |
 | 8 | `fix/home-no-js` | Remove `test.fixme` from the home no-JS test in `tests/e2e/no-js.spec.ts`. Render essential home sections inline (no `<Suspense>` on ISR `/`); the "Suspense only around non-essential or JS-dependent content" principle is already in CLAUDE.md; reviewer checks routes with JS disabled | — |
-| 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint T, sprint 4 |
+| 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint 4 |
 | 10 | `feat/comments-admin` | D: /admin with password, hide/unhide comments | sprint 9 |
 
 Deferred: the `/search` empty-state title is a `<div>`, not a heading (a11y suggestion from the sprint T tester; fix it

@@ -1,5 +1,9 @@
 # Agent system status
 
+> **Reading guide (2026-10-13).** §2–§4 are the audit snapshot of 2026-10-12, *before* the fixes: statements there
+> such as "no agent sets `model:`" or "`.github/` does not exist" describe that day, not now. The current state is
+> §8 (each step's ticks and notes) and the files themselves; the workflow is `.claude/skills/lead/SKILL.md`.
+
 The multi-agent setup that builds this blog, as of 2026-10-12. It grew piece by piece on top of an existing project
 (planner session → planner + orchestrator sessions → one `/lead` session with four subagents), so it has gaps and
 drift that a from-scratch design would not. This file lists what exists, what is wrong, the target structure, and the
@@ -354,6 +358,12 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
 - [x] `SKILL.md` rewritten top to bottom: team table, file map, flow 0–9 with a diagram, spec approval stop point.
 - [x] Gaps from the review on 2026-10-13: `close.md` is written before the merge (no commit to `main` after);
       parallel worktrees off until the hook is verified there; "any dependency" everywhere.
+- [x] Peer audit from session rsc-0b (2026-10-13) applied in the same PR: per-agent write areas (developer/builder
+      were only kept out of `tests/`), helper agents can't edit the project, git writes caught after global options
+      (`git -C . push`) plus `commit`, `gh api` writes blocked, `close.md` waits for every report, SKILL.md no longer
+      overstates the hook, this reading guide added. Left to the user: an independent pre-merge approval (branch
+      protection or a "user approves the PR" stop), and the `gh` token scopes (`repo`, `workflow`) every agent's
+      shell can use.
 - [ ] Verify in a new session: the planner's `WebFetch`/`WebSearch` tools load (the agent list shows them), and a
       foreground subagent honors the `SubagentStop` block.
 - [ ] Sprint 4 started before this; on resume the planner writes its spec, brief and tasks from PR #10.
