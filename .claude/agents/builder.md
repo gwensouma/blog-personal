@@ -33,7 +33,11 @@ page structure and data wiring in `app/` belong to the developer, so ask the lea
 
 ## Report back
 
-- Design decisions in 2–5 bullets.
-- Files created/changed.
-- Gate result: the command you ran and its exit code, with the error verbatim if it failed.
-- Anything you were unsure about or deliberately left out.
+The lead pastes your report into the sprint file, so use these fields:
+
+- **Status:** done, blocked (on what) or failed (gate red after two attempts).
+- **Summary:** design decisions in 2–5 bullets.
+- **Files:** created or changed paths.
+- **Gate:** the command you ran and its exit code, with the error verbatim if it failed.
+- **AC → test:** for each acceptance criterion, what the tester should check (states, widths, no-JS, reduced motion).
+- **Open questions:** anything you were unsure about or deliberately left out; "none" if none.

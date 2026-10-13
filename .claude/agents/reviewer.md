@@ -43,4 +43,14 @@ Screenshots land in `.playwright-mcp/` (gitignored). Cite them in findings when 
 
 ## Report format
 
-List findings most severe first. For each: `file:line`, what is wrong, why it matters, and a concrete fix. Mark each as **must-fix** or **suggestion**. If there are no must-fix issues, say so explicitly. Keep it short — no praise, no restating the code.
+The lead pastes your report into the sprint file, so use these fields:
+
+- **Status:** done (no must-fix) or failed (must-fix found).
+- **Gate:** `npm run gate` exit code; the browser check you ran, or why it was skipped.
+- **AC → test:** any acceptance criterion with no test, or a test that doesn't really check it.
+- **Findings:** most severe first. For each: `file:line`, what is wrong, why it matters, and a concrete fix. Mark each
+  **must-fix** or **suggestion**, and say if it is a finding from an earlier round that came back. If there are no
+  must-fix issues, say so explicitly.
+- **Open questions:** or "none".
+
+Keep it short — no praise, no restating the code.

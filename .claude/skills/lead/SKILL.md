@@ -33,6 +33,8 @@ A new session has no memory of the last one, so everything that matters is on di
 - This file — the single source of truth for *how* the team works.
 - `CLAUDE.md` and `.claude/rules/` — project rules and the "Where does a new file go?" ladder. Agents load them
   automatically; don't paste them into briefs.
+- `.design/sprints/<#>-<name>.md` — the live sprint: brief, every agent report, deferred findings and the close-out
+  ([template](../../../.design/sprints/_template.md)). Chat history doesn't survive a session; this file does.
 - `.design/*.md` — design decisions per feature. Every UI feature records its decisions in `.design/blog-refactor.md`,
   or in a new `.design/<feature>.md` when long.
 - Git and GitHub — branches, open PRs, what is merged.
@@ -46,6 +48,8 @@ A new session has no memory of the last one, so everything that matters is on di
 4. Check `ListAgents` for another live session on this repo. If one is mid-sprint, coordinate with it via
    `SendMessage`: one working tree, one writer.
 
+5. For a sprint already in progress, read its `.design/sprints/` file: the last report says where to pick up.
+
 Done when you can name the state of every open PR and the first unticked sprint.
 
 ## 2. Report
@@ -57,15 +61,23 @@ and what you will do next. Then carry on. Wait only for a decision that is the u
 
 Per sprint, in roadmap order:
 
-1. **Branch** off fresh `origin/main`: `feat/<name>`, `fix/<name>` or `chore/<name>`, matching the roadmap row.
-2. **Build.** Brief each agent with: goal, branch, files in scope, acceptance criteria and constraints from the roadmap
-   row, and the `.design/` file for decisions. Route by the ownership table above. When a sprint needs both, run the
+1. **Branch** off fresh `origin/main`: `feat/<name>`, `fix/<name>` or `chore/<name>`, matching the roadmap row. Copy
+   `.design/sprints/_template.md` to `.design/sprints/<#>-<name>.md`, write the Brief (numbered `AC1..n`), and link
+   the file from the roadmap row.
+2. **Build.** Brief each agent from the sprint file's Brief: goal, branch, files in scope, acceptance criteria and
+   constraints, and the `.design/` file for decisions. Route by the ownership table above. When a sprint needs both, run the
    developer first so the builder builds on real data.
 3. **Test.** Brief the tester with the acceptance criteria and the edge cases the developer/builder reported. It
    writes tests under `tests/` and runs the full suite. Route each defect to the agent that owns the file, continuing
    that *same* agent with `SendMessage` so it keeps context, then re-run the tester until no must-fix defect remains.
 4. **Review.** Run the reviewer on the branch diff, tests included. Route must-fix findings the same way and
    re-review until none remain.
+
+   After every agent turn, paste its report into the sprint file's Reports as `<agent> · round <n> · status`.
+
+   **Loop caps.** At most 3 tester rounds and 3 reviewer rounds per sprint. Only a must-fix opens a new round;
+   suggestions go to the sprint file's "Deferred". A finding that comes back after its fix was reported done is
+   escalated to the user, not looped again. Past the cap, stop and ask the user with the open findings listed.
 
    Ownership is enforced by the `PreToolUse` hook in `.claude/hooks/guard-paths.mjs` (tester writes only `tests/`,
    reviewer writes nothing, developer/builder stay out of `tests/`, subagents don't push/switch/merge, nobody kills
@@ -86,7 +98,17 @@ Per sprint, in roadmap order:
    red or pending check is not mergeable. Then fast-forward local
    `main`, and rebase any other open PR before its own merge.
 
-Done per sprint when the PR is merged, its row is ✅ on `main`, and `main` builds.
+Done per sprint when the PR is merged, its row is ✅ on `main`, the sprint file's Close is filled in, and `main`
+builds.
+
+### A bad merge
+
+If something broken reached `main`, revert it the same way it arrived: through a PR.
+
+1. `git switch -c fix/revert-<name> origin/main`, then `git revert -m 1 <merge-sha>` (`-m 1` keeps `main`'s side).
+2. Push, `gh pr create`, wait for green CI, merge. Never push to `main` directly and never force-push.
+3. Note the revert in the sprint file's Close and reopen the row in the roadmap. Redo the work on a new branch; to
+   reuse the reverted commits, revert the revert there first.
 
 Independent sprints (no shared files) may run in parallel worktrees. Anything touching the same file waits.
 
@@ -97,9 +119,10 @@ Stop and ask the user (with `AskUserQuestion` when there are clear options) when
 - the queue is empty: propose the next block from the roadmap's deferred items and phases, with choices;
 - a choice is product- or scope-level, or adds any dependency (runtime or dev);
 - a gate stays red after two honest fix attempts;
+- a loop passes its cap of 3 rounds, or a fixed finding comes back;
 - an action needs a permission this session doesn't have.
 
 ## 5. Hand-off
 
-Before ending, make the roadmap match reality: finished rows archived, new decisions recorded under the phase they
+Before ending, make sure the sprint file has every report so far, then make the roadmap match reality: finished rows archived, new decisions recorded under the phase they
 belong to, and deferred items noted. A future `/lead` reads only what you wrote down.
