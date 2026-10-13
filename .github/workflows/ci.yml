@@ -1,5 +1,5 @@
 # Independent verification for every PR: agents and the lead never merge on their own report alone.
-# Both job names are required status checks on `main` (branch protection).
+# The lead merges only when both jobs are green (.claude/skills/lead/SKILL.md). Branch protection is not enabled.
 name: CI
 
 on:

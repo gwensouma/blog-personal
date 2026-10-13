@@ -13,8 +13,8 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 ## 0. Resuming in a new session
 
 1. Read this file in full. It does not depend on chat history.
-2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–3 are merged
-   (PRs #11, #12 and the `chore/agent-single-source` PR); next is Step 4.
+2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–4 are merged
+   (PRs #11, #12, #13 and the `chore/agent-handoff` PR); next is Step 5.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
@@ -259,18 +259,20 @@ Keywords: progressive disclosure, path-scoped rules, context budget, single sour
       agent descriptions and in `SKILL.md`'s routing table.
 
 ### Step 4: persisted handoff, lighter lead (AS-4, AS-19, AS-6, AS-17)
+Done on branch `chore/agent-handoff`. Loop cap 3 is the proposal from §9 Q3, taken as the default; change it in
+`SKILL.md` if the user wants another number. The roadmap row → sprint file link starts with the next sprint.
 Keywords: handoff schema, structured agent report, evaluator-optimizer termination, circuit breaker.
-- [ ] `.design/sprints/_template.md`:
+- [x] `.design/sprints/_template.md`:
       - **Brief**: goal, branch, files in scope, acceptance criteria `AC1..n`, constraints, linked `.design/` note.
       - **Reports** (one per agent turn): `agent`, `round`, `status: done | blocked | failed`, `files`, `gate` (exit
         code), `AC → test`, `open questions`.
       - **Close**: tester rounds, reviewer rounds, CI result, PR number.
-- [ ] `SKILL.md`: write the brief into the sprint file before delegating; paste each report on receipt. A resumed
+- [x] `SKILL.md`: write the brief into the sprint file before delegating; paste each report on receipt. A resumed
       `/lead` reads the sprint file, not chat history. The roadmap row links to it.
-- [ ] Align every agent's "Report back" with the template fields.
-- [ ] Loop caps: at most 3 tester rounds and 3 reviewer rounds; past that, stop and ask the user. Only must-fix opens
+- [x] Align every agent's "Report back" with the template fields.
+- [x] Loop caps: at most 3 tester rounds and 3 reviewer rounds; past that, stop and ask the user. Only must-fix opens
       a round; suggestions go to "Deferred". A finding that returns after a fix is escalated, not re-looped.
-- [ ] Add a "bad merge" section: `git revert -m 1 <merge>` on a `fix/revert-…` branch, through a PR.
+- [x] Add a "bad merge" section: `git revert -m 1 <merge>` on a `fix/revert-…` branch, through a PR.
 
 ### Step 5: agent config (AS-7, AS-6, AS-15)
 Keywords: model routing, `effort`, `maxTurns`, `CLAUDE_CODE_ENABLE_TELEMETRY`.
@@ -327,7 +329,7 @@ Hooks can't read a running cost total, so they can't enforce a budget either.
 1. **Merging:** keep it delegated to the lead once CI and branch protection exist?
 2. **Models:** proposal: developer `opus`, reviewer `opus`, builder `opus` (design quality), tester `sonnet`; compare
    defect counts over two sprints before moving more to `sonnet`. Accept or change?
-3. **Loop cap:** 3 rounds per loop, then ask?
+3. **Loop cap:** 3 rounds per loop, then ask? *(Default taken in Step 4; open to change.)*
 4. **Third-party skills:** commit them (license permitting) or keep them local with a manifest?
 5. **Hosting:** a host with a persistent disk (VPS, Fly.io or Railway with a volume; the JSON store stays), or a
    serverless host with a DB/KV (SQLite/Turso, Postgres, Upstash; the store moves behind a seam)?

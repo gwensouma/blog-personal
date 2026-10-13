@@ -34,8 +34,13 @@ dependency.
 
 ## Report back
 
-- What you built, in 2–5 bullets, including any interface you added or changed in `lib/data/` / `lib/actions/`.
-- Files changed.
-- Gate result: the command you ran and its exit code, with the error verbatim if it failed.
-- The acceptance criteria and edge cases the tester should cover (inputs, limits, failure paths, no-JS behaviour).
-- Open questions or deliberate omissions.
+The lead pastes your report into the sprint file, so use these fields:
+
+- **Status:** done, blocked (on what) or failed (gate red after two attempts).
+- **Summary:** what you built in 2–5 bullets, including any interface you added or changed in `lib/data/` /
+  `lib/actions/`.
+- **Files:** changed paths.
+- **Gate:** the command you ran and its exit code, with the error verbatim if it failed.
+- **AC → test:** for each acceptance criterion, plus the edge cases (inputs, limits, failure paths, no-JS), what the
+  tester should cover.
+- **Open questions:** or deliberate omissions; "none" if none.

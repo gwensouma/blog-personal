@@ -40,7 +40,13 @@ Each test asserts behaviour a user or caller can observe, not implementation det
 
 ## Report back
 
-- Tests added (file → what each covers), and the full-suite result: pass/fail counts, with failures verbatim.
-- **Defects**, most severe first: the repro steps or failing test name, expected vs actual, and the suspected file.
-  Mark each **must-fix** or **suggestion**.
-- Gaps you couldn't cover, and why.
+The lead pastes your report into the sprint file, so use these fields:
+
+- **Status:** done (no must-fix defect), failed (must-fix defects found) or blocked (on what).
+- **Files:** test files added or changed.
+- **Gate:** the commands you ran (`npm test`, `npm run test:e2e`) with exit codes and pass/fail counts, failures
+  verbatim.
+- **AC → test:** each acceptance criterion → the test(s) that cover it. An AC with no test is a gap; say why.
+- **Findings:** defects, most severe first: repro steps or failing test name, expected vs actual, suspected file.
+  Mark each **must-fix** or **suggestion**. Say if a defect is one that was reported fixed in an earlier round.
+- **Open questions:** gaps you couldn't cover, and why; "none" if none.
