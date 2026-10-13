@@ -13,8 +13,8 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 ## 0. Resuming in a new session
 
 1. Read this file in full. It does not depend on chat history.
-2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–5 are merged
-   (PRs #11–#14 and the `chore/agent-config` PR); next is Step 6.
+2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–6 are merged
+   (PRs #11–#15 and the `chore/agent-setup` PR); next is Step 7, the hosting decision, before sprint 9.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
@@ -275,13 +275,14 @@ Keywords: handoff schema, structured agent report, evaluator-optimizer terminati
 - [x] Add a "bad merge" section: `git revert -m 1 <merge>` on a `fix/revert-…` branch, through a PR.
 
 ### Step 5: agent config (AS-7, AS-6, AS-15)
-Done on branch `chore/agent-config` with the §9 Q2 proposal as the default:
+Done on branch `chore/agent-config` with the §9 Q2 proposal as the default; the user then set every agent to
+`effort: medium` (Step 6 PR):
 
 | Agent | model | effort | maxTurns |
 |---|---|---|---|
-| developer | opus | high | 60 |
-| builder | opus | high | 60 |
-| reviewer | opus | high | 40 |
+| developer | opus | medium | 60 |
+| builder | opus | medium | 60 |
+| reviewer | opus | medium | 40 |
 | tester | sonnet | medium | 50 |
 
 `SKILL.md` says what to do when an agent hits `maxTurns` and records `/usage` per sprint. The account-level spend
@@ -312,12 +313,13 @@ There is **no per-subagent dollar cap** in Claude Code: no frontmatter field, no
 Hooks can't read a running cost total, so they can't enforce a budget either.
 
 ### Step 6: setup for a new machine (AS-22, AS-11, AS-10)
-- [ ] Complete `.env.example`: `PORT`, `NEXT_PUBLIC_SITE_URL`, `BLOG_DATA_DIR`, and (commented, for sprints 9–10)
+Done on branch `chore/agent-setup`. Memory now holds three files: user profile, lead merges PRs, local environment.
+- [x] Complete `.env.example`: `PORT`, `NEXT_PUBLIC_SITE_URL`, `BLOG_DATA_DIR`, and (commented, for sprints 9–10)
       `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `TRUST_PROXY`. CI secrets go in GitHub Secrets, not in a file.
-- [ ] Rewrite `README.md` with a "Setup" section: Node 22, `npm ci`, the third-party skills, `npx playwright install
+- [x] Rewrite `README.md` with a "Setup" section: Node 22, `npm ci`, the third-party skills, `npx playwright install
       chromium`, the Playwright MCP, `.env.local`, then "start a session with `/lead`".
-- [ ] `.claude/skills/SKILLS.md` (re-included in `.gitignore`), unless the user chooses to commit the skills (§9 Q4).
-- [ ] Clean auto-memory: delete `visual-upgrade-status.md` and `git-feature-branch-pr.md`; rename planner → lead;
+- [x] `.claude/skills/SKILLS.md` (re-included in `.gitignore`), unless the user chooses to commit the skills (§9 Q4).
+- [x] Clean auto-memory: delete `visual-upgrade-status.md` and `git-feature-branch-pr.md`; rename planner → lead;
       keep only facts about the user that the repo doesn't record.
 
 ### Step 7: hosting direction, before sprint 9 (AS-21)
@@ -342,7 +344,8 @@ Hooks can't read a running cost total, so they can't enforce a budget either.
 2. **Models:** proposal: developer `opus`, reviewer `opus`, builder `opus` (design quality), tester `sonnet`; compare
    defect counts over two sprints before moving more to `sonnet`. Accept or change? *(Default taken in Step 5; revisit after two sprints.)*
 3. **Loop cap:** 3 rounds per loop, then ask? *(Default taken in Step 4; open to change.)*
-4. **Third-party skills:** commit them (license permitting) or keep them local with a manifest?
+4. **Third-party skills:** commit them (license permitting) or keep them local with a manifest? *(Answered earlier:
+   the user keeps them local. Manifest added in Step 6.)*
 5. **Hosting:** a host with a persistent disk (VPS, Fly.io or Railway with a volume; the JSON store stays), or a
    serverless host with a DB/KV (SQLite/Turso, Postgres, Upstash; the store moves behind a seam)?
 6. **Sandbox:** move Claude Code into WSL2 for `/sandbox`, or rely on deny rules and hooks on native Windows?

@@ -1,7 +1,7 @@
 ---
 name: builder
 model: opus
-effort: high
+effort: medium
 maxTurns: 60
 description: Designs and implements UI for this blog end to end — picks the visual direction, then builds it with Tailwind v4 + shadcn/ui as React Server Components. Owns the JSX in `components/` (new components, redesigns, UI refactors); the developer owns `app/` page structure and data wiring. Returns a summary of the design decisions and the files changed.
 tools: Read, Write, Edit, Grep, Glob, Bash
