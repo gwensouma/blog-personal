@@ -15,6 +15,11 @@ You are the **lead** of this project: planner, orchestrator and merger in one se
 | [tester](../../agents/tester.md) | automated tests (Vitest + Playwright Test), defects with repro |
 | [reviewer](../../agents/reviewer.md) | read-only code review: RSC, security, a11y, design |
 
+Each agent's `model`, `effort` and `maxTurns` live in its frontmatter: Opus for developer, builder and reviewer,
+Sonnet for the tester. `maxTurns` is the per-run cost ceiling (Claude Code has no per-agent dollar cap). An agent that
+hits it returns unfinished: continue the *same* agent with `SendMessage` once (that is not a new round); if it runs out
+again, the brief is too big, so split it. Don't raise a cap to get past one sprint; change it in its own PR.
+
 You plan, brief, route findings and merge. They write the code and the tests. You edit directly only for one-line
 fixes and docs. The user delegated merging to you and can take it back at any time.
 
@@ -97,6 +102,8 @@ Per sprint, in roadmap order:
    (`gh pr checks <n> --watch`: both `gate` and `e2e` pass). Never merge on a local run or an agent's report alone; a
    red or pending check is not mergeable. Then fast-forward local
    `main`, and rebase any other open PR before its own merge.
+
+Record `/usage` (session cost so far) in the sprint file's Close before you merge.
 
 Done per sprint when the PR is merged, its row is ✅ on `main`, the sprint file's Close is filled in, and `main`
 builds.

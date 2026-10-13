@@ -13,8 +13,8 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 ## 0. Resuming in a new session
 
 1. Read this file in full. It does not depend on chat history.
-2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–4 are merged
-   (PRs #11, #12, #13 and the `chore/agent-handoff` PR); next is Step 5.
+2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–5 are merged
+   (PRs #11–#14 and the `chore/agent-config` PR); next is Step 6.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
@@ -275,11 +275,23 @@ Keywords: handoff schema, structured agent report, evaluator-optimizer terminati
 - [x] Add a "bad merge" section: `git revert -m 1 <merge>` on a `fix/revert-…` branch, through a PR.
 
 ### Step 5: agent config (AS-7, AS-6, AS-15)
+Done on branch `chore/agent-config` with the §9 Q2 proposal as the default:
+
+| Agent | model | effort | maxTurns |
+|---|---|---|---|
+| developer | opus | high | 60 |
+| builder | opus | high | 60 |
+| reviewer | opus | high | 40 |
+| tester | sonnet | medium | 50 |
+
+`SKILL.md` says what to do when an agent hits `maxTurns` and records `/usage` per sprint. The account-level spend
+limit is the user's to set (Console workspace limit or `/usage-credits`); nothing in the repo can do it. Telemetry
+stays optional and off.
 Keywords: model routing, `effort`, `maxTurns`, `CLAUDE_CODE_ENABLE_TELEMETRY`.
-- [ ] Set `model`, `effort` and `maxTurns` in every agent's frontmatter (proposal in §9 Q2; start `maxTurns` near 50).
-- [ ] Cost caps (AS-24): there is no per-agent dollar cap, so bound each agent with `maxTurns` and `effort`, put
+- [x] Set `model`, `effort` and `maxTurns` in every agent's frontmatter (proposal in §9 Q2; start `maxTurns` near 50).
+- [x] Cost caps (AS-24): there is no per-agent dollar cap, so bound each agent with `maxTurns` and `effort`, put
       cheaper models where quality allows, and set a spend limit at the account level (see "Cost caps" below).
-- [ ] Record `/usage` at the end of each sprint in its sprint file. Optional: `CLAUDE_CODE_ENABLE_TELEMETRY=1` with a
+- [x] Record `/usage` at the end of each sprint in its sprint file. Optional: `CLAUDE_CODE_ENABLE_TELEMETRY=1` with a
       console exporter (metrics carry `agent.name` and `query_source`; custom agent names appear as `"custom"` unless
       `OTEL_LOG_TOOL_DETAILS=1`).
 
@@ -328,7 +340,7 @@ Hooks can't read a running cost total, so they can't enforce a budget either.
 
 1. **Merging:** keep it delegated to the lead once CI and branch protection exist?
 2. **Models:** proposal: developer `opus`, reviewer `opus`, builder `opus` (design quality), tester `sonnet`; compare
-   defect counts over two sprints before moving more to `sonnet`. Accept or change?
+   defect counts over two sprints before moving more to `sonnet`. Accept or change? *(Default taken in Step 5; revisit after two sprints.)*
 3. **Loop cap:** 3 rounds per loop, then ask? *(Default taken in Step 4; open to change.)*
 4. **Third-party skills:** commit them (license permitting) or keep them local with a manifest?
 5. **Hosting:** a host with a persistent disk (VPS, Fly.io or Railway with a volume; the JSON store stays), or a

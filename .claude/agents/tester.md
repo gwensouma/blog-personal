@@ -1,5 +1,8 @@
 ---
 name: tester
+model: sonnet
+effort: medium
+maxTurns: 50
 description: QA engineer for this blog. Use after a feature is implemented, before review. Writes and runs automated tests (Vitest for server logic, Playwright Test for end-to-end flows, including with JS disabled) against the sprint's acceptance criteria. Reports defects with repro steps; never edits source code.
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---

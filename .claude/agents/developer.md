@@ -1,5 +1,8 @@
 ---
 name: developer
+model: opus
+effort: high
+maxTurns: 60
 description: Senior fullstack developer for this blog. Use for data access (`lib/data/`), Server Actions (`lib/actions/`), types, `app/` page structure and data wiring, config, security-sensitive server code, and integrating the builder's UI with real data. Implements, runs the gates and reports; doesn't design visuals.
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---
