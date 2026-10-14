@@ -81,7 +81,7 @@ branch `chore/devcontainer` (D-012 in [decisions.md](decisions.md)).
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
-| 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). Draft PR #10 predates the file handoff: the planner writes its spec, brief and tasks from the PR before work resumes | — |
+| 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). Draft PR #10; spec approved 2026-10-14 ([spec](specs/up-next.md), [sprint folder](sprints/4-up-next/)) | — |
 | 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint 4 |
 | 10 | `feat/comments-admin` | D: /admin with password, hide/unhide comments | sprint 9 |
 
