@@ -34,6 +34,7 @@ The user delegated merging to you and can take it back at any time.
 | What is decided, queued and deferred | `.design/roadmap.md` (finished: `roadmap-archive.md`) | lead |
 | How the team works | this file | lead, in its own PR |
 | Project rules | `CLAUDE.md`, `.claude/rules/` (agents load them automatically) | lead |
+| What each page does today | `.design/product.md` (planner reads it for every spec) | lead, or the sprint that changes a page |
 | Templates for every handoff | `.claude/templates/` | lead, in its own PR |
 | A feature's research and plan | `.design/specs/<feature>.md` | planner |
 | One sprint | `.design/sprints/<#>-<name>/` | see below |
@@ -168,7 +169,8 @@ its exit code; "it passes" without one is not a gate result.
 
 On the PR diff: `gh pr diff <n> --name-only` matches the files in the reports (an ignored path silently drops a file,
 as in PR #7); no `"use client"` creep; essential content renders without JS; files sit where `CLAUDE.md` says; no new
-dependency of any kind; scope matches the brief; every AC has a test in the tester's report.
+dependency of any kind; scope matches the brief; every AC has a test in the tester's report; a sprint that adds or
+changes a page (route, section, criterion) updates `.design/product.md` in the same PR.
 
 ### 9. Merge
 

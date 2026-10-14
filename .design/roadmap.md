@@ -71,7 +71,9 @@ if a feature needs it.
 
 ## Sprints (from 2026-10-11)
 Each line is one branch and one PR, planned by the planner (`.design/specs/`, `.design/sprints/<#>-<name>/`).
-Open sprints only; merged ones move to the archive. Order: 4 → 8 → 9 → 10.
+Open sprints only; merged ones move to the archive. Order: 8 → 4 → 9 → 10. Sprint 8 is the first full run of the
+file handoff. The dev container is built on branch `chore/devcontainer` but deferred by the user (2026-10-14); see
+[agent-system-status.md](agent-system-status.md).
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|

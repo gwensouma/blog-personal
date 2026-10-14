@@ -19,6 +19,8 @@ Input: the user's idea, or a roadmap phase or deferred item. Output: `.design/sp
 1. **Understand the ask.** Restate the problem from the reader's or the owner's side. If the idea is vague, write the
    open points as "Questions for the user", each with your default; don't guess silently.
 2. **Research.**
+   - **Always** read `.design/product.md` first: the pages and criteria the feature must keep (or change on
+     purpose, saying so in the spec, and listing the product.md update in the brief).
    - The code: what already exists that the feature can reuse (`lib/data/`, components, types), with `path:line`.
      Read `.design/roadmap.md`, `.design/roadmap-archive.md` and the related `.design/*.md` notes for past decisions.
    - Outside sources when they change the plan: Next.js and React docs first, then well-known articles. Cite links.

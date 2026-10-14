@@ -18,8 +18,10 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 
 1. Read this file in full. It does not depend on chat history.
 2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–6 are merged
-   (PRs #11–#16). Step 7 (hosting) is deferred by the user. Step 8 (file handoff + planner) is the
-   `chore/agent-file-handoff` PR. "Later" items are optional.
+   (PRs #11–#16). Step 7 (hosting) is deferred by the user. Step 8 (file handoff + planner) is merged (PRs #18,
+   #19). A dev container is built on branch `chore/devcontainer` (Node 22, gh, Playwright, default-deny firewall;
+   verified: gate 0, e2e 0) but deferred by the user on 2026-10-14; open its PR when the user asks.
+   "Later" items are optional.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
