@@ -5,24 +5,26 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --muted: #f4f6f9;
-  --accent: #f4f6f9;
+  /* Petrol palette: a deep teal primary (oklch(0.48 0.08 200), 6.3:1 on white) with neutrals carrying a
+     faint tint of the same hue. Rationale and contrast table: .design/decisions.md. */
+  --muted: #f1f6f7;
+  --accent: #f1f6f7;
   --background: #ffffff;
   --foreground: #0a0a0a;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #1d4ed8;
+  --primary: #076b6f;
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: #f4f6f9;
+  --secondary: #f1f6f7;
   --secondary-foreground: oklch(0.205 0 0);
-  --muted-foreground: #5b6472;
+  --muted-foreground: #586365;
   --accent-foreground: #0a0a0a;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e2e6ec;
-  --input: #e2e6ec;
-  --ring: #1d4ed8;
+  --border: #dce3e4;
+  --input: #dce3e4;
+  --ring: #076b6f;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -38,13 +40,13 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   /* Default post cover: tonal fields within the primary hue (see .design "Image-led layouts"). */
-  --brand: #1d4ed8;
-  --brand-deep: oklch(0.36 0.17 266);
-  --brand-ink: oklch(0.25 0.11 266);
+  --brand: #076b6f;
+  --brand-deep: oklch(0.34 0.06 208);
+  --brand-ink: oklch(0.24 0.045 212);
   --brand-foreground: oklch(0.985 0 0);
-  /* Pale tone of the same hue, with deep-blue type on it. */
-  --brand-soft: oklch(0.93 0.035 262);
-  --brand-soft-foreground: oklch(0.36 0.17 266);
+  /* Pale tone of the same hue, with deep-petrol type on it. */
+  --brand-soft: oklch(0.94 0.028 195);
+  --brand-soft-foreground: oklch(0.34 0.06 208);
   /* Markdown callouts (GitHub alerts): one tone per kind, used for the rule, the label and a
      faint tint. Each clears 4.5:1 as text on the background and on its own 6% tint. */
   --callout-note: var(--primary);
@@ -133,49 +135,49 @@
   }
 }
 
-/* Dark: a navy-ink take on the deep-blue editorial palette. Surfaces carry a
-   faint blue tint (hue 262) instead of neutral grey; primary is lifted to a
-   lighter blue so links keep >= 4.5:1 contrast on the dark background. */
+/* Dark: a deep-ink take on the petrol palette. Surfaces carry a faint
+   blue-green tint (hue 215) instead of neutral grey; primary is lifted to a
+   light teal so links keep >= 4.5:1 contrast on the dark background. */
 .dark {
-  --background: oklch(0.17 0.018 262);
-  --foreground: oklch(0.94 0.008 262);
-  --card: oklch(0.2 0.02 262);
-  --card-foreground: oklch(0.94 0.008 262);
-  --popover: oklch(0.21 0.02 262);
-  --popover-foreground: oklch(0.94 0.008 262);
-  --primary: oklch(0.74 0.13 260);
-  --primary-foreground: oklch(0.17 0.03 262);
-  --secondary: oklch(0.24 0.02 262);
-  --secondary-foreground: oklch(0.94 0.008 262);
-  --muted: oklch(0.23 0.02 262);
-  --muted-foreground: oklch(0.72 0.02 262);
-  --accent: oklch(0.25 0.025 262);
-  --accent-foreground: oklch(0.94 0.008 262);
+  --background: oklch(0.17 0.014 215);
+  --foreground: oklch(0.94 0.006 210);
+  --card: oklch(0.2 0.016 215);
+  --card-foreground: oklch(0.94 0.006 210);
+  --popover: oklch(0.21 0.016 215);
+  --popover-foreground: oklch(0.94 0.006 210);
+  --primary: oklch(0.78 0.09 195);
+  --primary-foreground: oklch(0.17 0.03 210);
+  --secondary: oklch(0.24 0.016 215);
+  --secondary-foreground: oklch(0.94 0.006 210);
+  --muted: oklch(0.23 0.016 215);
+  --muted-foreground: oklch(0.72 0.016 210);
+  --accent: oklch(0.25 0.02 212);
+  --accent-foreground: oklch(0.94 0.006 210);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.3 0.02 262);
-  --input: oklch(0.34 0.02 262);
-  --ring: oklch(0.74 0.13 260);
+  --border: oklch(0.3 0.016 215);
+  --input: oklch(0.34 0.016 215);
+  --ring: oklch(0.78 0.09 195);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.2 0.02 262);
-  --sidebar-foreground: oklch(0.94 0.008 262);
-  --sidebar-primary: oklch(0.74 0.13 260);
-  --sidebar-primary-foreground: oklch(0.17 0.03 262);
-  --sidebar-accent: oklch(0.25 0.025 262);
-  --sidebar-accent-foreground: oklch(0.94 0.008 262);
-  --sidebar-border: oklch(0.3 0.02 262);
-  --sidebar-ring: oklch(0.74 0.13 260);
-  --brand: oklch(0.38 0.13 262);
-  --brand-deep: oklch(0.26 0.08 264);
-  --brand-foreground: oklch(0.96 0.01 262);
-  /* Dark tones are spread wide (ink ~0.13, deep ~0.32, soft 0.55) so they stay distinct at thumbnail size. */
-  --brand-ink: oklch(0.13 0.035 264);
-  --brand-soft: oklch(0.55 0.1 260);
-  --brand-soft-foreground: oklch(0.15 0.04 264);
-  /* Callout tones lifted for the navy background (>= 4.5:1 as text). Note follows --primary. */
+  --sidebar: oklch(0.2 0.016 215);
+  --sidebar-foreground: oklch(0.94 0.006 210);
+  --sidebar-primary: oklch(0.78 0.09 195);
+  --sidebar-primary-foreground: oklch(0.17 0.03 210);
+  --sidebar-accent: oklch(0.25 0.02 212);
+  --sidebar-accent-foreground: oklch(0.94 0.006 210);
+  --sidebar-border: oklch(0.3 0.016 215);
+  --sidebar-ring: oklch(0.78 0.09 195);
+  --brand: oklch(0.38 0.07 205);
+  --brand-deep: oklch(0.26 0.045 210);
+  --brand-foreground: oklch(0.96 0.01 200);
+  /* Dark tones are spread wide (ink ~0.13, deep ~0.26, soft 0.58) so they stay distinct at thumbnail size. */
+  --brand-ink: oklch(0.13 0.025 212);
+  --brand-soft: oklch(0.58 0.08 198);
+  --brand-soft-foreground: oklch(0.15 0.03 212);
+  /* Callout tones lifted for the dark background (>= 4.5:1 as text). Note follows --primary. */
   --callout-tip: oklch(0.76 0.13 155);
   --callout-important: oklch(0.74 0.14 300);
   --callout-warning: oklch(0.8 0.13 75);

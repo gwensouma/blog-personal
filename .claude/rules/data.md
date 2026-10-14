@@ -11,8 +11,9 @@ paths:
 - `lib/data/` is server-only (`import "server-only"`) and owns all I/O. Keep its exported interface small so a real
   database or CMS can replace the internals without touching `app/` or `components/`.
 - `lib/data/posts.ts` reads `content/posts/*.md` (Markdown + frontmatter: title, date, excerpt, tags, featured,
-  series, seriesOrder, …) behind a simulated `setTimeout` delay standing in for a DB call. `getPost` is wrapped in
-  React `cache()` so `generateMetadata` and the page share one fetch.
+  series, seriesOrder, …) behind an optional simulated delay (`BLOG_LATENCY_MS`, off by default) standing in for a DB
+  call. `getPost` is wrapped in React `cache()` so `generateMetadata` and the page share one fetch; rendered Markdown
+  is also memoised per slug for the process, since the post route renders per request.
 - `lib/data/store.ts` is a JSON-file key/value store standing in for a DB (likes, views, subscribers). Its directory
   is `BLOG_DATA_DIR` (default `.data/`).
 - `lib/actions/<entity>.ts` holds `"use server"` actions: validate input, then call `lib/data/`. Treat every action

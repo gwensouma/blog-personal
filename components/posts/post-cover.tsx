@@ -51,7 +51,7 @@ const settle =
 
 // --- Default cover variations -------------------------------------------------
 // Every post gets a deterministic look so a list of default covers never reads as
-// one blue block repeated. The pick (composition, tone, glow corner) lives in
+// one brand-colored block repeated. The pick (composition, tone, glow corner) lives in
 // lib/cover-variant.ts, shared with the OG card. Every thumbnail keeps a
 // post-specific main mark ("No. xx" or the tag): below 12rem the centered `mark`
 // layout swaps to the tag (or number) layout.

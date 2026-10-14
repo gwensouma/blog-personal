@@ -8,15 +8,15 @@ import { OG_FONT_FAMILY } from "@/lib/og";
 export const OG_COLORS = {
   background: "#ffffff",
   foreground: "#0a0a0a",
-  primary: "#1d4ed8",
-  mutedForeground: "#5b6472",
-  border: "#e2e6ec",
+  primary: "#076b6f",
+  mutedForeground: "#586365",
+  border: "#dce3e4",
   /** --brand family: the default cover fields. */
-  brand: "#1d4ed8",
-  brandDeep: "#132d94", // oklch(0.36 0.17 266)
-  brandInk: "#091955", // oklch(0.25 0.11 266)
-  brandSoft: "#dbe9ff", // oklch(0.93 0.035 262)
-  brandSoftForeground: "#132d94", // oklch(0.36 0.17 266)
+  brand: "#076b6f",
+  brandDeep: "#004048", // oklch(0.34 0.06 208)
+  brandInk: "#00252c", // oklch(0.24 0.045 212)
+  brandSoft: "#d7f1f1", // oklch(0.94 0.028 195)
+  brandSoftForeground: "#004048", // oklch(0.34 0.06 208)
   brandForeground: "#fbfbfb", // oklch(0.985 0 0)
 } as const;
 

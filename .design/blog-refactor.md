@@ -1,12 +1,12 @@
 # Blog UI refactor: design decisions
 
-Genre: editorial (hallmark). It builds on Main.dc.html / Detail.dc.html and keeps the deep-blue palette from CLAUDE.md.
+Genre: editorial (hallmark). It builds on Main.dc.html / Detail.dc.html and keeps the editorial palette (deep blue at first; petrol since D-015, the values below are current).
 
 ## Tokens
-- Light: unchanged (`--primary` #1d4ed8 on white, `--muted` #f4f6f9, `--border` #e2e6ec).
-- Dark (new): navy ink, hue 262. Background oklch(0.17 0.018 262), foreground oklch(0.94 0.008 262),
-  muted/secondary oklch(0.23–0.24 0.02 262), border oklch(0.30 0.02 262), primary lifted to
-  oklch(0.74 0.13 260) with dark primary-foreground so links and buttons keep >= 4.5:1.
+- Light: `--primary` #076b6f on white, `--muted` #f1f6f7, `--border` #dce3e4.
+- Dark: deep ink, hue 215. Background oklch(0.17 0.014 215), foreground oklch(0.94 0.006 210),
+  muted/secondary oklch(0.23–0.24 0.016 215), border oklch(0.30 0.016 215), primary lifted to
+  oklch(0.78 0.09 195) with dark primary-foreground so links and buttons keep >= 4.5:1.
 - Code blocks: `bg-muted` + `border-border`. Shiki token colors come from `--shiki-light` / `--shiki-dark`.
 
 ## Layout
@@ -49,11 +49,11 @@ A calm, branded placeholder that should look intentional, not like a broken imag
 
   | Token | Light | Dark |
   |---|---|---|
-  | `--brand` | `#1d4ed8` (= primary) | `oklch(0.38 0.13 262)` |
-  | `--brand-deep` | `oklch(0.36 0.17 266)` | `oklch(0.26 0.08 264)` |
-  | `--brand-foreground` | `oklch(0.985 0 0)` | `oklch(0.96 0.01 262)` |
+  | `--brand` | `#076b6f` (= primary) | `oklch(0.38 0.07 205)` |
+  | `--brand-deep` | `oklch(0.34 0.06 208)` | `oklch(0.26 0.045 210)` |
+  | `--brand-foreground` | `oklch(0.985 0 0)` | `oklch(0.96 0.01 200)` |
 
-  In dark mode the field is a deep blue rather than the lifted dark-mode primary, so a 720px block doesn't glare.
+  In dark mode the field is a deep petrol rather than the lifted dark-mode primary, so a 720px block doesn't glare.
 - **A11y:** the default cover is decorative (`aria-hidden`, no figure). A real image is a `<figure>` with alt text and an
   optional caption/credit.
 - **Entrance:** the cover contents (real or default) settle from `scale(1.08)` inside the fixed frame over 1s with
@@ -202,12 +202,12 @@ New tokens:
 
 | Token | Light | Dark |
 |---|---|---|
-| `--brand-ink` | `oklch(0.25 0.11 266)` | `oklch(0.13 0.035 264)` |
-| `--brand-soft` | `oklch(0.93 0.035 262)` | `oklch(0.55 0.1 260)` |
-| `--brand-soft-foreground` | `oklch(0.36 0.17 266)` | `oklch(0.15 0.04 264)` |
+| `--brand-ink` | `oklch(0.24 0.045 212)` | `oklch(0.13 0.025 212)` |
+| `--brand-soft` | `oklch(0.94 0.028 195)` | `oklch(0.58 0.08 198)` |
+| `--brand-soft-foreground` | `oklch(0.34 0.06 208)` | `oklch(0.15 0.03 212)` |
 
-The dark tones are spread wide (ink about L 0.13, deep about 0.32, soft 0.55) because closer values merged at
-thumbnail size. Dark `soft` is a mid blue with dark type; it stays below the lifted dark primary (0.74), so a large
+The dark tones are spread wide (ink about L 0.13, deep about 0.26, soft 0.58) because closer values merged at
+thumbnail size. Dark `soft` is a mid petrol with dark type; it stays below the lifted dark primary (0.78), so a large
 soft cover doesn't glare. The ink glow drops to `brand/40` in dark.
 
 A 1px inset `brand-foreground/10` hairline keeps the dark `ink` tone distinct from the dark page.
