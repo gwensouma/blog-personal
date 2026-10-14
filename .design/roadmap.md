@@ -71,18 +71,18 @@ if a feature needs it.
 
 ## Sprints (from 2026-10-11)
 Each line is one branch and one PR, planned by the planner (`.design/specs/`, `.design/sprints/<#>-<name>/`).
-Open sprints only; merged ones move to the archive. Order: 8 → 4 → 9 → 10. Sprint 8 is the first full run of the
-file handoff. The dev container is built on branch `chore/devcontainer` but deferred by the user (2026-10-14); see
+Open sprints only; merged ones move to the archive. Order: 4 → 9 → 10. Sprint 8 (merged) was the first full
+run of the file handoff; its lessons are in `.design/sprints/8-home-no-js/close.md`. The dev container is built on branch `chore/devcontainer` but deferred by the user (2026-10-14); see
 [agent-system-status.md](agent-system-status.md).
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
 | 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). Draft PR #10 predates the file handoff: the planner writes its spec, brief and tasks from the PR before work resumes | — |
-| 8 | `fix/home-no-js` | Remove `test.fixme` from the home no-JS test in `tests/e2e/no-js.spec.ts`. Render essential home sections inline (no `<Suspense>` on ISR `/`); the "Suspense only around non-essential or JS-dependent content" principle is already in CLAUDE.md; reviewer checks routes with JS disabled | — |
 | 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint 4 |
 | 10 | `feat/comments-admin` | D: /admin with password, hide/unhide comments | sprint 9 |
 
-Deferred: the `/search` empty-state title is a `<div>`, not a heading (a11y suggestion from the sprint T tester; fix it
+Deferred: button-styled links ("View all posts" and others) render with `role="button"` (sprint 8 tester and reviewer;
+an a11y pass of its own). The `/search` empty-state title is a `<div>`, not a heading (a11y suggestion from the sprint T tester; fix it
 with the next search touch). Also deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
 the user's own content).
 

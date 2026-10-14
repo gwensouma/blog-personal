@@ -7,6 +7,7 @@ Newest first. Read this for history; plan from the roadmap.
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
+| 8 ✅ | `fix/home-no-js` | Home renders featured, latest, topics and the cover deck inline (no `<Suspense>` on ISR `/`); no-JS home test un-parked; first full run of the file handoff ([sprint folder](sprints/8-home-no-js/)). PR #22 | — |
 | 1 ✅ | `chore/stabilize` | A4 + A5, and update CLAUDE.md Commands | — |
 | 2 ✅ | `feat/markdown-callouts-footnotes` | B: `> [!NOTE]/[!TIP]/[!WARNING]` callouts + styled GFM footnotes | — |
 | 3 ✅ | `feat/post-series` | B: `series` + `seriesOrder` frontmatter, series box, series nav. First series "RSC Fundamentals": server-components-run-on-the-server (1) → client-components-render-twice (2) → rsc-shrinks-your-bundle (3) | — |
