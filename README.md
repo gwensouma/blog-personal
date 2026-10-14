@@ -6,6 +6,35 @@ small JSON-file store in `.data/`.
 
 ## Setup
 
+### Recommended: the dev container
+
+[.devcontainer/](.devcontainer/) runs the whole toolchain, Claude Code included, in a Linux container: Node 22, `gh`,
+Playwright's Chromium (e2e) and Google Chrome (Playwright MCP), and a default-deny egress firewall
+([init-firewall.sh](.devcontainer/init-firewall.sh)) that allows only Anthropic, GitHub, the npm registry, the
+Playwright browser CDN, Google Fonts (`next/font` at build time) and VS Code's extension hosts. The container protects
+the machine; the guard hook still enforces the agent roles inside it.
+
+1. Install Docker Desktop, VS Code and the Dev Containers extension.
+2. In VS Code run **Dev Containers: Clone Repository in Container Volume...** and enter
+   `https://github.com/gwensouma/blog-personal`. A volume is much faster than bind-mounting a Windows folder for
+   `npm ci` and `next build`. The first build takes several minutes; `npm ci` runs on create, the firewall on start.
+3. In the container terminal: `claude` (sign in), then `gh auth login` (GitHub.com, HTTPS, browser).
+4. Copy any local Claude Code memory into the container: auto-memory is keyed by project path, and the workspace is
+   `/workspaces/blog-personal`, so from the host:
+   ```powershell
+   docker ps   # the container's name
+   docker exec <name> mkdir -p /home/node/.claude/projects/-workspaces-blog-personal/memory
+   docker cp "$env:USERPROFILE\.claude\projects\<host-project-dir>\memory\." <name>:/home/node/.claude/projects/-workspaces-blog-personal/memory/
+   docker exec -u root <name> chown -R node:node /home/node/.claude/projects
+   ```
+5. Continue with steps 3 and 6–10 below (Node, `npm ci` and the browsers are already in the image).
+
+A host the firewall doesn't allow fails fast (connection rejected), including `WebFetch` to arbitrary sites. To allow
+one, add it to `ALLOWED_DOMAINS` in `init-firewall.sh` in a PR, then rebuild or run
+`sudo /usr/local/bin/init-firewall.sh` (safe to re-run; a local dnsmasq keeps rotating CDN addresses allowed).
+
+### On the host
+
 1. **Node 22** (`^22.12` or `>=24`, see `engines` in `package.json`). CI uses Node 22.
 2. **Install:** `npm ci`
 3. **Environment:** `cp .env.example .env.local`, then set `PORT` if 3000 is taken. Everything else has a local

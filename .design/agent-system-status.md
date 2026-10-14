@@ -18,8 +18,10 @@ Legend: ✅ in place · ⚠️ in place but weak · ❌ missing · ➖ not neede
 
 1. Read this file in full. It does not depend on chat history.
 2. Do each step on its own `chore/<name>` branch off fresh `main`, never on a feature branch. Steps 1–6 are merged
-   (PRs #11–#16). Step 7 (hosting) is deferred by the user. Step 8 (file handoff + planner) is the
-   `chore/agent-file-handoff` PR. "Later" items are optional.
+   (PRs #11–#16). Step 7 (hosting) is deferred by the user. Step 8 (file handoff + planner) is merged (PR #18).
+   Step 9 (dev container) is built on branch `chore/devcontainer` but **not merged: the user deferred it on
+   2026-10-14** (the Windows setup works). When the user wants it, open the PR from that branch, then Step 9.
+   "Later" items are optional.
 3. Start at the first unticked step in §8. Each step is meant to be one PR.
 4. Open questions for the user are in §9. Ask them before the step that needs the answer, not all at once.
 
@@ -368,9 +370,35 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
       foreground subagent honors the `SubagentStop` block.
 - [ ] Sprint 4 started before this; on resume the planner writes its spec, brief and tasks from PR #10.
 
+### Step 9: move the lead into a dev container (built 2026-10-13, deferred by the user on 2026-10-14)
+Native Windows has no sandbox. The user chose a **dev container** (Docker Desktop) over WSL2 + `/sandbox`: it isolates
+the whole Claude Code process (shell, file tools, hooks, MCP) and lives in the repo. The guard hook stays; it enforces
+agent roles, the container protects the machine. Work order relayed by session rsc-0b; done in this order:
+- [x] PR #18 merged by the lead (2026-10-13).
+- [x] `.devcontainer/` on branch `chore/devcontainer` (pushed, no PR; verified in Docker: gate 0, e2e 0, hook tests 22/22): Node 22, `gh`, Playwright Chromium + Chrome, Claude Code,
+      default-deny firewall (Anthropic, GitHub, npm, Playwright CDN, Google Fonts for `next/font`, VS Code hosts;
+      a local dnsmasq adds each resolved IP of an allowed host, since Google Fonts rotates IPs per query),
+      config volume with `CLAUDE_CONFIG_DIR`, `.gitattributes` for LF scripts. README "Setup" leads with it.
+- [ ] **User, interactive:** open the repo with "Clone Repository in Container Volume", sign in to Claude Code,
+      `gh auth login` as **gwensouma**, copy the host memory files (README, Setup step 4), re-install the third-party
+      skills ([.claude/skills/SKILLS.md](../.claude/skills/SKILLS.md)) and user-level plugins, trust the workspace.
+- [ ] Container session: `/lead`, then check the environment once: `npm run gate` and `npm run test:e2e` exit 0,
+      the Playwright MCP connects, the guard hook blocks a role-agent spawn without a task file, `gh auth status`
+      shows only gwensouma. Update the `local-environment` memory (the Windows notes don't apply in the container).
+- [ ] Container session: `.design/product.md` in its own PR: the current product only, no plans; "Readers" left
+      blank for the user; every current page with 2–4 checkable criteria, no-JS included; non-goals; 60–100 lines.
+      `CLAUDE.md` links it (not auto-loaded), the planner must read it, and SKILL.md gains the rule "a sprint that adds
+      or changes a page updates product.md in the same PR", checked in the lead check. No `STACK.md`: the stack stays
+      in `CLAUDE.md`.
+- [ ] Container session: sprint 8 (`fix/home-no-js`) through the full flow (planner spec → **user approves** →
+      tasks → developer/builder → tester → reviewer → close → merge), the first real run of the file handoff.
+
+Known limits in the container: `WebFetch` reaches only allowlisted hosts (the planner's research leans on
+`WebSearch`); the guard hook blocks `taskkill /IM` but not `pkill node`/`killall node`, which in the container would
+kill Claude Code itself (follow-up hook PR). Host-side sessions on `E:\` keep working; run one lead at a time.
+
 ### Later
-- [ ] AS-20: run Claude Code inside WSL2 and enable `/sandbox` (`sandbox.enabled`, `sandbox.network.allowedDomains`
-      for npm and GitHub), if the user wants real isolation.
+- [x] AS-20: isolation. Superseded by Step 9 (dev container) instead of WSL2 + `/sandbox`.
 - [ ] AS-16: agent evals. 3–5 seeded-bug patches (raw hex color, needless `"use client"`, unvalidated Server Action
       input, content hidden without JS) with the expected finding each; re-run the reviewer after any prompt change.
 - [ ] Preview deploys per PR, once a host exists.
@@ -391,6 +419,7 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
 5. **Hosting:** a host with a persistent disk (VPS, Fly.io or Railway with a volume; the JSON store stays), or a
    serverless host with a DB/KV (SQLite/Turso, Postgres, Upstash; the store moves behind a seam)?
 6. **Sandbox:** move Claude Code into WSL2 for `/sandbox`, or rely on deny rules and hooks on native Windows?
+   *(Answered 2026-10-13: neither; a dev container, Step 9.)*
 7. **Order:** steps 1–2 before resuming sprint 4?
 
 ---
