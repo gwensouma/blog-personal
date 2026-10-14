@@ -148,6 +148,36 @@ describe("guard-paths hook: areas and helpers", () => {
   });
 });
 
+// A task file filled in from its template (.claude/templates/task-<agent>.md).
+const SECTIONS: Record<string, string[]> = {
+  developer: ["## Do", "## Files you may change", "## Acceptance criteria this task serves", "## Done when"],
+  builder: ["## Do", "## Files you may change", "## Acceptance criteria this task serves", "## Done when"],
+  tester: ["## Cover", "## Files you may change", "## Done when"],
+  reviewer: ["## Review", "## Done when"],
+};
+function taskText(agent: string, round = 1, sprintDir = ".design/sprints/8-home-no-js") {
+  return [
+    `# Task: ${agent} · round ${round}`,
+    `<!-- ${sprintDir}/tasks/<agent>-r<n>.md -->`,
+    `Brief: \`${sprintDir}/brief.md\` · Branch: \`fix/home-no-js\``,
+    `Report to: \`${sprintDir}/reports/${agent}-r${round}.md\` (format: \`.claude/templates/report.md\`)`,
+    ...SECTIONS[agent].flatMap((h) => [h, "- something concrete"]),
+  ].join("\n");
+}
+
+// A report in the shape of .claude/templates/report.md.
+function reportText(agent: string, gateLine = "- `npm run gate` → exit 0") {
+  return [
+    `# Report: ${agent} · round 1 · status: done`,
+    "## Summary\n- did it",
+    "## Files\n- lib/a.ts",
+    `## Gate\n${gateLine}`,
+    "## AC → test\n| AC1 | tests/e2e/a.spec.ts | pass |",
+    "## Findings\nnone",
+    "## Open questions\nnone",
+  ].join("\n\n");
+}
+
 describe("guard-paths hook: file handoff", () => {
   // A throwaway project with one sprint, so task and report files can exist or not.
   const project = mkdtempSync(path.join(tmpdir(), "guard-hook-"));
@@ -156,13 +186,13 @@ describe("guard-paths hook: file handoff", () => {
   const report = `${sprint}/reports/developer-r1.md`;
   mkdirSync(path.join(project, sprint, "tasks"), { recursive: true });
   mkdirSync(path.join(project, sprint, "reports"), { recursive: true });
-  writeFileSync(path.join(project, task), "# Task: developer · round 1\n");
+  writeFileSync(path.join(project, task), taskText("developer"));
   afterAll(() => rmSync(project, { recursive: true, force: true }));
 
   const spawn = (subagent_type: string, prompt: string) =>
     run({ tool_name: "Agent", tool_input: { subagent_type, prompt, description: "x" } }, project);
-  const writeIn = (agent: string, file: string) =>
-    run({ tool_name: "Write", agent_type: agent, tool_input: { file_path: file, content: "x" } }, project);
+  const writeIn = (agent: string, file: string, content = "x") =>
+    run({ tool_name: "Write", agent_type: agent, tool_input: { file_path: file, content } }, project);
   const stop = (agent: string, transcriptText: string, extra: Record<string, unknown> = {}) => {
     const transcript = path.join(project, `transcript-${agent}.jsonl`);
     writeFileSync(transcript, transcriptText);
@@ -179,7 +209,7 @@ describe("guard-paths hook: file handoff", () => {
 
   it("holds the next dispatch until every other task in the sprint has its report", () => {
     const testerTask = `${sprint}/tasks/tester-r1.md`;
-    writeFileSync(path.join(project, testerTask), "# Task: tester · round 1\n");
+    writeFileSync(path.join(project, testerTask), taskText("tester"));
     const waiting = spawn("tester", `Task: ${testerTask}`);
     expect(waiting.code).toBe(2);
     expect(waiting.stderr).toContain(task); // developer-r1 has no report yet
@@ -205,10 +235,10 @@ describe("guard-paths hook: file handoff", () => {
   });
 
   it("lets each agent write only its own report in the sprint folder", () => {
-    expect(writeIn("developer", report).code).toBe(0);
-    expect(writeIn("reviewer", `${sprint}/reports/reviewer-r1.md`).code).toBe(0);
-    expect(writeIn("tester", `${sprint}/reports/tester-r1.md`).code).toBe(0);
-    expect(writeIn("tester", report).code).toBe(2);
+    expect(writeIn("developer", report, reportText("developer")).code).toBe(0);
+    expect(writeIn("reviewer", `${sprint}/reports/reviewer-r1.md`, reportText("reviewer")).code).toBe(0);
+    expect(writeIn("tester", `${sprint}/reports/tester-r1.md`, reportText("tester")).code).toBe(0);
+    expect(writeIn("tester", report, reportText("tester")).code).toBe(2);
     expect(writeIn("developer", task).code).toBe(2);
     expect(writeIn("developer", `${sprint}/brief.md`).code).toBe(2);
   });
@@ -233,5 +263,86 @@ describe("guard-paths hook: file handoff", () => {
     expect(stop("developer", JSON.stringify({ content: `Task: ${task.replaceAll("/", "\\")}` })).code).toBe(2);
     writeFileSync(path.join(project, report), "# Report\n");
     expect(stop("developer", prompt).code).toBe(0);
+  });
+});
+
+describe("guard-paths hook: handoff format", () => {
+  const project = mkdtempSync(path.join(tmpdir(), "guard-format-"));
+  const sprint = ".design/sprints/9-format";
+  mkdirSync(path.join(project, sprint, "tasks"), { recursive: true });
+  mkdirSync(path.join(project, sprint, "reports"), { recursive: true });
+  afterAll(() => rmSync(project, { recursive: true, force: true }));
+
+  const spawn = (subagent_type: string, prompt: string) =>
+    run({ tool_name: "Agent", tool_input: { subagent_type, prompt, description: "x" } }, project);
+  const putTask = (name: string, text: string) => writeFileSync(path.join(project, sprint, "tasks", name), text);
+  const clearTask = (name: string) => rmSync(path.join(project, sprint, "tasks", name));
+
+  it("accepts only the one-line prompt naming the task", () => {
+    const task = `${sprint}/tasks/developer-r1.md`;
+    putTask("developer-r1.md", taskText("developer", 1, sprint));
+    expect(spawn("developer", `Task: ${task}`).code).toBe(0);
+    expect(spawn("developer", `Task: \`${task}\``).code).toBe(0);
+    const chatty = spawn("developer", `Task: ${task}\nAlso refactor the header while you're there.`);
+    expect(chatty.code).toBe(2);
+    expect(chatty.stderr).toContain("one line");
+    expect(spawn("developer", `Please do Task: ${task}`).code).toBe(2);
+    clearTask("developer-r1.md");
+  });
+
+  it("blocks a task file that misses its template's sections, lines or values", () => {
+    const task = `${sprint}/tasks/tester-r1.md`;
+    putTask("tester-r1.md", taskText("tester", 1, sprint).replace("## Cover", "## Things"));
+    const noCover = spawn("tester", `Task: ${task}`);
+    expect(noCover.code).toBe(2);
+    expect(noCover.stderr).toContain("## Cover");
+    putTask("tester-r1.md", taskText("tester", 1, sprint).replace("reports/tester-r1.md", "reports/tester-r2.md"));
+    expect(spawn("tester", `Task: ${task}`).stderr).toContain("Report to:");
+    putTask("tester-r1.md", taskText("tester", 1, sprint).replace("fix/home-no-js", "<branch>"));
+    expect(spawn("tester", `Task: ${task}`).stderr).toContain("<branch>");
+    putTask("tester-r1.md", taskText("tester", 1, sprint)); // placeholders inside the HTML comment are fine
+    expect(spawn("tester", `Task: ${task}`).code).toBe(0);
+    clearTask("tester-r1.md");
+  });
+
+  it("checks fix tasks against the fix template", () => {
+    const task = `${sprint}/tasks/builder-r2.md`;
+    const header = [
+      "# Task: builder · round 2 (fix)",
+      `Brief: \`${sprint}/brief.md\``,
+      `Report to: \`${sprint}/reports/builder-r2.md\``,
+    ];
+    putTask("builder-r2.md", [...header, "## Fix", "| F1 | x | a.tsx:1 | y |", "## Done when", "- gate"].join("\n"));
+    expect(spawn("builder", `Task: ${task}`).stderr).toContain("Source:");
+    putTask(
+      "builder-r2.md",
+      [...header, "Source: `reports/reviewer-r1.md`", "## Fix", "| F1 |", "## Done when", "- gate"].join("\n"),
+    );
+    expect(spawn("builder", `Task: ${task}`).code).toBe(0);
+    clearTask("builder-r2.md");
+  });
+
+  it("blocks a report without its status line, gate exit codes or sections", () => {
+    const report = `${sprint}/reports/developer-r1.md`;
+    const writeReport = (content: string) =>
+      run({ tool_name: "Write", agent_type: "developer", tool_input: { file_path: report, content } }, project);
+    expect(writeReport(reportText("developer")).code).toBe(0);
+    const passes = writeReport(reportText("developer", "- `npm run gate` passes"));
+    expect(passes.code).toBe(2);
+    expect(passes.stderr).toContain("exit <code>");
+    expect(writeReport(reportText("developer").replace("status: done", "status: mostly")).code).toBe(2);
+    expect(writeReport(reportText("developer").replace("## Files", "## Changed")).stderr).toContain("## Files");
+  });
+
+  it("checks the report as it will be after an edit", () => {
+    const report = `${sprint}/reports/tester-r1.md`;
+    writeFileSync(path.join(project, report), reportText("tester"));
+    const editReport = (old_string: string, new_string: string) =>
+      run(
+        { tool_name: "Edit", agent_type: "tester", tool_input: { file_path: report, old_string, new_string } },
+        project,
+      );
+    expect(editReport("did it", "did it well").code).toBe(0);
+    expect(editReport("→ exit 0", "→ green").code).toBe(2);
   });
 });

@@ -51,13 +51,18 @@ The user delegated merging to you and can take it back at any time.
 
 `.claude/hooks/guard-paths.mjs` (tests: `tests/unit/guard-hook.test.ts`) blocks, not just asks:
 
-- spawning developer, builder, tester or reviewer without an existing `tasks/<that-agent>-r<n>.md` path in the prompt;
+- spawning developer, builder, tester or reviewer with any prompt other than the one line `Task: <path>`, naming an
+  existing `tasks/<that-agent>-r<n>.md` that has its template's sections (`## Do`, `## Cover`, `## Fix`, …), a
+  `Brief:` line, a `Report to:` line naming the matching report, and no unfilled placeholder such as `<branch>`;
 - spawning the next task while any other task in the same sprint has no report yet (the dispatch gate: a missing
   report stops the sprint, so continue that agent until it writes one);
 - you writing `close.md` while any task of that sprint has no report (this catches the last agent of a sprint,
   which no later dispatch would);
 - a foreground role agent finishing before its report exists. Background agents can finish past this block (checked
   live on 2026-10-13), which is why the two gates above exist;
+- a role agent's report without the template's shape: the `# Report: <agent> · round <n> · status: …` line, a
+  `## Gate` section with `exit <code>` per command, and its role's sections (`## Files`, `## AC → test`,
+  `## Findings`);
 - Write/Edit outside each agent's area: developer `app/`, `lib/`, `types/`, `content/`, `public/`, `assets/`, root
   config files and `.design/<feature>.md`; builder `components/`, `app/globals.css`, `public/`, `assets/` and
   `.design/<feature>.md`; tester `tests/`; reviewer its report only; planner specs, briefs and tasks. `.github/`,
@@ -70,7 +75,8 @@ The user delegated merging to you and can take it back at any time.
   or `gh api` with a non-GET method or fields;
 - anyone killing processes by image name.
 
-What it can't see: files written from a shell (`echo > file`, a script) and the gate's exit codes. So the backstops
+What it can't see: files written from a shell (`echo > file`, a script), whether a stated exit code is true, and
+whether a section says anything useful. So the backstops
 stay manual. After every agent turn run
 `git status --porcelain`: a change outside that agent's area is a defect to revert and report. Read the gate line in
 every report before you dispatch the next task. If the hook blocks
