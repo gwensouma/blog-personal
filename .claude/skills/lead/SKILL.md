@@ -62,6 +62,8 @@ The user delegated merging to you and can take it back at any time.
   which no later dispatch would);
 - a foreground role agent finishing before its report exists. Background agents can finish past this block (checked
   live on 2026-10-13), which is why the two gates above exist;
+- a planner prompt that doesn't start with `Mode: spec` or `Mode: tasks`, and a `Mode: tasks` prompt without an
+  existing spec that says `Status: approved`, the sprint folder and `Branch: <branch>`;
 - a role agent's report without the template's shape: the `# Report: <agent> · round <n> · status: …` line, a
   `## Gate` section with `exit <code>` per command, and its role's sections (`## Files`, `## AC → test`,
   `## Findings`);
@@ -125,7 +127,7 @@ one, and the user only confirms it.
 ### 2. Prepare: spec → sprint folder
 
 1. Branch off fresh `origin/main`: `feat/<name>`, `fix/<name>` or `chore/<name>`, as in the roadmap row.
-2. Call the planner with mode `tasks`, the approved spec, the sprint number and the branch. It writes `brief.md` and
+2. Call the planner: `Mode: tasks`, the approved spec's path, `.design/sprints/<#>-<name>/` and `Branch: <branch>`. It writes `brief.md` and
    `tasks/<agent>-r1.md` for each agent the sprint needs.
 3. Read the brief and tasks. Check: every AC appears in a task, each task stays in its agent's area, the developer task
    comes before the builder task when both exist. Send corrections back to the planner, not around it.

@@ -11,6 +11,12 @@ Report to: `.design/sprints/<#>-<name>/reports/reviewer-r<n>.md` (format: `.clau
 - Routes to check in a browser: `/…` at 320/768/1280, light and dark, JS on and off.
 - Round > 1: only the findings listed below from the last round, plus anything their fixes touched.
 
+## Files you may change
+None: the reviewer writes only its report.
+
+## Acceptance criteria this task serves
+AC1..n (from the brief): which ones this review checks by reading or in the browser.
+
 ## Done when
 - `npm run gate` exit code is in the report, and the browser check is done or its skip is explained.
 - Findings are marked must-fix / suggestion with `file:line`; "no must-fix" is said explicitly when true.

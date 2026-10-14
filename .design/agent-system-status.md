@@ -373,6 +373,16 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
 - [x] Dispatch gate deadlock, found in the first real run (sprint 8, 2026-10-14): the planner writes every round-1
       task up front, and the gate waited on all of them. The gate now waits only on dispatched tasks, which the hook
       records in `<sprint>/dispatched.txt`.
+- [x] Fixes from sprint 8's close.md (2026-10-14): the planner prompt starts with `Mode: spec|tasks`, and `tasks` needs an
+      approved spec, the sprint folder and a branch (hook); the reviewer template has `## Files you may change` and
+      `## Acceptance criteria` like the others; the reviewer gets a no-JS browser (`playwright-nojs` MCP,
+      `.claude/playwright-nojs.json`, verified to block page scripts).
+- [ ] **User, by hand** (the auto-mode classifier blocks the lead from editing its own permissions): add the
+      `playwright-nojs` server to `.mcp.json` and `enabledMcpjsonServers`, allow `mcp__playwright-nojs`, and allow
+      `Edit(/app/**)`, `Edit(/lib/**)`, `Edit(/types/**)`, `Edit(/components/**)`, `Edit(/content/**)`,
+      `Edit(/public/**)`, `Edit(/assets/**)`, `Edit(/tests/**)`, `Edit(/.design/**)` in `.claude/settings.json`, so
+      subagents stop asking for every write (the hook still keeps each agent in its area). Until then the reviewer
+      checks no-JS with curl.
 - [ ] Verify in a new session: the planner's `WebFetch`/`WebSearch` tools load (the agent list shows them), and a
       foreground subagent honors the `SubagentStop` block.
 - [ ] Sprint 4 started before this; on resume the planner writes its spec, brief and tasks from PR #10.

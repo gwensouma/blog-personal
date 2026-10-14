@@ -248,7 +248,7 @@ describe("guard-paths hook: file handoff", () => {
   });
 
   it("leaves other agents (planner, built-ins) free to spawn", () => {
-    expect(spawn("planner", "Draft a spec for comments.").code).toBe(0);
+    expect(spawn("planner", "Mode: spec\nIdea: comments").code).toBe(0);
     expect(spawn("Explore", "Find the store.").code).toBe(0);
   });
 
@@ -362,5 +362,30 @@ describe("guard-paths hook: handoff format", () => {
       );
     expect(editReport("did it", "did it well").code).toBe(0);
     expect(editReport("→ exit 0", "→ green").code).toBe(2);
+  });
+});
+
+describe("guard-paths hook: planner prompt", () => {
+  const project = mkdtempSync(path.join(tmpdir(), "guard-planner-"));
+  const spec = ".design/specs/up-next.md";
+  mkdirSync(path.join(project, ".design/specs"), { recursive: true });
+  afterAll(() => rmSync(project, { recursive: true, force: true }));
+
+  const spawn = (prompt: string) =>
+    run({ tool_name: "Agent", tool_input: { subagent_type: "planner", prompt, description: "x" } }, project);
+  const tasksPrompt = `Mode: tasks\nSpec: ${spec}\nFolder: .design/sprints/4-up-next/\nBranch: feat/up-next`;
+
+  it("needs the mode on the first line", () => {
+    expect(spawn("Mode: spec\nIdea: comments").code).toBe(0);
+    expect(spawn("Draft a spec for comments.").stderr).toContain("Mode: spec");
+  });
+
+  it("writes tasks only from an existing, approved spec with a folder and a branch", () => {
+    expect(spawn(tasksPrompt).stderr).toContain("existing spec");
+    writeFileSync(path.join(project, spec), "# Spec: up-next\n\nStatus: draft · Author: planner\n");
+    expect(spawn(tasksPrompt).stderr).toContain("not approved");
+    writeFileSync(path.join(project, spec), "# Spec: up-next\n\nStatus: approved by the user on 2026-10-14\n");
+    expect(spawn(tasksPrompt).code).toBe(0);
+    expect(spawn(tasksPrompt.replace("Branch: feat/up-next", "")).stderr).toContain("Branch:");
   });
 });
