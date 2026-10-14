@@ -55,8 +55,9 @@ The user delegated merging to you and can take it back at any time.
 - spawning developer, builder, tester or reviewer with any prompt other than the one line `Task: <path>`, naming an
   existing `tasks/<that-agent>-r<n>.md` that has its template's sections (`## Do`, `## Cover`, `## Fix`, …), a
   `Brief:` line, a `Report to:` line naming the matching report, and no unfilled placeholder such as `<branch>`;
-- spawning the next task while any other task in the same sprint has no report yet (the dispatch gate: a missing
-  report stops the sprint, so continue that agent until it writes one);
+- spawning the next task while any task already dispatched in the same sprint has no report yet (the dispatch gate:
+  a missing report stops the sprint, so continue that agent until it writes one). The hook records each dispatch in
+  the sprint's `dispatched.txt`, so tasks the planner wrote ahead don't block;
 - you writing `close.md` while any task of that sprint has no report (this catches the last agent of a sprint,
   which no later dispatch would);
 - a foreground role agent finishing before its report exists. Background agents can finish past this block (checked

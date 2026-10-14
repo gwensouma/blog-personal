@@ -207,9 +207,10 @@ describe("guard-paths hook: file handoff", () => {
     expect(spawn("builder", `Task: ${task}`).code).toBe(2); // someone else's task
   });
 
-  it("holds the next dispatch until every other task in the sprint has its report", () => {
+  it("holds the next dispatch until every dispatched task in the sprint has its report", () => {
     const testerTask = `${sprint}/tasks/tester-r1.md`;
     writeFileSync(path.join(project, testerTask), taskText("tester"));
+    expect(spawn("developer", `Task: ${task}`).code).toBe(0); // dispatched, so now it must report first
     const waiting = spawn("tester", `Task: ${testerTask}`);
     expect(waiting.code).toBe(2);
     expect(waiting.stderr).toContain(task); // developer-r1 has no report yet
@@ -217,6 +218,23 @@ describe("guard-paths hook: file handoff", () => {
     expect(spawn("tester", `Task: ${testerTask}`).code).toBe(0);
     rmSync(path.join(project, report));
     rmSync(path.join(project, testerTask));
+  });
+
+  it("doesn't wait on tasks written ahead but not yet dispatched", () => {
+    const fresh = mkdtempSync(path.join(tmpdir(), "guard-ahead-"));
+    for (const agent of ["developer", "builder", "tester", "reviewer"]) {
+      mkdirSync(path.join(fresh, sprint, "tasks"), { recursive: true });
+      writeFileSync(path.join(fresh, sprint, "tasks", `${agent}-r1.md`), taskText(agent));
+    }
+    const spawnIn = (agent: string) =>
+      run({ tool_name: "Agent", tool_input: { subagent_type: agent, prompt: `Task: ${sprint}/tasks/${agent}-r1.md` } }, fresh);
+    expect(spawnIn("developer").code).toBe(0);
+    expect(spawnIn("developer").code).toBe(0); // re-dispatching the same task is fine
+    expect(spawnIn("builder").stderr).toContain("developer-r1.md");
+    mkdirSync(path.join(fresh, sprint, "reports"), { recursive: true });
+    writeFileSync(path.join(fresh, sprint, "reports", "developer-r1.md"), reportText("developer"));
+    expect(spawnIn("builder").code).toBe(0);
+    rmSync(fresh, { recursive: true, force: true });
   });
 
   it("lets the lead write close.md only after every task has a report", () => {

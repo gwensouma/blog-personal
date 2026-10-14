@@ -370,6 +370,9 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
       must be exactly `Task: <path>`; the task file must have its template's sections, `Brief:`, a matching
       `Report to:` and no placeholder left; a role agent's report must have the status line, `## Gate` with exit
       codes and its role's sections. Content quality stays with the lead's reading.
+- [x] Dispatch gate deadlock, found in the first real run (sprint 8, 2026-10-14): the planner writes every round-1
+      task up front, and the gate waited on all of them. The gate now waits only on dispatched tasks, which the hook
+      records in `<sprint>/dispatched.txt`.
 - [ ] Verify in a new session: the planner's `WebFetch`/`WebSearch` tools load (the agent list shows them), and a
       foreground subagent honors the `SubagentStop` block.
 - [ ] Sprint 4 started before this; on resume the planner writes its spec, brief and tasks from PR #10.
