@@ -411,6 +411,8 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
    serverless host with a DB/KV (SQLite/Turso, Postgres, Upstash; the store moves behind a seam)?
 6. **Sandbox:** move Claude Code into WSL2 for `/sandbox`, or rely on deny rules and hooks on native Windows?
 7. **Order:** steps 1–2 before resuming sprint 4?
+8. **Multi-agent direction:** switch to Claude Code agent teams? *(Answered 2026-10-14: no. Keep orchestrator–worker
+   subagents with file handoff and keep fixing the gaps sprint 8 found. Revisit if parallel review or debate is needed.)*
 
 ---
 
