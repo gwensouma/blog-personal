@@ -49,7 +49,7 @@ export function UpNext({ upNext }: { upNext: UpNextPick | null }) {
         {/* A primary bar sweeps across the top edge on hover/focus: "this way". */}
         <span
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 z-10 h-1 origin-left scale-x-0 bg-primary transition-transform duration-500 ease-out-expo group-hover/card:scale-x-100 group-has-focus-visible/card:scale-x-100 motion-reduce:transition-none"
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-1 origin-left scale-x-0 bg-primary transition-transform duration-500 ease-out-expo group-hover/card:scale-x-100 group-has-focus-visible/card:scale-x-100 motion-reduce:transition-none"
         />
         <PostCover
           post={post}

@@ -41,10 +41,6 @@ export function PostArticle({ post, series, ending }: PostArticleProps) {
   // A one-part "series" has nothing to navigate to yet.
   const shownSeries = series && series.parts.length > 1 ? series : null;
   const { adjacent, upNext } = ending;
-  // The Up next card is the forward step at the end; when it is the next part, the series nav keeps only
-  // the way back (and is skipped on part 1, where there is no way back).
-  const upNextIsNextPart = upNext?.reason === "series";
-  const showSeriesNav = shownSeries ? shownSeries.position > 1 || !upNextIsNextPart : false;
 
   return (
     <div className="flex flex-col gap-16">
@@ -103,9 +99,11 @@ export function PostArticle({ post, series, ending }: PostArticleProps) {
 
           <PostBody content={post.content} className="mt-10" />
 
-          {shownSeries && showSeriesNav ? (
+          {/* The Up next card is the forward step at the end (the next part, when there is one), so the
+              series nav only goes back, and part 1 has no way back. */}
+          {shownSeries && shownSeries.position > 1 ? (
             <Reveal className="mt-16">
-              <PostSeriesNav series={shownSeries} hideNext={upNextIsNextPart} />
+              <PostSeriesNav series={shownSeries} />
             </Reveal>
           ) : null}
 

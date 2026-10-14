@@ -488,11 +488,11 @@ Frontmatter `series` + `seriesOrder` (data: `getPostSeries` in `lib/data/posts.t
   (what's still ahead reads strongest); position, not colour alone, separates them.
   `<nav aria-label="<name>: all parts">` (the visible `h2` stays). No `<details>`: three short rows are compact enough on mobile. Revisit if a series passes ~5 parts.
 - **Series nav** (`PostSeriesNav`): after the body, before the like/share footer, wrapped in the existing `Reveal`.
-  Text links only on a hairline ("Previous in series" / "Next in series" + title in Fraunces, arrows nudge on hover
-  like the adjacent cards), plus a muted "RSC Fundamentals, part 2 of 3" line ("RSC Fundamentals, final part (3 of 3)"
-  on the last). The arrow follows "Next" in DOM order (no `flex-row-reverse`), so below `sm` the label lines up with
-  the left-aligned title. Deliberately not a card: the end-of-post card is "Up next" (below), which takes over the
-  forward link. `<nav aria-label="<name>: previous and next part">`.
+  Not rendered on part 1 (no way back). A text link only on a hairline ("Previous in series" + title in Fraunces, the
+  arrow nudges left on hover/focus like the adjacent cards), plus a muted "RSC Fundamentals, part 2 of 3" line
+  ("RSC Fundamentals, final part (3 of 3)" on the last). Single left-aligned column at every width. Deliberately not a
+  card and never a forward link: the end-of-post card is "Up next" (below), which takes the step to the next part.
+  `<nav aria-label="<name>: previous part">`.
 - **No duplicate links at the end:** series parts never appear in the chronological adjacent cards or in Related
   posts (`getPostEnding` in `lib/data/posts.ts` dedupes; see "Up next (sprint 4)").
 - **List marker** (`PostSeriesMarker`): "RSC Fundamentals, part 2" as the last item of the meta line on post rows
@@ -523,9 +523,10 @@ The end of a post is one reading path. Data: `getPostEnding` (`lib/data/posts.ts
   `motion-safe:` or `motion-reduce:transition-none`.
 - **Focus:** the card has `overflow-hidden` (flush cover corners), which would clip a ring on the link's `::after`, so
   the card draws the ring itself with `has-focus-visible:ring-3 ring-ring/50` plus the primary border.
-- **Series parts, dedup decision:** the series nav's "Next in series" link and an up-next with reason "series" point
-  to the same post. The Up next card wins: it explains the step ("Next in RSC Fundamentals · Part 3 of 3") and is the
-  one forward CTA. `PostSeriesNav` gets `hideNext` and keeps only "Previous in series" plus the "part n of N" /
-  "final part" line. On part 1 there is no previous part, so the series nav isn't rendered at all (the series box at
-  the top and the Up next label already say where the reader is). The last part is unchanged (no next part, so
-  up-next falls through to related/newer/older).
+- **Series parts, dedup decision:** a series nav "Next" link and an up-next with reason "series" would point to the
+  same post, and a shown series part with a next part always gets that up-next. The Up next card wins: it explains
+  the step ("Next in RSC Fundamentals · Part 3 of 3") and is the one forward CTA. So `PostSeriesNav` never has a next
+  link: only "Previous in series" plus the "part n of N" / "final part" line. On part 1 there is no previous part, so
+  the series nav isn't rendered at all (the series box at the top and the Up next label already say where the reader
+  is). On the last part the nav keeps "Previous in series" and the "final part" line; there is no next part, so
+  up-next falls through to related/newer/older.

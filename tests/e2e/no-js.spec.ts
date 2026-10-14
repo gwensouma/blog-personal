@@ -60,16 +60,19 @@ test.describe("without JavaScript", { tag: "@no-js" }, () => {
       "/posts/server-components-run-on-the-server",
     );
 
-    const seriesNav = page.getByRole("navigation", { name: "RSC Fundamentals: previous and next part" });
+    const seriesNav = page.getByRole("navigation", { name: "RSC Fundamentals: previous part" });
     await expectShown(seriesNav);
     await expect(seriesNav).toContainText("RSC Fundamentals, part 2 of 3");
     await expect(seriesNav.getByRole("link", { name: /Previous in series.*Server Components run on the server/ })).toBeVisible();
-    await expect(seriesNav.getByRole("link", { name: /Next in series.*RSC helps shrink/ })).toBeVisible();
+    // The forward step moved into the Up next card (AC1).
+    await expect(seriesNav.getByRole("link", { name: /Next in series/ })).toHaveCount(0);
+    const upNext = page.getByRole("region", { name: "Up next" });
+    await expectShown(upNext.getByRole("link", { name: "RSC helps shrink the JavaScript sent to the browser" }));
   });
 
   test("content: the last series part says 'final part' and has no next link", async ({ page }) => {
     await page.goto("/posts/rsc-shrinks-your-bundle");
-    const seriesNav = page.getByRole("navigation", { name: "RSC Fundamentals: previous and next part" });
+    const seriesNav = page.getByRole("navigation", { name: "RSC Fundamentals: previous part" });
     await expect(seriesNav).toContainText("RSC Fundamentals, final part (3 of 3)");
     await expect(seriesNav.getByRole("link", { name: /Next in series/ })).toHaveCount(0);
   });
