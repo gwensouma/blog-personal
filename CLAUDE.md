@@ -3,6 +3,7 @@
 A personal blog built to learn React Server Components: Next.js 15 App Router, React 19, TypeScript, Tailwind v4,
 shadcn/ui (`base-nova` on Base UI). Area rules load on demand from `.claude/rules/` (`ui.md`, `data.md`, `tests.md`).
 Team workflow: `/lead` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)); plan: [.design/roadmap.md](.design/roadmap.md);
+decisions and why: [.design/decisions.md](.design/decisions.md);
 what each page does today: [.design/product.md](.design/product.md) (read it before changing a page).
 
 ## Project goals

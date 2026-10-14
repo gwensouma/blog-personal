@@ -23,7 +23,8 @@ phase or deferred item. Output: `.design/specs/<feature>.md` from
    - **Always** read `.design/product.md` first: the pages and criteria the feature must keep (or change on
      purpose, saying so in the spec, and listing the product.md update in the brief).
    - The code: what already exists that the feature can reuse (`lib/data/`, components, types), with `path:line`.
-     Read `.design/roadmap.md`, `.design/roadmap-archive.md` and the related `.design/*.md` notes for past decisions.
+     Read `.design/decisions.md` (project-level decisions; flag any conflict under "Questions for the user"),
+     `.design/roadmap.md`, `.design/roadmap-archive.md` and the related `.design/*.md` notes.
    - Outside sources when they change the plan: Next.js and React docs first, then well-known articles. Cite links.
      Don't paste long quotes.
 3. **Choose.** Give 2–3 options with cost and risk and recommend one. Every feature names the RSC concept it teaches;

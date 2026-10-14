@@ -119,6 +119,7 @@ describe("guard-paths hook: areas and helpers", () => {
     expect(write("developer", ".github/workflows/ci.yml").code).toBe(2);
     expect(write("developer", ".claude/hooks/guard-paths.mjs").code).toBe(2);
     expect(write("developer", ".design/roadmap.md").code).toBe(2);
+    expect(write("developer", ".design/decisions.md").code).toBe(2);
   });
 
   it("keeps the builder in components/, globals.css and design notes", () => {

@@ -1,7 +1,8 @@
 # Roadmap
 
 Owner: the lead session (start it with `/lead`). How the team works lives in `.claude/skills/lead/SKILL.md`; this file
-says only *what* is decided, queued and deferred. Finished sprints and plans: [roadmap-archive.md](roadmap-archive.md).
+says only *what* is queued and deferred; decisions and their reasons are in [decisions.md](decisions.md). Finished
+sprints and plans: [roadmap-archive.md](roadmap-archive.md).
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
 Last updated: 2026-10-14.
 

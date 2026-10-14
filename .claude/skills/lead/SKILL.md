@@ -31,7 +31,8 @@ The user delegated merging to you and can take it back at any time.
 
 | What | Where | Written by |
 |---|---|---|
-| What is decided, queued and deferred | `.design/roadmap.md` (finished: `roadmap-archive.md`) | lead |
+| What is queued and deferred | `.design/roadmap.md` (finished: `roadmap-archive.md`) | lead |
+| Project-level decisions and why | `.design/decisions.md` (planner reads it for every spec) | lead |
 | How the team works | this file | lead, in its own PR |
 | Project rules | `CLAUDE.md`, `.claude/rules/` (agents load them automatically) | lead |
 | What each page does today | `.design/product.md` (planner reads it for every spec) | lead, or the sprint that changes a page |
@@ -70,7 +71,7 @@ The user delegated merging to you and can take it back at any time.
 - Write/Edit outside each agent's area: developer `app/`, `lib/`, `types/`, `content/`, `public/`, `assets/`, root
   config files and `.design/<feature>.md`; builder `components/`, `app/globals.css`, `public/`, `assets/` and
   `.design/<feature>.md`; tester `tests/`; reviewer its report only; planner specs, briefs and tasks. `.github/`,
-  `.claude/`, `CLAUDE.md`, `README.md`, the roadmap and this status doc are yours alone;
+  `.claude/`, `CLAUDE.md`, `README.md`, the roadmap, `decisions.md` and the agent status doc are yours alone;
 - helper agents (general-purpose, claude, Explore, …) editing anything in the project: they research, they don't
   write, so code work can't bypass the task files;
 - only the tester adds `test.fixme`/`.skip`; nobody adds `.only`;
@@ -102,7 +103,7 @@ something an agent legitimately needs, decide it yourself; change the hook only 
 
 ### 0. Orient
 
-1. Read `.design/roadmap.md` in full.
+1. Read `.design/roadmap.md` and `.design/decisions.md` in full.
 2. Run `git fetch --prune`, `git status`, `git worktree list`, `gh pr list --state open`.
 3. Reconcile: every open PR maps to a sprint row, every merged PR's row is archived. Fix drift in your next PR.
 4. For a sprint in progress, list its folder: the newest task without a report is where to pick up.
@@ -119,7 +120,8 @@ For anything new (a user idea, the next roadmap phase, a deferred item), call th
 idea. It researches the code and outside sources and writes `.design/specs/<feature>.md` (Status: draft).
 
 **Stop:** show the user the spec's recommendation, ACs and "Questions for the user". Record their answers in the spec,
-set `Status: approved by the user on <date>`, and add the sprint rows to the roadmap.
+set `Status: approved by the user on <date>`, and add the sprint rows to the roadmap. An answer that later sprints
+must respect also gets an entry in `.design/decisions.md`.
 
 A roadmap row that already has a decided plan (e.g. "Phase D plan") still gets a spec: the planner turns the plan into
 one, and the user only confirms it.
@@ -211,4 +213,4 @@ Stop and ask the user (with `AskUserQuestion` when there are clear options) when
 ## Hand-off
 
 Before ending a session: every dispatched task has a report or a note in it saying why not, the roadmap matches
-reality, and new decisions are in the spec or roadmap they belong to. A future `/lead` reads only files.
+reality, and new decisions are in the spec they belong to or, when they outlive the sprint, in `.design/decisions.md`. A future `/lead` reads only files.

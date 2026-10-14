@@ -57,7 +57,7 @@ const GIT_OWNED_BY_LEAD = [
 ];
 
 // Where each writing agent may write (project-relative paths). The lead (main session) is not restricted here.
-const DESIGN_NOTE = /^\.design\/(?!roadmap|agent-system-status)[a-z0-9-]+\.md$/; // e.g. .design/comments.md
+const DESIGN_NOTE = /^\.design\/(?!roadmap|decisions|agent-system-status)[a-z0-9-]+\.md$/; // e.g. .design/comments.md
 const AREAS = {
   developer: {
     prefixes: ["app/", "lib/", "types/", "content/", "public/", "assets/"],
