@@ -37,6 +37,7 @@ The user delegated merging to you and can take it back at any time.
 | Project rules | `CLAUDE.md`, `.claude/rules/` (agents load them automatically) | lead |
 | What each page does today | `.design/product.md` (planner reads it for every spec) | lead, or the sprint that changes a page |
 | Templates for every handoff | `.claude/templates/` | lead, in its own PR |
+| Claude Code facts (agents, hooks, permissions, cost) | `.claude/skills/lead/claude-code-facts.md` | lead |
 | A feature's research and plan | `.design/specs/<feature>.md` | planner |
 | One sprint | `.design/sprints/<#>-<name>/` | see below |
 | Visual design decisions | `.design/<feature>.md`, `.design/blog-refactor.md` | builder |
@@ -71,7 +72,7 @@ The user delegated merging to you and can take it back at any time.
 - Write/Edit outside each agent's area: developer `app/`, `lib/`, `types/`, `content/`, `public/`, `assets/`, root
   config files and `.design/<feature>.md`; builder `components/`, `app/globals.css`, `public/`, `assets/` and
   `.design/<feature>.md`; tester `tests/`; reviewer its report only; planner specs, briefs and tasks. `.github/`,
-  `.claude/`, `CLAUDE.md`, `README.md`, the roadmap, `decisions.md` and the agent status doc are yours alone;
+  `.claude/`, `CLAUDE.md`, `README.md`, the roadmap and `decisions.md` are yours alone;
 - helper agents (general-purpose, claude, Explore, …) editing anything in the project: they research, they don't
   write, so code work can't bypass the task files;
 - only the tester adds `test.fixme`/`.skip`; nobody adds `.only`;

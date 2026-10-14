@@ -76,8 +76,8 @@ if a feature needs it.
 ## Sprints (from 2026-10-11)
 Each line is one branch and one PR, planned by the planner (`.design/specs/`, `.design/sprints/<#>-<name>/`).
 Open sprints only; merged ones move to the archive. Order: 4 → 9 → 10. Sprint 8 (merged) was the first full
-run of the file handoff; its lessons are in `.design/sprints/8-home-no-js/close.md`. The dev container is built on branch `chore/devcontainer` but deferred by the user (2026-10-14); see
-[agent-system-status.md](agent-system-status.md).
+run of the file handoff; its lessons are in `.design/sprints/8-home-no-js/close.md`. The dev container waits on
+branch `chore/devcontainer` (D-012 in [decisions.md](decisions.md)).
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
@@ -89,6 +89,22 @@ Deferred: button-styled links ("View all posts" and others) render with `role="b
 an a11y pass of its own). The `/search` empty-state title is a `<div>`, not a heading (a11y suggestion from the sprint T tester; fix it
 with the next search touch). Also deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
 the user's own content).
+
+## Agent harness: open items
+Left over from the 2026-10-12 harness audit (steps 1–8 merged, PRs #11–#23; the audit is in git history, the facts it
+relied on in `.claude/skills/lead/claude-code-facts.md`).
+- **User, by hand** (the auto-mode classifier blocks the lead from editing its own permissions): add the
+  `playwright-nojs` server to `.mcp.json` and `enabledMcpjsonServers`, allow `mcp__playwright-nojs`, and allow
+  `Edit(/app/**)`, `Edit(/lib/**)`, `Edit(/types/**)`, `Edit(/components/**)`, `Edit(/content/**)`,
+  `Edit(/public/**)`, `Edit(/assets/**)`, `Edit(/tests/**)`, `Edit(/.design/**)` in `.claude/settings.json`, so
+  subagents stop asking for every write (the hook still keeps each agent in its area). Until then the reviewer checks
+  no-JS with curl.
+- **Verify in a fresh session:** the planner's `WebFetch`/`WebSearch` tools load, and a foreground subagent honors the
+  `SubagentStop` block (a background one doesn't; the dispatch gate covers that).
+- **Later, optional:** WSL2 + `/sandbox` (see Open questions in decisions.md); agent evals (3–5 seeded-bug patches such
+  as a raw hex color, a needless `"use client"`, an unvalidated Server Action input or content hidden without JS, each
+  with its expected finding; re-run the reviewer after any prompt change); preview deploys per PR once a host exists.
+  Agents in CI or the cloud are not needed at this scale.
 
 ## Phase D plan: comments (decided by the user on 2026-10-12)
 Queue after sprint T, sprint 4 (`feat/up-next`) and sprint 8 (`fix/home-no-js`). Sprint 9 waits for sprint 4, because both edit
