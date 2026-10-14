@@ -11,7 +11,7 @@
 // Events: PreToolUse (Write/Edit/MultiEdit/NotebookEdit, Bash/PowerShell, Agent) and SubagentStop (a role agent may
 // not stop before its report exists).
 // Input: the hook JSON on stdin. Output: exit 2 with a reason on stderr blocks; exit 0 allows.
-// See .design/agent-system-status.md, steps 2 and 8.
+// Workflow: .claude/skills/lead/SKILL.md.
 
 import { appendFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -57,7 +57,7 @@ const GIT_OWNED_BY_LEAD = [
 ];
 
 // Where each writing agent may write (project-relative paths). The lead (main session) is not restricted here.
-const DESIGN_NOTE = /^\.design\/(?!roadmap|decisions|agent-system-status)[a-z0-9-]+\.md$/; // e.g. .design/comments.md
+const DESIGN_NOTE = /^\.design\/(?!roadmap|decisions)[a-z0-9-]+\.md$/; // e.g. .design/comments.md
 const AREAS = {
   developer: {
     prefixes: ["app/", "lib/", "types/", "content/", "public/", "assets/"],
