@@ -4,9 +4,10 @@
 // - only the tester may add test.fixme / test.skip, and nobody may add .only;
 // - subagents never push, merge, open PRs, switch branches or rewrite history (the lead owns git);
 // - nobody kills processes by image name (taskkill /IM kills the user's other Node processes).
-// - work is handed over in files: a role agent is spawned only with an existing task file
-//   (.design/sprints/<sprint>/tasks/<agent>-r<n>.md), the planner alone writes specs, briefs and tasks, and each
-//   agent may write its own report (.design/sprints/<sprint>/reports/<agent>-r<n>.md) and no other.
+// - work is handed over in files: a role agent is spawned only with the one-line prompt "Task: <path>" naming an
+//   existing task file (.design/sprints/<sprint>/tasks/<agent>-r<n>.md) that has its template's sections, the planner
+//   alone writes specs, briefs and tasks, and each agent may write its own report
+//   (.design/sprints/<sprint>/reports/<agent>-r<n>.md), in the report template's shape, and no other.
 // Events: PreToolUse (Write/Edit/MultiEdit/NotebookEdit, Bash/PowerShell, Agent) and SubagentStop (a role agent may
 // not stop before its report exists).
 // Input: the hook JSON on stdin. Output: exit 2 with a reason on stderr blocks; exit 0 allows.
@@ -22,7 +23,26 @@ const SUBAGENTS = new Set([...ROLE_AGENTS, "planner"]);
 // .design/sprints/<sprint>/tasks/<agent>-r<n>.md, with / or \ separators (doubled when JSON-escaped in a transcript).
 const TASK_PATH = /\.design[\\/]+sprints[\\/]+([^\\/\s`'"]+)[\\/]+tasks[\\/]+([a-z]+)-r(\d+)\.md/g;
 
-const SKIP_PATTERNS = [/\btest\.fixme\s*\(/g, /\b(?:test|describe|it)\.skip\s*\(/g];
+// The whole dispatch prompt of a role agent: "Task: <path>", optionally in backticks.
+const DISPATCH_PROMPT = /^Task:\s*`?[^\s`]+`?$/;
+
+// Sections each task and report must have, from .claude/templates/. Fix tasks (title ends "(fix)") need "## Fix".
+const TASK_SECTIONS = {
+  developer: ["## Do", "## Files you may change", "## Acceptance criteria", "## Done when"],
+  builder: ["## Do", "## Files you may change", "## Acceptance criteria", "## Done when"],
+  tester: ["## Cover", "## Files you may change", "## Done when"],
+  reviewer: ["## Review", "## Done when"],
+};
+const REPORT_SECTIONS = {
+  developer: ["## Files", "## AC"],
+  builder: ["## Files", "## AC"],
+  tester: ["## AC", "## Findings"],
+  reviewer: ["## Findings"],
+};
+// Unfilled template placeholders: <n>, <#>-<name>, <branch>, <agent>, <m>, <developer|builder|tester>.
+const PLACEHOLDER = /<(?:n|m|#|branch|agent|developer\|builder\|tester|tester\|reviewer)>/;
+
+const SKIP_PATTERNS =[/\btest\.fixme\s*\(/g, /\b(?:test|describe|it)\.skip\s*\(/g];
 const ONLY_PATTERN = /\b(?:test|describe|it)\.only\s*\(/g;
 
 // git, then any global options (-C <dir>, -c k=v, --no-pager, …), then the subcommand.
@@ -137,6 +157,14 @@ function decide(event, projectDir) {
     }
     const missing = own.filter((t) => !existsSync(path.resolve(projectDir, t.rel)));
     if (missing.length > 0) return `Task file not found: ${missing.map((t) => t.rel).join(", ")}. Write it first.`;
+    // The prompt is the task path and nothing else, so every instruction lives in a file.
+    if (!DISPATCH_PROMPT.test((input.prompt ?? "").trim()) || own.length > 1) {
+      return `Send ${target} one line, "Task: ${own[0].rel}". Put any extra instruction in the task file.`;
+    }
+    const problems = taskProblems(readFileSync(path.resolve(projectDir, own[0].rel), "utf8"), own[0]);
+    if (problems.length > 0) {
+      return `${own[0].rel} doesn't follow its template (.claude/templates/): ${problems.join("; ")}.`;
+    }
     // Dispatch gate: the next task waits until every other task in the sprint has its report. This is the check
     // that holds for background agents, which can finish past a SubagentStop block.
     const waiting = unreportedTasks(projectDir, own[0].sprintDir).filter((rel) => !own.some((t) => t.rel === rel));
@@ -181,7 +209,12 @@ function decide(event, projectDir) {
   }
   if (sprint && isSubagent) {
     if (sprint.kind === "report") {
-      return sprint.agent === agent ? null : `${agent} may write only its own report (reports/${agent}-r<n>.md), not ${rel}.`;
+      if (sprint.agent !== agent) return `${agent} may write only its own report (reports/${agent}-r<n>.md), not ${rel}.`;
+      const problems = reportProblems(resultingText(tool, input, path.resolve(projectDir, filePath)), agent);
+      if (problems.length > 0) {
+        return `Your report doesn't follow .claude/templates/report.md: ${problems.join("; ")}.`;
+      }
+      return null;
     }
     if (agent === "planner" && (sprint.kind === "brief" || sprint.kind === "task")) return null;
     return `${rel} is the ${sprint.kind === "close" ? "lead's" : "planner's or the lead's"} to write; ${agent} writes only its own report.`;
@@ -216,6 +249,50 @@ function decide(event, projectDir) {
     }
   }
   return null;
+}
+
+/** The whole file as it will be after a Write, Edit or MultiEdit. */
+function resultingText(toolName, input, absPath) {
+  if (toolName === "Write") return input.content ?? "";
+  let text = existsSync(absPath) ? readFileSync(absPath, "utf8") : "";
+  const edits = toolName === "MultiEdit" ? (input.edits ?? []) : [input];
+  for (const e of edits) {
+    const from = e.old_string ?? "";
+    text = e.replace_all ? text.split(from).join(e.new_string ?? "") : text.replace(from, e.new_string ?? "");
+  }
+  return text;
+}
+
+/** What a task file lacks against its template (.claude/templates/task-*.md), as short phrases. */
+function taskProblems(text, task) {
+  const problems = [];
+  const fix = /^# Task:.*\(fix\)/m.test(text);
+  const required = fix ? ["## Fix", "## Done when"] : TASK_SECTIONS[task.agent];
+  for (const heading of required) {
+    if (!text.split(/\r?\n/).some((line) => line.trim().startsWith(heading))) problems.push(`no "${heading}" section`);
+  }
+  if (!/^Brief:/m.test(text)) problems.push(`no "Brief:" line`);
+  if (fix && !/^Source:/m.test(text)) problems.push(`no "Source:" line naming the tester or reviewer report`);
+  const reportTo = /^Report to:.*$/m.exec(text)?.[0].replaceAll("\\", "/") ?? "";
+  if (!reportTo.includes(task.report)) problems.push(`"Report to:" must name ${task.report}`);
+  const placeholder = PLACEHOLDER.exec(text.replace(/<!--[\s\S]*?-->/g, ""));
+  if (placeholder) problems.push(`template placeholder "${placeholder[0]}" left in`);
+  return problems;
+}
+
+/** What a report lacks against .claude/templates/report.md, as short phrases. */
+function reportProblems(text, agent) {
+  const problems = [];
+  if (!new RegExp(`^# Report: ${agent}\\b.*\\bstatus: (?:done|failed|blocked)\\b`, "m").test(text)) {
+    problems.push(`first line "# Report: ${agent} · round <n> · status: done | failed | blocked"`);
+  }
+  const gate = /^## Gate\b([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(text);
+  if (!gate) problems.push(`no "## Gate" section`);
+  else if (!/\bexit(?: code)?\s*:?\s*-?\d+/i.test(gate[1])) problems.push(`"## Gate" needs each command with "exit <code>"`);
+  for (const heading of REPORT_SECTIONS[agent] ?? []) {
+    if (!new RegExp(`^${heading}`, "m").test(text)) problems.push(`no "${heading}" section`);
+  }
+  return problems;
 }
 
 /** Task files in a sprint folder that have no matching report yet. */

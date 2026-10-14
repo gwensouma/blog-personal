@@ -364,6 +364,10 @@ Done on branch `chore/agent-file-handoff`. The user found delegation was "all ve
       overstates the hook, this reading guide added. The independent pre-merge gate is now branch protection
       (see Step 1). Still left to the user: the `gh` token scopes (`repo`, `workflow`) every agent's shell can use,
       and a sandbox (none on native Windows; WSL2 + `/sandbox` is the "Later" item AS-20).
+- [x] Format checks (branch `chore/handoff-format-checks`, asked by the user on 2026-10-14): the dispatch prompt
+      must be exactly `Task: <path>`; the task file must have its template's sections, `Brief:`, a matching
+      `Report to:` and no placeholder left; a role agent's report must have the status line, `## Gate` with exit
+      codes and its role's sections. Content quality stays with the lead's reading.
 - [ ] Verify in a new session: the planner's `WebFetch`/`WebSearch` tools load (the agent list shows them), and a
       foreground subagent honors the `SubagentStop` block.
 - [ ] Sprint 4 started before this; on resume the planner writes its spec, brief and tasks from PR #10.
