@@ -3,13 +3,16 @@
 Owner: the lead session (start it with `/lead`). How the team works lives in `.claude/skills/lead/SKILL.md`; this file
 says only *what* is decided, queued and deferred. Finished sprints and plans: [roadmap-archive.md](roadmap-archive.md).
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
-Last updated: 2026-10-13.
+Last updated: 2026-10-14.
 
 ## Out of scope for now
 - **AI features** (`lib/ai/`): postponed by the user. Keep the data layer extensible; build nothing yet.
 - **Deploy and hosting**: postponed (re-confirmed 2026-10-13: no real data source or images yet, features first). The
   `.data/` JSON store and `NEXT_PUBLIC_SITE_URL` stay as they are; keep all data access behind `lib/data/`.
 - **Data source migration** (Markdown → DB/CMS): parked. Phase C only adds an internal seam.
+- **Agent teams** (Claude Code's experimental teammates that message each other): not adopted. Decided by the user on
+  2026-10-14: keep the lead + subagents + file handoff, since the work is mostly sequential and sprint 8's problems were
+  not about agents talking. Revisit if a sprint needs parallel review or debate.
 
 ## Feature map
 
