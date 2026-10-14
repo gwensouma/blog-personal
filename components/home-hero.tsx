@@ -1,10 +1,9 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { DriftBackdrop } from "@/components/motion/drift-backdrop";
 import { Enter } from "@/components/motion/enter";
 import { TextReveal } from "@/components/motion/text-reveal";
-import { CoverDeckSkeleton, LatestCoverDeck } from "@/components/posts/cover-deck";
+import { LatestCoverDeck } from "@/components/posts/cover-deck";
 import { linkSweepClassName } from "@/lib/motion";
 import { site } from "@/lib/site";
 
@@ -12,7 +11,8 @@ import { site } from "@/lib/site";
 // word, then the dek and intro) over a drifting backdrop, so it animates on first
 // paint without waiting for hydration and reads fine without JS.
 // From md up, a deck of the latest covers sits beside the title as the visual
-// anchor (streamed behind its own Suspense; the title never waits for data).
+// anchor. The deck is an async Server Component rendered inline, so it is in the
+// prerendered HTML and visible without JS.
 // It never sits behind text, so the measured muted-text contrast is unchanged.
 export function HomeHero() {
   return (
@@ -34,9 +34,7 @@ export function HomeHero() {
         </Enter>
       </PageHeader>
       <div className="hidden pt-2 md:block">
-        <Suspense fallback={<CoverDeckSkeleton />}>
-          <LatestCoverDeck />
-        </Suspense>
+        <LatestCoverDeck />
       </div>
     </div>
   );

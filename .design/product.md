@@ -21,8 +21,7 @@ A personal learning journal about React Server Components, built with them: post
 ### Home `/`
 - Shows the intro, the featured post, the latest posts, the topics and the newsletter form.
 - "Most read" appears once any post has views, and lists posts by view count.
-- No JS: every section above is visible. **Known gap:** featured, latest and topics sit behind `<Suspense>` and stay
-  hidden without JS (sprint 8, `test.fixme` in `tests/e2e/no-js.spec.ts`).
+- No JS: every section above is visible.
 
 ### Archive `/posts`
 - Lists every post newest first under year headings, 5 per page, with numbered pagination.
