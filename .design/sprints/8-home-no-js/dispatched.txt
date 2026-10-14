@@ -1,0 +1,4 @@
+.design/sprints/8-home-no-js/tasks/developer-r1.md
+.design/sprints/8-home-no-js/tasks/builder-r1.md
+.design/sprints/8-home-no-js/tasks/tester-r1.md
+.design/sprints/8-home-no-js/tasks/reviewer-r1.md

@@ -1,13 +1,19 @@
 # Roadmap
 
-Owner: the lead session (start it with `/lead`). Execution: lead → builder ⇄ reviewer, per CLAUDE.md "Agent workflow".
+Owner: the lead session (start it with `/lead`). How the team works lives in `.claude/skills/lead/SKILL.md`; this file
+says only *what* is queued and deferred; decisions and their reasons are in [decisions.md](decisions.md). Finished
+sprints and plans: [roadmap-archive.md](roadmap-archive.md).
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
-Last updated: 2026-10-12.
+Last updated: 2026-10-14.
 
 ## Out of scope for now
 - **AI features** (`lib/ai/`): postponed by the user. Keep the data layer extensible; build nothing yet.
-- **Deploy**: postponed. The `.data/` JSON store and `NEXT_PUBLIC_SITE_URL` stay as they are.
+- **Deploy and hosting**: postponed (re-confirmed 2026-10-13: no real data source or images yet, features first). The
+  `.data/` JSON store and `NEXT_PUBLIC_SITE_URL` stay as they are; keep all data access behind `lib/data/`.
 - **Data source migration** (Markdown → DB/CMS): parked. Phase C only adds an internal seam.
+- **Agent teams** (Claude Code's experimental teammates that message each other): not adopted. Decided by the user on
+  2026-10-14: keep the lead + subagents + file handoff, since the work is mostly sequential and sprint 8's problems were
+  not about agents talking. Revisit if a sprint needs parallel review or debate.
 
 ## Feature map
 
@@ -31,23 +37,6 @@ Last updated: 2026-10-12.
 ```
 
 Each feature names the RSC concept it teaches, because that is the point of the project.
-
-## Phase A: Stabilize (do first)
-1. ✅ **Version control.** Add `origin` → the repo above, rename `master` → `main`, and commit the full baseline once the
-   tree builds. Keep `.data/`, `.next/`, `.env` and `.playwright-mcp/` out of it (`.gitignore` already does this).
-   After that, one commit per finished, reviewed task.
-2. ✅ **Re-verify the store** (`lib/data/store.ts`): like ×3 then GET and check `.data/postStats.json`, then 20 parallel
-   GETs + 20 parallel likes. Also check that the newsletter `role="alert"` is announced on Enter-submit.
-3. ✅ **Agent definitions.** In `reviewer.md`, replace "editorial restraint" with the bold-motion direction and add a motion
-   checklist: reduced motion, `transform`/`opacity` only, content visible without JS, `LazyMotion` + `m`. Mirror the
-   motion rules in `builder.md` if anything is missing.
-4. ✅ **TypeScript-only.** `next.config.js` → `next.config.ts`. `scripts/with-env.js` only exists so `PORT` from
-   `.env.local` reaches the Next CLI. Node 22.14 is installed, so replace it with
-   `node --env-file-if-exists=.env.local node_modules/next/dist/bin/next dev|start` and delete the script.
-5. ✅ **Quality gate.** Add a `typecheck` script (`tsc --noEmit`) and an ESLint flat config with a `lint` script
-   (`next lint` is deprecated as of 15.5). The reviewer then runs typecheck, lint and build. Update the "Commands"
-   section of CLAUDE.md. Baseline on 2026-10-11: `tsc --noEmit` passes with no errors.
-6. ✅ **OG leftovers.** Fraunces in `ImageResponse`, and the Phase 2 cover variations in the OG card.
 
 ## Phase B: Reading experience
 | Feature | What | RSC lesson |
@@ -80,88 +69,42 @@ Each feature names the RSC concept it teaches, because that is the point of the 
 | /now, /uses | simple pages in `app/(site)/` | route groups |
 
 ## Order
-A (all) → B (series, callouts/footnotes, up next, image zoom) → E (popular, archive by year, search) → D (comments) →
+A ✅ (archived) → B (series, callouts/footnotes, up next, image zoom) → E (popular, archive by year, search) → D (comments) →
 C (seam, validation, preview). C goes last because the data layer is parked, but its seam is cheap and can move earlier
 if a feature needs it.
 
 ## Sprints (from 2026-10-11)
-Each line is one branch and one PR. The lead merges. Order: T → 4 → 8 → 9 → 10.
+Each line is one branch and one PR, planned by the planner (`.design/specs/`, `.design/sprints/<#>-<name>/`).
+Open sprints only; merged ones move to the archive. Order: 4 → 9 → 10. Sprint 8 (merged) was the first full
+run of the file handoff; its lessons are in `.design/sprints/8-home-no-js/close.md`. The dev container waits on
+branch `chore/devcontainer` (D-012 in [decisions.md](decisions.md)).
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
-| 1 ✅ | `chore/stabilize` | A4 + A5, and update CLAUDE.md Commands | — |
-| 2 ✅ | `feat/markdown-callouts-footnotes` | B: `> [!NOTE]/[!TIP]/[!WARNING]` callouts + styled GFM footnotes | — |
-| 3 ✅ | `feat/post-series` | B: `series` + `seriesOrder` frontmatter, series box, series nav. First series "RSC Fundamentals": server-components-run-on-the-server (1) → client-components-render-twice (2) → rsc-shrinks-your-bundle (3) | — |
-| 4 🚧 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). **In progress, paused 2026-10-12**; see "Sprint 4 status" | sprint 3 |
-| 5 ✅ | `feat/archive-by-year` | E: `/posts` grouped by year, pagination kept | — |
-| 6 ✅ | `feat/popular-posts` | E: top posts by views on home (ISR 5m, rendered inline, no `<Suspense>`) | — |
-| 7 ✅ | `feat/search-filters` | E: tag chips + match highlight, URL params only | — |
-| T ✅ | `chore/test-setup` | Vitest + Playwright Test (`js` / `no-js` projects), 81 unit + 18 e2e regression tests (see "Next up: test infrastructure") | — |
-| 8 | `fix/home-no-js` | Remove `test.fixme` from the home no-JS test in `tests/e2e/no-js.spec.ts`. Render essential home sections inline (no `<Suspense>` on ISR `/`); add the "Suspense only around non-essential or JS-dependent content" principle to CLAUDE.md; reviewer checks routes with JS disabled | — |
-| 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint T, sprint 4 |
+| 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). Draft PR #10 predates the file handoff: the planner writes its spec, brief and tasks from the PR before work resumes | — |
+| 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint 4 |
 | 10 | `feat/comments-admin` | D: /admin with password, hide/unhide comments | sprint 9 |
 
-Deferred: the `/search` empty-state title is a `<div>`, not a heading (a11y suggestion from the sprint T tester; fix it
+Deferred: button-styled links ("View all posts" and others) render with `role="button"` (sprint 8 tester and reviewer;
+an a11y pass of its own). The `/search` empty-state title is a `<div>`, not a heading (a11y suggestion from the sprint T tester; fix it
 with the next search touch). Also deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
-the user's own content). Re-plan after sprint 7: D (comments) next, then C.
+the user's own content).
 
-## Working rules
-- One feature = one branch (`feat/…`, `fix/…`, `chore/…` off `main`) → briefs → developer/builder → tester loop →
-  reviewer loop → typecheck/lint/build/test pass → tick it here → push → `gh pr create` → lead check → the lead
-  merges. Feature work always lands on `main` through a PR. The full procedure is in `/lead`.
-- Branch the next sprint off `main` only after the previous PR is merged, unless the two don't touch the same files.
-- Every UI feature records its design decisions in `.design/blog-refactor.md` (or a new `.design/<feature>.md` when long).
-- Ask the user before adding any dependency (zod, MDX, test runner).
-
-## Sprint 4 status (paused by the user on 2026-10-12)
-Work is on branch `feat/up-next`, pushed as a **draft PR**. Resume with `/lead`: check out the branch and continue from
-"Remaining".
-
-**Done (gates: typecheck, lint, build and `npm test` 81/81 pass)**
-- Developer: `getPostEnding(slug)` in `lib/data/posts.ts` (types `PostEnding`, `UpNext`, `UpNextReason`) decides
-  the whole post ending in one pass. upNext rules, first match wins:
-  1. the next series part;
-  2. else the top related post, which becomes **part 1** when it belongs to another series;
-  3. else the newer neighbour, else the older one.
-  Dedup: a post appears at most once across upNext > adjacent > related, and series parts never appear in
-  adjacent/related. `getAdjacentPosts` was removed; `getRelatedPosts` stays because tests use it.
-- Builder: `components/posts/up-next.tsx` (a Server Component, visible without JS). The end-of-post order is: like/share
-  → Up next → newsletter → prev/next cards → related. The Up next card replaces the series nav's "Next in series"
-  link (`PostSeriesNav hideNext`), and part 1 renders no series nav. Decisions are in `.design/blog-refactor.md` "Up next
-  (sprint 4)".
-
-**Remaining**
-1. Tester:
-   - update `tests/e2e/no-js.spec.ts:67`. It still expects "Next in series" in the series nav; it should expect the
-     link inside the `region` "Up next", and 0 next links in the series nav.
-   - add unit tests for `getPostEnding`: the per-post table and the invariants (no duplicate slug, no own-series part
-     in adjacent/related, related ≤ 3, part-1 rule for streaming/caching/designing);
-   - add an e2e no-JS check of the Up next card.
-2. Decide: rename the series nav aria-label to "<name>: previous part" (more accurate now) together with that test.
-3. Reviewer pass (including the browser check at 320/768/1280; the builder only checked the server HTML), then the
-   full gates including `npm run test:e2e`, then mark the PR ready, tick, and merge.
-
-## Next up: test infrastructure (decided by the user on 2026-10-12)
-The team gained a **developer** (senior fullstack) and a **tester** agent. The user chose automated tests. This sprint
-runs **first**, right after #6 merges, so every later sprint ships with tests.
-
-**Sprint T: `chore/test-setup`** (developer for config, tester for the first tests)
-- Dev deps (approved): `vitest`, `@playwright/test` (plus the Chromium browser via `npx playwright install chromium`).
-- `vitest.config.ts`: the `@/` alias, a Node environment, and an alias for the `server-only` import to an empty module
-  so `lib/data/` can be imported. The store must be pointed at a temp dir in tests (add a small, explicit seam in
-  `lib/data/store.ts`, e.g. an env var for the data dir, not test-only branches in app code).
-- `playwright.config.ts`: `webServer` runs `next build && next start` on a free port, Chromium, and a `no-js` project
-  with `javaScriptEnabled: false`.
-- Scripts: `test` (vitest run), `test:e2e` (playwright test). Add `npm test` to the gates in CLAUDE.md "Commands",
-  and gitignore the Playwright reports.
-- First tests, which guard what we already learned the hard way:
-  - unit: the store's serialized concurrent writes, search query normalization + highlight segmentation (an XSS
-    payload stays text), series derivation, archive year counts/continued;
-  - e2e: `/`, `/posts`, a post and `/search?q=…&tag=…` render their essential content with JS off; the like button
-    toggles with JS on.
-- `/` home with JS off is known-broken until sprint 8: mark that test `fixme` and link sprint 8.
-
-Order after this: sprint 4 → sprint 8 → sprint 9 → sprint 10.
+## Agent harness: open items
+Left over from the 2026-10-12 harness audit (steps 1–8 merged, PRs #11–#23; the audit is in git history, the facts it
+relied on in `.claude/skills/lead/claude-code-facts.md`).
+- **User, by hand** (the auto-mode classifier blocks the lead from editing its own permissions): add the
+  `playwright-nojs` server to `.mcp.json` and `enabledMcpjsonServers`, allow `mcp__playwright-nojs`, and allow
+  `Edit(/app/**)`, `Edit(/lib/**)`, `Edit(/types/**)`, `Edit(/components/**)`, `Edit(/content/**)`,
+  `Edit(/public/**)`, `Edit(/assets/**)`, `Edit(/tests/**)`, `Edit(/.design/**)` in `.claude/settings.json`, so
+  subagents stop asking for every write (the hook still keeps each agent in its area). Until then the reviewer checks
+  no-JS with curl.
+- **Verify in a fresh session:** the planner's `WebFetch`/`WebSearch` tools load, and a foreground subagent honors the
+  `SubagentStop` block (a background one doesn't; the dispatch gate covers that).
+- **Later, optional:** WSL2 + `/sandbox` (see Open questions in decisions.md); agent evals (3–5 seeded-bug patches such
+  as a raw hex color, a needless `"use client"`, an unvalidated Server Action input or content hidden without JS, each
+  with its expected finding; re-run the reviewer after any prompt change); preview deploys per PR once a host exists.
+  Agents in CI or the cloud are not needed at this scale.
 
 ## Phase D plan: comments (decided by the user on 2026-10-12)
 Queue after sprint T, sprint 4 (`feat/up-next`) and sprint 8 (`fix/home-no-js`). Sprint 9 waits for sprint 4, because both edit

@@ -1,113 +1,64 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+A personal blog built to learn React Server Components: Next.js 15 App Router, React 19, TypeScript, Tailwind v4,
+shadcn/ui (`base-nova` on Base UI). Area rules load on demand from `.claude/rules/` (`ui.md`, `data.md`, `tests.md`).
+Team workflow: `/lead` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)); plan: [.design/roadmap.md](.design/roadmap.md);
+decisions and why: [.design/decisions.md](.design/decisions.md);
+what each page does today: [.design/product.md](.design/product.md) (read it before changing a page).
 
 ## Project goals
 
-This project is a personal blog, built as a learning vehicle for React Server Components. Keep these in mind when making decisions:
-
-- **TypeScript is the baseline.** All files are `.ts`/`.tsx`. No JS source files should be reintroduced.
-- **RSC is the point of the project.** Prefer Server Components by default; push `"use client"` down to the smallest leaf component, same pattern as [components/posts/like-button.tsx](components/posts/like-button.tsx). Favor server-side data fetching over client-side fetching/effects.
-- **AI features are planned** (e.g. AI-assisted writing, summarization, or similar blog-related AI tooling) — expect this to land later in `lib/ai/` (see Architecture below). Keep the data layer easy to extend rather than over-fitting to the current Markdown-file source.
-- **State management is unopinionated** — no library is chosen yet. Default to React built-ins (`useState`, `useReducer`, URL/search params) for as long as they're sufficient; only reach for an external state library when asked or when a clear cross-component/global need shows up, and ask which one the user prefers rather than assuming.
-- **Styling is Tailwind v4 + shadcn/ui.** Use Tailwind utilities with the semantic theme tokens in [app/globals.css](app/globals.css) (`bg-background`, `text-foreground`, `text-muted-foreground`, `text-primary`, `border-border`, `font-heading`, `font-sans`) — no raw hex or palette classes like `text-blue-700`. Prefer shadcn components (`components/ui/`, added via `npx shadcn@latest add <name>`) over hand-rolled equivalents. Don't add hand-written CSS classes to `globals.css`; it holds tokens, the base layer and the Shiki/dark-mode glue only (Markdown prose styles live as arbitrary variants in [components/posts/post-body.tsx](components/posts/post-body.tsx)).
-- **English only, everywhere.** All code comments and all UI-facing text/copy must be written in English. Do not introduce Vietnamese (or any other language) in new comments or UI strings; when editing existing Vietnamese comments, translate them to English.
+- **RSC is the point.** Server Components by default; push `"use client"` down to the smallest leaf (like
+  [components/posts/like-button.tsx](components/posts/like-button.tsx)). Fetch on the server, not in effects.
+  Essential content renders without JS: `<Suspense>` only around non-essential or JS-dependent content.
+- **TypeScript only** (`.ts`/`.tsx`). **English only** in comments and UI copy; translate Vietnamese comments you touch.
+- **AI features are planned** for `lib/ai/`. Keep the data layer easy to swap rather than fitted to Markdown files.
+- **No state library yet.** Use React built-ins and URL params; ask the user before adding one.
+- **No new dependency** (runtime or dev) without asking the user.
 
 ## Commands
 
-- `npm run dev` — start the Next.js dev server (loads `.env.local` via Node's `--env-file-if-exists`, so `PORT` there is honored)
-- `npm run build` — production build
-- `npm run start` — run the production build (same `.env.local` loading)
-- `npm run typecheck` — `tsc --noEmit`
-- `npm run lint` — ESLint flat config ([eslint.config.mjs](eslint.config.mjs), `next/core-web-vitals` + `next/typescript`)
-- `npm test` — Vitest unit tests (`tests/unit/**/*.test.ts`, Node environment; config in [vitest.config.mts](vitest.config.mts))
-- `npm run test:watch` — Vitest in watch mode
-- `npm run test:e2e` — Playwright Test (`tests/e2e/`, Chromium; config in [playwright.config.ts](playwright.config.ts)). Always builds and starts its own server on port 3200 (never reuses one; the run fails if 3200 is busy) with `BLOG_DATA_DIR=.data-e2e`, so the real `.data/` is never touched; it rebuilds `.next/`, so don't run it alongside `npm run dev`. Projects: `js` (default) and `no-js` (JavaScript disabled, runs only tests tagged `@no-js`).
-- Before a PR: `typecheck`, `lint`, `build` and `npm test` must all pass (`next build` also runs ESLint, so a lint error fails the build too). Also run `npm run test:e2e` for any UI or route change.
+- `npm run dev` / `npm run start` — dev server / production server (both load `.env.local`, so its `PORT` is honored)
+- `npm run build` — production build (also runs ESLint)
+- `npm run typecheck` — `tsc --noEmit`; `npm run lint` — ESLint ([eslint.config.mjs](eslint.config.mjs))
+- `npm test` — Vitest unit tests (`tests/unit/`); `npm run test:watch` — watch mode
+- `npm run test:e2e` — Playwright (`tests/e2e/`) against its own production build on port 3200 with
+  `BLOG_DATA_DIR=.data-e2e`. It rebuilds `.next/`, so don't run it alongside `npm run dev`; it fails if 3200 is busy.
+- `npm run gate` — typecheck, lint, unit tests and build; stops at the first failure.
+- Before a PR: `npm run gate` passes, plus `npm run test:e2e` for any UI or route change. CI
+  ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs `gate` and `e2e` on every PR; merge only when both are green.
 
 ## Architecture
 
-This is a minimal Next.js 15 App Router blog (React 19, Tailwind v4, shadcn/ui `base-nova` style on Base UI primitives) whose starting purpose is illustrating React Server Components (RSC) vs. Client Components. Existing code comments explaining this distinction were originally written in Vietnamese; per the English-only rule above, translate them to English as you touch these files rather than adding new non-English comments. The folder layout below is deliberately layered so future growth (AI features, a real data source) slots into existing boundaries instead of requiring a rewrite.
+Layered so new work (AI, a real database) slots into existing boundaries:
 
-```
-app/                         ROUTING ONLY — every folder is a URL segment
-  layout.tsx, globals.css      site-wide shell (html/body, fonts, theme pre-paint script, motion provider, header, <main>, footer)
-  template.tsx                 thin: returns the page-transition wrapper from components/motion/
-  not-found.tsx, global-error.tsx
-  icon.svg, opengraph-image.tsx, sitemap.ts, robots.ts, feed.xml/route.ts   site-wide metadata files
-  (blog)/                      route group: groups blog routes, adds nothing to the URL
-    page.tsx, error.tsx        "/" (streams featured/latest posts with in-page <Suspense>)
-    posts/page.tsx             "/posts" archive, ?page= pagination
-    posts/[slug]/              "/posts/:slug" (+ opengraph-image.tsx; dynamicParams = false; dynamic: likes/views read a cookie)
-    tags/, tags/[tag]/         "/tags", "/tags/:tag"
-    search/page.tsx            "/search?q="
-  (site)/about/page.tsx        "/about"
-content/posts/*.md             post source: Markdown + frontmatter (title, date, excerpt, tags, featured, …)
-components/
-  ui/                          shadcn-generated primitives (owned source, editable)
-  layout/                      site chrome: header (auto-hide), footer, nav, mobile nav, theme toggle
-  motion/                      generic animation primitives (reveal, stagger, text-reveal, enter, scroll-progress, …)
-  posts/  tags/  authors/      entity-specific UI
-  reading-column.tsx, page-header.tsx, json-ld.tsx, og-card.tsx   shared, domain-free
-lib/
-  data/<entity>.ts             server-only data access (getPosts, getPost, getAllTags, searchPosts, …)
-  data/store.ts                JSON-file key/value store (.data/store.json) standing in for a DB; likes, views, subscribers
-  actions/<entity>.ts          "use server" Server Actions: validate input, then call lib/data/ (thin, public endpoints)
-  ai/                          (planned) LLM code behind a narrow interface
-  markdown.ts                  server-only Markdown → hast (rendered to React by post-body) + HTML string (remark/rehype + Shiki), TOC, reading time
-  site.ts                      site config: name, url, author, nav, social links
-  motion.ts                    shared spring/ease presets for `motion` (CSS ease tokens live in globals.css @theme)
-  format.ts, tags.ts, rss.ts, structured-data.ts, theme.ts   pure helpers
-  utils.ts                     cn() — re-exports the `cn` package, used by shadcn
-types/<entity>.ts              shared domain types; global.d.ts for ambient declarations
-tests/
-  unit/**/*.test.ts            Vitest (Node); imports lib/ directly. `server-only` is stubbed (tests/stubs/)
-  e2e/**/*.spec.ts             Playwright against a production build; tag `@no-js` for the JavaScript-disabled project
-```
-
-- `app/` — **routing only**. In Next 15, dynamic route `params` is a `Promise` and must be awaited. Pages are Server Components that `await` calls into `lib/data/` and render one or a few `components/`. Don't put business logic, data fetching implementation, or large JSX here.
-- `components/` — reusable UI, one clear purpose each. Client Components (`"use client"`) are only small leaves: `like-button`, `copy-link-button`, `nav-link`, `mobile-nav`, `theme-toggle`, `auto-hide-header`, `toc-spy`, `back-to-top`, `command-menu`/`command-palette` (lazy-loaded on first open), `code-copy-button`, `newsletter-form`, and the JS-driven wrappers in `components/motion/` (plus the required `error.tsx`/`global-error.tsx`). When adding interactivity, keep it scoped to a small leaf Client Component like these rather than converting a page to a Client Component.
-- **Animation** uses `motion` (`motion/react`) via `LazyMotion` + `m`, never the full `motion` component. Motion wrappers in `components/motion/` take Server Component content as `children` — wrap, don't convert. Prefer CSS (Tailwind, `tw-animate-css`, scroll-driven animations) for above-the-fold entrances so they run before hydration; use `motion` for scroll reveals, springs and gestures. Content must never stay invisible without JS, every effect must respect `prefers-reduced-motion`, and only `transform`/`opacity` should animate. Presets live in [lib/motion.ts](lib/motion.ts); decisions are in [.design/blog-refactor.md](.design/blog-refactor.md). Icons come from `lucide-react`. `components/ui/` holds shadcn-generated components — treat them as owned source code you may edit.
-- `lib/data/` — data access layer ([lib/data/posts.ts](lib/data/posts.ts)). Currently reads Markdown files from `content/posts/`, with a simulated `setTimeout` delay standing in for a DB/API call; `getPost` is wrapped in React `cache()` so `generateMetadata` and the page share one fetch. Absolute URLs (RSS, sitemap, OG, JSON-LD) come from `NEXT_PUBLIC_SITE_URL` — set it in production (see `.env.example`). Server-only logic belongs here; keep its exported interface small so a real database/CMS can replace the internals without touching `app/` or `components/`.
-- `lib/ai/` — **not created yet**. This is the designated home for LLM client code, RAG pipeline, or agent orchestration once AI features are built. When that lands, expose a narrow interface (e.g. `summarizePost(post): Promise<string>`) so `app/`/`components/` never call an LLM SDK directly — keeps AI logic isolated and swappable.
-- `types/` — shared TypeScript types ([types/post.ts](types/post.ts): `Post`, `PostSummary`, `Tag`, `TocItem`, …).
+- `app/` — **routing only.** Pages are thin Server Components: `await` `lib/data/`, render `components/`. In Next 15,
+  `params` and `searchParams` are Promises. Route groups: `(blog)`, `(site)`.
+- `components/` — UI. `ui/` (shadcn, owned source), `layout/` (site chrome), `motion/` (animation wrappers),
+  `<entity>/` (e.g. `posts/`), and domain-free shared components at the root.
+- `lib/data/` — server-only data access (`posts.ts` reads `content/posts/*.md`; `store.ts` is a JSON-file store in
+  `.data/`). `lib/actions/` — thin `"use server"` actions. Other `lib/*.ts` are pure helpers.
+- `types/` — shared domain types. `tests/` — `unit/` (Vitest) and `e2e/` (Playwright).
 
 ### Where does a new file go?
 
-Answer these in order; the first "yes" decides.
+The first "yes" decides.
 
-1. **Is it a URL, or a Next.js special file for a URL** (`page`, `layout`, `loading`, `error`, `not-found`, `route`, `generateMetadata`)? → `app/`, in the folder matching the URL. Site-wide (applies to every URL) → `app/` root. Blog-only → `app/(blog)/…`. A new unrelated section (e.g. an About/portfolio area with its own layout) → a new route group `app/(<section>)/`. Special files stay thin: fetch via `lib/`, then return a component from `components/` (e.g. `loading.tsx` returns `<PostListSkeleton />`).
-2. **Is it a shadcn primitive?** → `components/ui/` via `npx shadcn@latest add <name>`; never hand-write files there.
-3. **Is it site chrome shown on many pages** (header, footer, nav, theme toggle)? → `components/layout/`.
-4. **Is it UI tied to one domain entity** (post, later tag/author/comment)? → `components/<entity-plural>/`, e.g. `components/posts/`. Create a new folder per new entity.
-5. **Is it UI with no domain meaning, reused across features** (e.g. a generic `PageHeading`)? → `components/` root — only once it's actually used in 2+ places.
-6. **Does it read/write data or talk to an external service?** → `lib/data/<entity>.ts` (or `lib/ai/` for LLM work). Server-only. A mutation the client triggers gets a thin Server Action in `lib/actions/<entity>.ts` that validates input and calls `lib/data/`.
-7. **Is it a pure helper with no React and no I/O?** → `lib/<topic>.ts` (e.g. `lib/format.ts`). Don't grow `lib/utils.ts` beyond `cn()`.
-8. **Is it a type used by 2+ files?** → `types/<entity>.ts`. Props types used by one component stay inline in that component.
-9. **Is it a test?** → unit tests (pure helpers, `lib/data/`, `lib/actions/`) go in `tests/unit/<topic>.test.ts`; browser tests of routes go in `tests/e2e/<route-or-feature>.spec.ts`. Never colocate tests in `app/`, `components/` or `lib/`. Tests that use the store set `process.env.BLOG_DATA_DIR` to their own temp dir and call `resetStoreForTests()` from `lib/data/store.ts`.
+1. **A URL or a Next.js special file** (`page`, `layout`, `loading`, `error`, `not-found`, `route`)? → `app/`, in the
+   folder matching the URL: site-wide at the root, blog in `(blog)/`, a new section in a new group `(<section>)/`.
+   Special files stay thin: fetch via `lib/`, return a component.
+2. **A shadcn primitive?** → `components/ui/` via `npx shadcn@latest add <name>`; never hand-written.
+3. **Site chrome on many pages** (header, footer, nav)? → `components/layout/`.
+4. **UI tied to one entity** (post, tag, comment)? → `components/<entity-plural>/`.
+5. **Domain-free UI used in 2+ places?** → `components/` root.
+6. **Reads/writes data or calls an external service?** → `lib/data/<entity>.ts` (LLM work: `lib/ai/`). A mutation the
+   client triggers gets a thin Server Action in `lib/actions/<entity>.ts`.
+7. **A pure helper, no React, no I/O?** → `lib/<topic>.ts`. `lib/utils.ts` holds only `cn()`.
+8. **A type used by 2+ files?** → `types/<entity>.ts`; single-use props types stay inline.
+9. **A test?** → `tests/unit/<topic>.test.ts` or `tests/e2e/<feature>.spec.ts`; never colocated.
 
-Conventions:
-- File names are kebab-case (`post-list-item.tsx`); components are PascalCase **named exports**. Only Next.js special files in `app/` use `export default`.
-- Imports always use the `@/` alias, never long relative paths.
-- Don't create `index.ts` barrel files, and don't create a folder for a single file unless rule 4 says so.
-- Folders in `app/` that are not routes must be private (`_name/`) — but prefer putting the code in `components/` or `lib/` instead.
-- Intentionally out of scope for now: micro-frontends / multi-service splitting — this is a single Next.js app, and splitting it would be premature. Revisit only if the blog needs independently deployed sub-apps.
-
-There is no `.cursorrules` or Copilot instructions in this repo.
-
-## Design reference
-
-[.design/Main.dc.html](.design/Main.dc.html) and [.design/Detail.dc.html](.design/Detail.dc.html) hold the visual mockups (Claude Design canvas artboards) the current UI is based on: an editorial layout with Fraunces (serif, headings) + Source Sans 3 (body) — see [app/globals.css](app/globals.css) for the implemented palette (deep blue `--primary` `#1d4ed8` on white/black, chosen over the mockups' warm-paper default). Fonts are loaded with `next/font` in [app/layout.tsx](app/layout.tsx) as `--font-heading` (Fraunces) and `--font-sans` (Source Sans 3). Keep new UI consistent with this look unless the user asks to change direction.
-
-## Agent workflow
-
-Start a working session with **`/lead`** ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)). The main session is then the **lead**: it plans from [.design/roadmap.md](.design/roadmap.md) (the single source of truth for what is decided, queued and done), briefs the subagents in [.claude/agents/](.claude/agents/), routes their findings, and merges.
-
-1. **Lead (main session)** — clarifies the request, decides scope, writes precise briefs (goal, branch, files in scope, acceptance criteria). Edits directly only for one-line fixes and docs.
-2. **[developer](.claude/agents/developer.md)** — senior fullstack: data layer, Server Actions, types, routes and their wiring, config, security-sensitive server code.
-3. **[builder](.claude/agents/builder.md)** — designs and implements UI. Skills: `hallmark` (primary design guide, editorial genre), `frontend-design` (secondary), `frontend-ui-engineering`, `shadcn`. Writes design decisions that change direction to `.design/`.
-4. **[tester](.claude/agents/tester.md)** — writes and runs automated tests in `tests/` (Vitest for `lib/`, Playwright Test end to end, including with JS disabled) against the acceptance criteria; reports defects, never edits source.
-5. **[reviewer](.claude/agents/reviewer.md)** — read-only. Skills: `hallmark`, `frontend-ui-engineering`, `shadcn`. Checks RSC boundaries, server-side security, token/shadcn usage, a11y, responsiveness, design consistency; reports must-fix vs. suggestion.
-6. **Loop** — build → test → review. The lead sends each defect or must-fix finding back to the agent that owns the file (continuing the same agent so it keeps context) and re-runs the tester/reviewer until none remain.
-
-**Git:** one branch per feature off `main` (`feat/<name>`, `fix/<name>`, `chore/<name>`). The lead creates the branch, commits, pushes to `origin`, opens a PR with `gh pr create`, and merges it (`gh pr merge --merge`) once the review loop is clean and typecheck, lint and build pass. Feature work always lands on `main` through a PR. The user delegated merging to the lead and can take it back at any time.
+Conventions (file names, `@/` imports and palette classes are also enforced by lint and `tests/unit/conventions.test.ts`):
+- kebab-case file names; components are PascalCase **named exports**; only Next special files `export default`.
+- Imports use the `@/` alias. No `index.ts` barrels, no folder for a single file (except rule 4).
+- Non-route folders inside `app/` are private (`_name/`), but prefer `components/` or `lib/`.
+- Out of scope: micro-frontends or splitting into services.

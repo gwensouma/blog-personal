@@ -18,6 +18,6 @@
 ## Caveats
 
 1. **No Suspense around PopularPosts, on purpose.** Prerendered (ISR) HTML keeps every Suspense boundary: the fallback is rendered in place, and the resolved content is put in a `<div hidden id="S:n">`, then swapped in by an inline `$RC()` script. On a prerendered page a boundary therefore makes the section invisible without JS, and it doesn't stream in production because the document is generated ahead of time. So `PopularPosts` renders inline, and its markup is in the HTML outside any hidden element (checked with curl against `next start`). The trade-off: in dev, where the page renders per request, the shell waits briefly for this section.
-   - **Known follow-up (not fixed in this PR):** Featured, Latest posts and Topics on `/` are still wrapped in `<Suspense>`, so they have the same no-JS visibility problem in the prerendered HTML.
+   - **Follow-up done (sprint 8, `fix/home-no-js`):** Featured, Latest posts, Topics and the hero cover deck now render inline too, so the whole home page is visible without JS.
 2. **An empty `.data/` at build time ships no section.** If the build runs with no recorded views, the prerendered `/` has no "Most read" section. The section appears at the first regeneration after views exist, which needs a request more than 5 minutes after the last generation.
 3. **Revalidation is time-based on purpose.** `recordView` runs on every post view, so calling `revalidatePath("/")` from it would regenerate the home page on nearly every visit. There's no on-demand revalidation, and none should be added for view counts.

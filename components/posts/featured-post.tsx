@@ -6,16 +6,15 @@ import { PostMeta } from "@/components/posts/post-meta";
 import { postRowCoverClassName, postRowLinkClassName } from "@/components/posts/post-row-accent";
 import { hasSeriesMarker, PostSeriesMarker } from "@/components/posts/post-series";
 import { PostTags } from "@/components/posts/post-tags";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getFeaturedPost } from "@/lib/data/posts";
 import { enterStaggerClassName, enterStaggerStyle } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-// Same frame on the card and its skeleton: taller on phones, a wide band from sm up.
+// Cover frame: taller on phones, a wide band from sm up.
 const coverFrame = "aspect-[3/2] sm:aspect-[2/1]";
 
-// Async Server Component: awaited inside <Suspense> on the home page, so the
-// intro renders immediately and this block streams in when its data is ready.
+// Async Server Component rendered inline on the home page, so it is in the
+// prerendered HTML and visible without JS.
 // Image-led: a large cover (scroll parallax, zooms on hover) above the title.
 // The title link stretches over the whole card, cover included.
 // Reveal (client) only animates it if it lands below the fold; the content is server-rendered.
@@ -59,33 +58,5 @@ export async function FeaturedPost() {
         </div>
       </article>
     </Reveal>
-  );
-}
-
-export function FeaturedPostSkeleton() {
-  return (
-    <div className="flex flex-col gap-4">
-      <span className="sr-only" role="status">
-        Loading featured post…
-      </span>
-      <div aria-hidden="true" className="flex flex-col gap-4">
-        <Skeleton className="h-4 w-16" />
-        <div className="flex flex-col gap-6">
-          <Skeleton className={cn("w-full rounded-lg", coverFrame)} />
-          <div className="flex flex-col gap-4">
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-9 w-4/5 sm:h-10" />
-            <div className="flex flex-col gap-1">
-              <Skeleton className="h-6 w-full max-w-[52ch]" />
-              <Skeleton className="h-6 w-3/4 max-w-[39ch]" />
-            </div>
-            <div className="flex gap-2">
-              <Skeleton className="h-5 w-20 rounded-full" />
-              <Skeleton className="h-5 w-16 rounded-full" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

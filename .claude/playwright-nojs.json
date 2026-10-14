@@ -1,0 +1,8 @@
+{
+  "browser": {
+    "isolated": true,
+    "launchOptions": { "headless": true },
+    "contextOptions": { "javaScriptEnabled": false }
+  },
+  "outputDir": ".playwright-mcp"
+}

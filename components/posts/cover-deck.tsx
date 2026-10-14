@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { PostCover } from "@/components/posts/post-cover";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getPosts } from "@/lib/data/posts";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +26,7 @@ const cardBox = "absolute w-32";
 // Async Server Component: the home hero's visual anchor. The latest three posts'
 // covers stacked like a small deck of issues, newest in front; it links to the
 // archive and fans out on hover/focus. Entrance and fan are CSS only (no client JS).
+// Rendered inline in the hero, so it is in the prerendered HTML and visible without JS.
 export async function LatestCoverDeck() {
   const posts = (await getPosts()).slice(0, 3).reverse();
   if (posts.length === 0) return null;
@@ -57,16 +57,5 @@ export async function LatestCoverDeck() {
         );
       })}
     </Link>
-  );
-}
-
-// Same box and poses as the deck, so it streams in without a shift.
-export function CoverDeckSkeleton() {
-  return (
-    <div aria-hidden="true" className={deckBox}>
-      {slots.map((slot, index) => (
-        <Skeleton key={index} className={cn(cardBox, "aspect-[3/4] rounded-lg ring-4 ring-background", slot.pose)} />
-      ))}
-    </div>
   );
 }

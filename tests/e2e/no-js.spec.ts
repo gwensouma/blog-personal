@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectShown } from "./helpers";
+import { expectShown } from "@/tests/e2e/helpers";
 
 // Every test here runs in the `no-js` project (javaScriptEnabled: false): essential content must
 // be in the server HTML and visible, and forms must work as plain GETs.
@@ -132,17 +132,39 @@ test.describe("without JavaScript", { tag: "@no-js" }, () => {
     await expectShown(page.getByRole("link", { name: /Meta\s*1 post$/ }));
   });
 
-  // Known bug: on the prerendered (ISR) home page the <Suspense> sections are hidden templates revealed by an
-  // inline script, so without JS they never show up. Tracked in .design/roadmap.md, sprint 8 (fix/home-no-js).
-  // Remove .fixme once that lands.
-  test.fixme("home / shows featured, latest and Most read without JS", async ({ page, request }) => {
-    // Give a non-featured post a view so "Most read" has something to show.
-    await request.get("/posts/streaming-with-suspense");
+  // "Most read" isn't asserted because the e2e build sees an empty store (.design/popular-posts.md, caveat 2).
+  test("content: home / shows every section without JS", async ({ page }) => {
     await page.goto("/");
+
+    // AC1: featured post.
     await expectShown(page.getByRole("heading", { level: 2, name: "Featured" }));
-    await expectShown(page.getByRole("link", { name: "Server Components run on the server" }).first());
+    const featured = page.locator('section[aria-labelledby="featured-heading"]');
+    await expectShown(featured.getByRole("link", { name: "Server Components run on the server" }));
+
+    // AC2: latest posts, without the featured one, plus the archive link.
     await expectShown(page.getByRole("heading", { level: 2, name: "Latest posts" }));
-    await expectShown(page.getByRole("heading", { level: 2, name: "Most read" }));
+    const latest = page.locator('section[aria-labelledby="latest-heading"]');
+    const titleLinks = latest.getByRole("heading", { level: 3 }).getByRole("link");
+    await expect(titleLinks).toHaveCount(4);
+    for (const link of await titleLinks.all()) await expectShown(link);
+    await expect(latest.getByRole("link", { name: "Server Components run on the server" })).toHaveCount(0);
+    // Located by tag, not role: the Button-rendered anchor carries role="button" (reported as a suggestion).
+    const viewAll = latest.locator("a", { hasText: "View all posts" });
+    await expectShown(viewAll);
+    await expect(viewAll).toHaveAttribute("href", "/posts");
+
+    // AC3: topics.
+    await expectShown(page.getByRole("heading", { level: 2, name: "Browse by topic" }));
+    const allTags = page.getByRole("link", { name: "All tags" });
+    await expectShown(allTags);
+    await expect(allTags).toHaveAttribute("href", "/tags");
+
+    // AC4: hero deck link (1280 wide, so md applies) and no skeleton text in the HTML.
+    const archive = page.getByRole("link", { name: "Browse the archive" });
+    await expectShown(archive);
+    await expect(archive).toHaveAttribute("href", "/posts");
+    await expect(page.getByText("Loading featured post…")).toHaveCount(0);
+    await expect(page.getByText("Loading posts…")).toHaveCount(0);
   });
 });
 

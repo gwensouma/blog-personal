@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { PostList } from "@/components/posts/post-list";
-import { PostListSkeleton } from "@/components/posts/post-list-skeleton";
 import { Button } from "@/components/ui/button";
 import { getFeaturedPost, getPosts } from "@/lib/data/posts";
 
@@ -16,7 +15,8 @@ function LatestPostsHeading() {
   );
 }
 
-// Async Server Component streamed on the home page. Skips the featured post
+// Async Server Component rendered inline on the home page (in the prerendered
+// HTML, visible without JS). Skips the featured post
 // so it isn't listed twice.
 export async function LatestPosts() {
   const [posts, featured] = await Promise.all([getPosts(), getFeaturedPost()]);
@@ -38,15 +38,6 @@ export async function LatestPosts() {
           />
         </Button>
       ) : null}
-    </section>
-  );
-}
-
-export function LatestPostsSkeleton() {
-  return (
-    <section aria-labelledby="latest-heading" className="flex flex-col gap-6">
-      <LatestPostsHeading />
-      <PostListSkeleton count={LATEST_COUNT} />
     </section>
   );
 }

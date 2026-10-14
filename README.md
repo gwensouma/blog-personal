@@ -1,63 +1,47 @@
-# RSC Demo — Personal Blog (React Server Components)
+# Personal blog: a React Server Components learning project
 
-A learning project for React Server Components (Next.js 14 App Router) + TypeScript.
+A personal blog built to learn React Server Components with Next.js 15 (App Router), React 19, TypeScript,
+Tailwind v4 and shadcn/ui. Posts are Markdown files in `content/posts/`; likes, views and newsletter sign-ups go to a
+small JSON-file store in `.data/`.
 
-## Requirements
+## Setup
 
-- [Node.js](https://nodejs.org/) installed (latest LTS recommended).
-- After cloning/downloading the project, install dependencies:
+1. **Node 22** (`^22.12` or `>=24`, see `engines` in `package.json`). CI uses Node 22.
+2. **Install:** `npm ci`
+3. **Environment:** `cp .env.example .env.local`, then set `PORT` if 3000 is taken. Everything else has a local
+   default; see the comments in [.env.example](.env.example).
+4. **Browser for e2e tests:** `npx playwright install chromium`
+5. **Check it works:** `npm run gate` (typecheck, lint, unit tests, build), then `npm run dev`.
 
-```bash
-npm install
-```
+### For the Claude Code agent team (optional)
 
-## How to run
+6. **Third-party skills:** follow [.claude/skills/SKILLS.md](.claude/skills/SKILLS.md). They are gitignored, so a
+   fresh clone has only the project's own `lead` skill.
+7. **Playwright MCP** (the reviewer's browser checks) is declared in [.mcp.json](.mcp.json) and enabled in
+   `.claude/settings.json`; it runs through `npx`, so there is nothing to install. Approve it when Claude Code asks.
+   If it fails to connect, the reviewer falls back to a static review and says so.
+8. **Trust the workspace** when Claude Code asks: the `PreToolUse` hook in `.claude/hooks/guard-paths.mjs` enforces
+   which agent may edit what.
+9. **Start a session with `/lead`.** The lead reads [.design/roadmap.md](.design/roadmap.md) and runs the sprint loop
+   with the planner, developer, builder, tester and reviewer agents; every task and report is a file under
+   `.design/sprints/` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)).
+10. **Spend limit:** agents are bounded by `maxTurns`, not dollars. Set a monthly limit on your account (Console
+    workspace limit for an API key, or `/usage-credits` on a subscription).
 
-### 1. Run dev (for active development)
+## Commands
 
-```bash
-npm run dev
-```
+| Command | What it does |
+|---|---|
+| `npm run dev` | dev server with hot reload, on `PORT` from `.env.local` |
+| `npm run build` then `npm run start` | production build, then serve it (`start` fails without a build) |
+| `npm run gate` | typecheck, lint, unit tests and build; must pass before a PR |
+| `npm test` | Vitest unit tests (`tests/unit/`) |
+| `npm run test:e2e` | Playwright tests (`tests/e2e/`) on their own build, port 3200; don't run alongside `npm run dev` |
 
-- Has hot reload — edits show up immediately, no restart needed.
-- Opens by default at: http://localhost:3001 (port comes from the `.env.local` file, see below).
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs `gate` and `e2e` on every pull request.
 
-### 2. Run production (simulates a real build, for checking before deploy)
+## Where to read more
 
-You must build first, since Next.js needs to pre-compile into the `.next` directory:
-
-```bash
-npm run build
-npm run start
-```
-
-Running `npm run start` without `npm run build` first will fail with:
-`Could not find a production build in the '.next' directory`.
-
-| Command | When to use it | Needs a build first? |
-|---|---|---|
-| `npm run dev` | Active development, needs hot reload | No |
-| `npm run build` | Package the production bundle | — |
-| `npm run start` | Try out the production build (after building) | Yes |
-
-## Changing the port
-
-The port is configured in [.env.local](.env.local):
-
-```
-PORT=3001
-```
-
-Change this number if it conflicts with another app already running on your machine, then re-run `npm run dev`/`npm run start`. No need to edit `package.json`.
-
-> Why put it in `.env.local` instead of editing `package.json` directly? Because `.env.local` is the standard place to hold environment variables (port, API keys, database URL, etc.), kept separate from code — later, when AI features are added (see `lib/ai/`) and need an API key, it will also be declared here.
-
-## Folder structure (summary)
-
-- `app/` — routing, pages (Server Components), calling into `lib/data/` to fetch data.
-- `components/` — shared UI. Only components that need interactivity (`useState`, `onClick`, etc.) are marked `"use client"`.
-- `lib/data/` — data access layer (currently an in-memory fake).
-- `lib/ai/` — (not created yet) will hold AI-related code later.
-- `types/` — shared TypeScript types.
-
-See more architecture details in [CLAUDE.md](CLAUDE.md).
+- [CLAUDE.md](CLAUDE.md): project goals, architecture and where each new file goes.
+- [.claude/rules/](.claude/rules/): UI, data and test rules.
+- [.design/](.design/): roadmap, sprint records and design decisions.

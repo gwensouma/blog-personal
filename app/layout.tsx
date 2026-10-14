@@ -7,7 +7,7 @@ import { MotionProvider } from "@/components/motion/motion-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { site } from "@/lib/site";
 import { themeInitScript } from "@/lib/theme";
-import "./globals.css";
+import "@/app/globals.css";
 
 // Fonts are self-hosted by next/font and exposed as CSS variables for Tailwind.
 const fraunces = Fraunces({ subsets: ["latin"], weight: ["400", "600"], variable: "--font-heading" });
