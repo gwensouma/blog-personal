@@ -15,18 +15,19 @@ import { PostShare } from "@/components/posts/post-share";
 import { PostTags } from "@/components/posts/post-tags";
 import { PostToc } from "@/components/posts/post-toc";
 import { RelatedPosts } from "@/components/posts/related-posts";
+import { UpNext } from "@/components/posts/up-next";
 import { Button } from "@/components/ui/button";
 import { linkSweepClassName } from "@/lib/motion";
 import { absoluteUrl, site } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import type { AdjacentPosts, Post, PostSeries, PostSummary } from "@/types/post";
+import type { Post, PostEnding, PostSeries } from "@/types/post";
 
 type PostArticleProps = {
   post: Post;
-  adjacent: AdjacentPosts;
-  related: PostSummary[];
   /** The series this post belongs to, or null. */
   series: PostSeries | null;
+  /** The end-of-post links, already deduped by getPostEnding (lib/data/posts.ts). */
+  ending: PostEnding;
 };
 
 // Server Component: renders a full post. Client leaves: LikeButton, the
@@ -35,20 +36,11 @@ type PostArticleProps = {
 // server-rendered children through).
 // The view count and the like button are per-visitor data behind their own
 // <Suspense>: the article streams first and they fill in (see post-engagement.tsx).
-export function PostArticle({ post, adjacent, related, series }: PostArticleProps) {
+export function PostArticle({ post, series, ending }: PostArticleProps) {
   const hasToc = post.toc.length > 0;
   // A one-part "series" has nothing to navigate to yet.
   const shownSeries = series && series.parts.length > 1 ? series : null;
-  // The series nav already links the previous/next part, so the chronological cards skip
-  // series parts instead of repeating them. Sprint 4 reworks this end block.
-  const seriesSlugs = new Set(shownSeries?.parts.map((part) => part.slug));
-  const endAdjacent: AdjacentPosts = shownSeries
-    ? {
-        previous: adjacent.previous && !seriesSlugs.has(adjacent.previous.slug) ? adjacent.previous : null,
-        next: adjacent.next && !seriesSlugs.has(adjacent.next.slug) ? adjacent.next : null,
-      }
-    : adjacent;
-  // Related posts already exclude series parts (getRelatedPosts).
+  const { adjacent, upNext } = ending;
 
   return (
     <div className="flex flex-col gap-16">
@@ -107,7 +99,9 @@ export function PostArticle({ post, adjacent, related, series }: PostArticleProp
 
           <PostBody content={post.content} className="mt-10" />
 
-          {shownSeries ? (
+          {/* The Up next card is the forward step at the end (the next part, when there is one), so the
+              series nav only goes back, and part 1 has no way back. */}
+          {shownSeries && shownSeries.position > 1 ? (
             <Reveal className="mt-16">
               <PostSeriesNav series={shownSeries} />
             </Reveal>
@@ -131,14 +125,17 @@ export function PostArticle({ post, adjacent, related, series }: PostArticleProp
       </div>
 
       <ReadingColumn className="flex flex-col gap-16">
+        {/* One reading path: the single recommended next read first, then the newsletter, then more to
+            browse. getPostEnding already deduped these: a post appears at most once below. */}
+        <UpNext upNext={upNext} />
         <NewsletterSection />
         {/* Skip the wrapper when both slots are empty, so it doesn't leave an extra gap. */}
-        {endAdjacent.previous || endAdjacent.next ? (
+        {adjacent.previous || adjacent.next ? (
           <Reveal>
-            <PostAdjacentNav adjacent={endAdjacent} />
+            <PostAdjacentNav adjacent={adjacent} />
           </Reveal>
         ) : null}
-        <RelatedPosts posts={related} />
+        <RelatedPosts posts={ending.related} />
       </ReadingColumn>
     </div>
   );

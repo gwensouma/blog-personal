@@ -1,0 +1,5 @@
+.design/sprints/4-up-next/tasks/developer-r1.md
+.design/sprints/4-up-next/tasks/builder-r1.md
+.design/sprints/4-up-next/tasks/tester-r1.md
+.design/sprints/4-up-next/tasks/reviewer-r1.md
+.design/sprints/4-up-next/tasks/tester-r2.md

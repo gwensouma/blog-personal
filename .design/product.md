@@ -30,9 +30,11 @@ A personal learning journal about React Server Components, built with them: post
 
 ### Post `/posts/[slug]`
 - Shows cover, title, meta (date, reading time, tags), the body with highlighted code, and a table of contents.
-- Ends with likes and views, share links, the series box and nav (when in a series), related posts and prev/next.
-- An unknown slug is a 404. No JS: the body, series box and nav, related posts and prev/next are visible; like, copy
-  buttons and the TOC highlight need JS.
+- Ends with likes and views, share links, an **Up next** card (the next series part, else the most related post,
+  else the newer or older post), the newsletter, prev/next and related posts; a post appears at most once in this
+  ending. When in a series: the series box at the top and a series nav back to the previous part (none on part 1).
+- An unknown slug is a 404. No JS: the body, series box and nav, the Up next card, related posts and prev/next
+  are visible; like, copy buttons and the TOC highlight need JS.
 
 ### Tags `/tags` and `/tags/[tag]`
 - `/tags` lists every tag with its post count, most used first.

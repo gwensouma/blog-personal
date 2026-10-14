@@ -75,14 +75,13 @@ if a feature needs it.
 
 ## Sprints (from 2026-10-11)
 Each line is one branch and one PR, planned by the planner (`.design/specs/`, `.design/sprints/<#>-<name>/`).
-Open sprints only; merged ones move to the archive. Order: 4 → 9 → 10. Sprint 8 (merged) was the first full
+Open sprints only; merged ones move to the archive. Order: Ctrl+K flake fix → 9 → 10. Sprint 8 (merged) was the first full
 run of the file handoff; its lessons are in `.design/sprints/8-home-no-js/close.md`. The dev container waits on
 branch `chore/devcontainer` (D-012 in [decisions.md](decisions.md)).
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
-| 4 | `feat/up-next` | B: end-of-post card (next in series, else the most related post). Draft PR #10 predates the file handoff: the planner writes its spec, brief and tasks from the PR before work resumes | — |
-| 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | sprint 4 |
+| 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | — |
 | 10 | `feat/comments-admin` | D: /admin with password, hide/unhide comments | sprint 9 |
 
 Deferred: button-styled links ("View all posts" and others) render with `role="button"` (sprint 8 tester and reviewer;

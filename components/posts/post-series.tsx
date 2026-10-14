@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PostSeries, PostSeriesRef } from "@/types/post";
 
@@ -60,58 +60,40 @@ export function PostSeriesBox({ series, className }: { series: PostSeries; class
   );
 }
 
-const arrowClassName = "size-3.5 transition-transform duration-300 ease-out-expo motion-reduce:transition-none";
-
-function SeriesStep({ part, direction }: { part: PostSeries["parts"][number]; direction: "previous" | "next" }) {
-  const isNext = direction === "next";
-  const Arrow = isNext ? ArrowRightIcon : ArrowLeftIcon;
-  return (
-    <Link
-      href={`/posts/${part.slug}`}
-      className={cn(
-        "group flex flex-col gap-1 rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-        isNext && "sm:items-end sm:text-right",
-      )}
-    >
-      {/* Arrow before "Previous", after "Next" (DOM order, like post-adjacent-nav), so the label
-          lines up with the title at every width. */}
-      <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-        {isNext ? null : <Arrow aria-hidden="true" className={cn(arrowClassName, "motion-safe:group-hover:-translate-x-1 motion-safe:group-focus-visible:-translate-x-1")} />}
-        {isNext ? "Next in series" : "Previous in series"}
-        {isNext ? <Arrow aria-hidden="true" className={cn(arrowClassName, "motion-safe:group-hover:translate-x-1 motion-safe:group-focus-visible:translate-x-1")} /> : null}
-      </span>
-      <span className="font-heading text-lg leading-snug font-semibold text-balance [overflow-wrap:anywhere] transition-colors group-hover:text-primary motion-reduce:transition-none">
-        {part.title}
-      </span>
-    </Link>
-  );
-}
-
 /**
- * Minimal previous/next within the series, at the end of the post body. Kept to
- * text links on a hairline so it doesn't compete with the chronological
- * adjacent-post cards further down.
+ * The way back within the series, at the end of the post body: a "Previous in series" text link on a
+ * hairline, plus the "part n of N" / "final part" line. The forward step is the Up next card further down
+ * (it always points at the next part when there is one), so this nav only goes back. Render it from part 2
+ * on: part 1 has no previous part. "final part" comes from the series itself, not from what is shown.
  */
 export function PostSeriesNav({ series, className }: { series: PostSeries; className?: string }) {
   const previous = series.parts[series.position - 2];
-  const next = series.parts[series.position];
-  const isLast = !next;
+  const isLast = !series.parts[series.position];
 
   return (
-    <nav aria-label={`${series.name}: previous and next part`} className={cn("flex flex-col gap-5 border-t border-border pt-8", className)}>
+    <nav aria-label={`${series.name}: previous part`} className={cn("flex flex-col gap-5 border-t border-border pt-8", className)}>
       <p className="text-sm text-muted-foreground">
         {isLast
           ? `${series.name}, final part (${series.position} of ${series.parts.length})`
           : `${series.name}, part ${series.position} of ${series.parts.length}`}
       </p>
-      <div className="grid gap-6 sm:grid-cols-2">
-        {previous ? <SeriesStep part={previous} direction="previous" /> : null}
-        {next ? (
-          <div className="sm:col-start-2">
-            <SeriesStep part={next} direction="next" />
-          </div>
-        ) : null}
-      </div>
+      {previous ? (
+        <Link
+          href={`/posts/${previous.slug}`}
+          className="group flex flex-col gap-1 self-start rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            <ArrowLeftIcon
+              aria-hidden="true"
+              className="size-3.5 transition-transform duration-300 ease-out-expo motion-safe:group-hover:-translate-x-1 motion-safe:group-focus-visible:-translate-x-1 motion-reduce:transition-none"
+            />
+            Previous in series
+          </span>
+          <span className="font-heading text-lg leading-snug font-semibold text-balance [overflow-wrap:anywhere] transition-colors group-hover:text-primary motion-reduce:transition-none">
+            {previous.title}
+          </span>
+        </Link>
+      ) : null}
     </nav>
   );
 }

@@ -9,12 +9,13 @@ import { site } from "@/lib/site";
 import { tagSlug } from "@/lib/tags";
 import { yearOf } from "@/lib/format";
 import { markdownToPlainText, normalizeQuery, snippetAround } from "@/lib/highlight";
+import { decidePostEnding, rankRelated, RELATED_LIMIT, seriesPartsOf } from "@/lib/post-ending";
 import type {
-  AdjacentPosts,
   ArchivePage,
   Paginated,
   Post,
   PostCover,
+  PostEnding,
   PostIndexItem,
   PostSeries,
   PostSeriesRef,
@@ -236,30 +237,17 @@ export const getPost = cache(async (slug: string): Promise<Post | null> => {
   return { ...raw.summary, content: await renderMarkdown(raw.body), toc: extractToc(raw.body) };
 });
 
-export async function getAdjacentPosts(slug: string): Promise<AdjacentPosts> {
-  const posts = (await loadAllPosts()).map((post) => post.summary);
-  const index = posts.findIndex((post) => post.slug === slug);
-  if (index === -1) return { previous: null, next: null };
-  // List is newest first: the next (newer) post sits before, the previous (older) one after.
-  return { next: posts[index - 1] ?? null, previous: posts[index + 1] ?? null };
-}
-
 /** Posts sharing the most tags with the given one, excluding itself and the other parts of its series. */
-export async function getRelatedPosts(slug: string, limit = 3): Promise<PostSummary[]> {
+export async function getRelatedPosts(slug: string, limit = RELATED_LIMIT): Promise<PostSummary[]> {
   const posts = (await loadAllPosts()).map((post) => post.summary);
   const current = posts.find((post) => post.slug === slug);
-  if (!current) return [];
-  const currentTags = new Set(current.tags.map(tagSlug));
-  // Other parts of a real series are already linked by the series box, so leave room for different posts.
-  const seriesSlug = current.series && (current.series.total ?? 0) > 1 ? current.series.slug : null;
+  return current ? rankRelated(posts, current).slice(0, limit) : [];
+}
 
-  return posts
-    .filter((post) => post.slug !== slug && (!seriesSlug || post.series?.slug !== seriesSlug))
-    .map((post) => ({ post, shared: post.tags.filter((tag) => currentTags.has(tagSlug(tag))).length }))
-    .filter(({ shared }) => shared > 0)
-    .sort((a, b) => b.shared - a.shared)
-    .slice(0, limit)
-    .map(({ post }) => post);
+// The rules (up next, dedup priority) live in decidePostEnding.
+export async function getPostEnding(slug: string): Promise<PostEnding> {
+  const posts = (await loadAllPosts()).map((post) => post.summary);
+  return decidePostEnding(posts, slug);
 }
 
 /** The series the given post belongs to, with every part in reading order, or null. */
@@ -268,9 +256,7 @@ export async function getPostSeries(slug: string): Promise<PostSeries | null> {
   const current = posts.find((post) => post.slug === slug)?.series;
   if (!current) return null;
 
-  const parts = posts
-    .filter((post) => post.series?.slug === current.slug)
-    .sort((a, b) => a.series!.order - b.series!.order || a.date.localeCompare(b.date));
+  const parts = seriesPartsOf(posts, current.slug);
   const orders = parts.map((post) => post.series!.order);
   if (new Set(orders).size !== orders.length) {
     warnOnce(`series:${current.slug}`, `[posts] series "${current.name}" has duplicate seriesOrder values: ${orders.join(", ")}.`);
