@@ -13,7 +13,7 @@
 // Input: the hook JSON on stdin. Output: exit 2 with a reason on stderr blocks; exit 0 allows.
 // See .design/agent-system-status.md, steps 2 and 8.
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 // Role agents get their work from a task file and must report in a file. The planner writes the task files.
@@ -165,12 +165,17 @@ function decide(event, projectDir) {
     if (problems.length > 0) {
       return `${own[0].rel} doesn't follow its template (.claude/templates/): ${problems.join("; ")}.`;
     }
-    // Dispatch gate: the next task waits until every other task in the sprint has its report. This is the check
-    // that holds for background agents, which can finish past a SubagentStop block.
-    const waiting = unreportedTasks(projectDir, own[0].sprintDir).filter((rel) => !own.some((t) => t.rel === rel));
+    // Dispatch gate: the next task waits until every task already dispatched in the sprint has its report. This is
+    // the check that holds for background agents, which can finish past a SubagentStop block. Tasks written ahead
+    // (the planner writes every round-1 task at once) don't count until they are dispatched.
+    const dispatched = dispatchedTasks(projectDir, own[0].sprintDir);
+    const waiting = unreportedTasks(projectDir, own[0].sprintDir).filter(
+      (rel) => rel !== own[0].rel && dispatched.includes(rel),
+    );
     if (waiting.length > 0) {
       return `Waiting on reports for: ${waiting.join(", ")}. Get each report written (continue that agent) before dispatching the next task.`;
     }
+    recordDispatch(projectDir, own[0]);
     return null;
   }
 
@@ -293,6 +298,21 @@ function reportProblems(text, agent) {
     if (!new RegExp(`^${heading}`, "m").test(text)) problems.push(`no "${heading}" section`);
   }
   return problems;
+}
+
+// The hook's own record of dispatched tasks, one path per line. Agents can't write it (it is neither a task nor a
+// report), and it stays in the sprint folder as part of the record.
+const DISPATCH_LOG = "dispatched.txt";
+
+/** Task paths dispatched so far in a sprint. */
+function dispatchedTasks(projectDir, sprintDir) {
+  const log = path.resolve(projectDir, sprintDir, DISPATCH_LOG);
+  return existsSync(log) ? readFileSync(log, "utf8").split(/\r?\n/).filter(Boolean) : [];
+}
+
+function recordDispatch(projectDir, task) {
+  if (dispatchedTasks(projectDir, task.sprintDir).includes(task.rel)) return;
+  appendFileSync(path.resolve(projectDir, task.sprintDir, DISPATCH_LOG), `${task.rel}\n`);
 }
 
 /** Task files in a sprint folder that have no matching report yet. */
