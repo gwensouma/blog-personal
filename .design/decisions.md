@@ -37,14 +37,15 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
   full e2e: 213s → 137s with a build, 66s without.
 - **Source:** the user, 2026-10-16.
 
-### D-016 · 2026-10-14 · Simulated data latency is opt-in; post pages get a loading boundary
+### D-016 · 2026-10-14 · Simulated data latency is opt-in; rendered posts are memoised
 - **Decision:** the fixed 300ms `setTimeout` in `lib/data/posts.ts` is off by default and set with `BLOG_LATENCY_MS`.
-  `/posts/[slug]` gets a `loading.tsx` skeleton, and rendered Markdown is memoised per slug for the server process.
+  Rendered Markdown is memoised per slug for the server process. `/posts/[slug]` gets **no** `loading.tsx`.
 - **Why:** the user found opening a post slow. Measured on the dev server: about 0.52s per navigation, 300ms of it the
   artificial delay and about 200ms re-running Markdown + Shiki (the route is dynamic because of the like cookie, so it
-  renders per request). With no loading boundary the click showed nothing until the whole page arrived, and `<Link>`
-  can't prefetch a dynamic route without one. Making the route static again (moving the liked-state read to the
-  client) is the bigger fix and is not done here.
+  renders per request). A route-level `loading.tsx` was tried and dropped: it puts the whole article behind a
+  Suspense boundary, so without JS the streamed content stays in a hidden div and only the skeleton shows (the no-JS
+  e2e tests caught it). Making the route static again (moving the liked-state read to the client) is the bigger fix
+  and is not done here.
 - **Source:** the user, 2026-10-14.
 
 ### D-015 · 2026-10-14 · Petrol replaces the deep-blue palette
