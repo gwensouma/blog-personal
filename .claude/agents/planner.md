@@ -13,7 +13,8 @@ them. You don't write code, spawn agents, touch git or edit the roadmap (the gua
 
 ## Mode `spec`: an idea becomes a spec
 
-Input: the user's idea, or a roadmap phase or deferred item. Output: `.design/specs/<feature>.md` from
+Prompt (the guard hook checks it): first line `Mode: spec`, then the idea. Input: the user's idea, or a roadmap
+phase or deferred item. Output: `.design/specs/<feature>.md` from
 `.claude/templates/spec.md`, with `Status: draft`.
 
 1. **Understand the ask.** Restate the problem from the reader's or the owner's side. If the idea is vague, write the
@@ -34,7 +35,8 @@ Input: the user's idea, or a roadmap phase or deferred item. Output: `.design/sp
 
 ## Mode `tasks`: an approved spec becomes a sprint
 
-Input: an approved spec (`Status: approved`), the sprint number and the branch name. Output, in
+Prompt (the guard hook checks it): `Mode: tasks`, the spec path, the sprint folder `.design/sprints/<#>-<name>/` and
+`Branch: <branch>`; the spec must say `Status: approved`. Input: an approved spec, the sprint number and the branch. Output, in
 `.design/sprints/<#>-<name>/`:
 
 - `brief.md` from `.claude/templates/brief.md`: goal, the ACs copied from the spec, files in scope by owner,

@@ -31,7 +31,7 @@ const TASK_SECTIONS = {
   developer: ["## Do", "## Files you may change", "## Acceptance criteria", "## Done when"],
   builder: ["## Do", "## Files you may change", "## Acceptance criteria", "## Done when"],
   tester: ["## Cover", "## Files you may change", "## Done when"],
-  reviewer: ["## Review", "## Done when"],
+  reviewer: ["## Review", "## Acceptance criteria", "## Done when"],
 };
 const REPORT_SECTIONS = {
   developer: ["## Files", "## AC"],
@@ -150,6 +150,7 @@ function decide(event, projectDir) {
 
   if (tool === "Agent" || tool === "Task") {
     const target = input.subagent_type;
+    if (target === "planner") return plannerPromptProblem(input.prompt ?? "", projectDir);
     if (!ROLE_AGENTS.has(target)) return null;
     const own = taskRefs(input.prompt ?? "").filter((t) => t.agent === target);
     if (own.length === 0) {
@@ -266,6 +267,24 @@ function resultingText(toolName, input, absPath) {
     text = e.replace_all ? text.split(from).join(e.new_string ?? "") : text.replace(from, e.new_string ?? "");
   }
   return text;
+}
+
+/** The planner's prompt starts with its mode; mode `tasks` names an approved spec, a sprint folder and a branch. */
+function plannerPromptProblem(prompt, projectDir) {
+  const mode = /^Mode:\s*(spec|tasks)\b/.exec(prompt.trim())?.[1];
+  if (!mode) return 'Start the planner\'s prompt with "Mode: spec" or "Mode: tasks" (see .claude/agents/planner.md).';
+  if (mode === "spec") return null;
+  const spec = /\.design[\\/]+specs[\\/]+[a-z0-9-]+\.md/.exec(prompt)?.[0].replaceAll("\\", "/");
+  if (!spec || !existsSync(path.resolve(projectDir, spec))) {
+    return "Mode tasks needs an existing spec: name .design/specs/<feature>.md in the prompt.";
+  }
+  if (!/^Status:\s*approved\b/m.test(readFileSync(path.resolve(projectDir, spec), "utf8"))) {
+    return `${spec} is not approved yet ("Status: approved …"). The user (or the lead, when the user waives it) approves the spec before tasks are written.`;
+  }
+  if (!/\.design[\\/]+sprints[\\/]+\d+-[a-z0-9-]+/.test(prompt) || !/\bBranch:\s*`?[\w./-]+/.test(prompt)) {
+    return "Mode tasks needs the sprint folder (.design/sprints/<#>-<name>/) and \"Branch: <branch>\" in the prompt.";
+  }
+  return null;
 }
 
 /** What a task file lacks against its template (.claude/templates/task-*.md), as short phrases. */
