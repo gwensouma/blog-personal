@@ -37,6 +37,26 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
   full e2e: 213s → 137s with a build, 66s without.
 - **Source:** the user, 2026-10-16.
 
+### D-016 · 2026-10-14 · Simulated data latency is opt-in; rendered posts are memoised
+- **Decision:** the fixed 300ms `setTimeout` in `lib/data/posts.ts` is off by default and set with `BLOG_LATENCY_MS`.
+  Rendered Markdown is memoised per slug for the server process. `/posts/[slug]` gets **no** `loading.tsx`.
+- **Why:** the user found opening a post slow. Measured on the dev server: about 0.52s per navigation, 300ms of it the
+  artificial delay and about 200ms re-running Markdown + Shiki (the route is dynamic because of the like cookie, so it
+  renders per request). A route-level `loading.tsx` was tried and dropped: it puts the whole article behind a
+  Suspense boundary, so without JS the streamed content stays in a hidden div and only the skeleton shows (the no-JS
+  e2e tests caught it). Making the route static again (moving the liked-state read to the client) is the bigger fix
+  and is not done here.
+- **Source:** the user, 2026-10-14.
+
+### D-015 · 2026-10-14 · Petrol replaces the deep-blue palette
+- **Decision:** `--primary` is a deep petrol teal, `#076b6f` / `oklch(0.48 0.08 200)` (6.3:1 on white), lifted to
+  `oklch(0.78 0.09 195)` in dark (9.9:1). Neutrals and the dark surfaces carry a faint tint of the same hue (200–215)
+  instead of blue (262), and the `--brand-*` cover tones follow. Every text pair clears 4.5:1.
+- **Why:** the user found the old `#1d4ed8` (Tailwind's stock `blue-700`) ugly: generic and too saturated for a
+  reading-first blog. Petrol is calm and distinct while keeping the cool, technical tone. Terracotta was rejected as
+  too close to the warning/caution callouts, forest green as a clash with the tip callout (hue 155).
+- **Source:** the user asked for a researched alternative and accepted the recommendation, 2026-10-14.
+
 ### D-014 · 2026-10-14 · Project-level decisions get their own log
 - **Decision:** keep this file, `.design/decisions.md`, as the one place for decisions that outlive a sprint.
 - **Why:** decisions were spread across specs, sprint reports, the roadmap, `agent-system-status.md` and auto-memory,

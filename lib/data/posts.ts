@@ -3,6 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { cache } from "react";
 import matter from "gray-matter";
+import type { Root } from "hast";
 import { getImageMeta, isRemoteImage } from "@/lib/data/images";
 import { estimateReadingTime, extractToc, renderMarkdown } from "@/lib/markdown";
 import { site } from "@/lib/site";
@@ -29,9 +30,24 @@ import type {
 // content/posts; swapping this for a database/CMS only changes this file.
 const POSTS_DIR = path.join(process.cwd(), "content", "posts");
 
-// Simulated network latency so loading states stay visible while learning RSC.
-const LATENCY_MS = 300;
-const delay = () => new Promise((resolve) => setTimeout(resolve, LATENCY_MS));
+// Optional simulated network latency, standing in for a DB call. Off by default (it was a fixed 300ms
+// on every post load); set BLOG_LATENCY_MS in .env.local to make loading states visible while learning RSC.
+const LATENCY_MS = Math.max(0, Number(process.env.BLOG_LATENCY_MS) || 0);
+const delay = () => (LATENCY_MS ? new Promise((resolve) => setTimeout(resolve, LATENCY_MS)) : Promise.resolve());
+
+// Rendered Markdown per slug for the life of the server process. /posts/[slug] renders per request
+// (it reads the like cookie), and Shiki shouldn't re-highlight an unchanged post every time. Keyed on
+// the body too, so an edited file is re-rendered; failures are evicted so the next request retries.
+const renderedPosts = new Map<string, { body: string; content: Promise<Root> }>();
+
+function renderPostBody(slug: string, body: string): Promise<Root> {
+  const cached = renderedPosts.get(slug);
+  if (cached?.body === body) return cached.content;
+  const content = renderMarkdown(body);
+  content.catch(() => renderedPosts.delete(slug));
+  renderedPosts.set(slug, { body, content });
+  return content;
+}
 
 type RawPost = { summary: PostSummary; body: string };
 
@@ -234,7 +250,7 @@ export const getPost = cache(async (slug: string): Promise<Post | null> => {
   const raw = (await loadAllPosts()).find((post) => post.summary.slug === slug);
   if (!raw) return null;
 
-  return { ...raw.summary, content: await renderMarkdown(raw.body), toc: extractToc(raw.body) };
+  return { ...raw.summary, content: await renderPostBody(slug, raw.body), toc: extractToc(raw.body) };
 });
 
 /** Posts sharing the most tags with the given one, excluding itself and the other parts of its series. */

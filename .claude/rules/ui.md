@@ -35,6 +35,6 @@ Only small leaves are `"use client"`: `like-button`, `copy-link-button`, `nav-li
 ## Design reference
 - Mockups: `.design/Main.dc.html` and `.design/Detail.dc.html`. An editorial layout: Fraunces headings
   (`--font-heading`) and Source Sans 3 body (`--font-sans`), both loaded with `next/font` in `app/layout.tsx`.
-- Palette: deep blue `--primary` (`#1d4ed8`) on white/black (see `app/globals.css`), chosen over the mockups'
-  warm paper. Motion is deliberately bold on top of the editorial look.
+- Palette: deep petrol `--primary` (`#076b6f`) on white / deep ink (see `app/globals.css` and D-015 in
+  `.design/decisions.md`), chosen over the mockups' warm paper. Motion is deliberately bold on top of the editorial look.
 - Keep new UI consistent with this unless the user changes direction; write a direction change to `.design/`.

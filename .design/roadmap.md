@@ -4,7 +4,7 @@ Owner: the lead session (start it with `/lead`). How the team works lives in `.c
 says only *what* is queued and deferred; decisions and their reasons are in [decisions.md](decisions.md). Finished
 sprints and plans: [roadmap-archive.md](roadmap-archive.md).
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
-Last updated: 2026-10-14.
+Last updated: 2026-10-16.
 
 ## Out of scope for now
 - **AI features** (`lib/ai/`): postponed by the user. Keep the data layer extensible; build nothing yet.
@@ -75,7 +75,7 @@ if a feature needs it.
 
 ## Sprints (from 2026-10-11)
 Each line is one branch and one PR, planned by the planner (`.design/specs/`, `.design/sprints/<#>-<name>/`).
-Open sprints only; merged ones move to the archive. Order: Ctrl+K flake fix → 9 → 10. Sprint 8 (merged) was the first full
+Open sprints only; merged ones move to the archive. Order: 9 → 10 (the Ctrl+K flake was fixed in PR #28). Sprint 8 (merged) was the first full
 run of the file handoff; its lessons are in `.design/sprints/8-home-no-js/close.md`. The dev container waits on
 branch `chore/devcontainer` (D-012 in [decisions.md](decisions.md)).
 
