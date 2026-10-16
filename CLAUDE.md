@@ -22,10 +22,12 @@ what each page does today: [.design/product.md](.design/product.md) (read it bef
 - `npm run build` — production build (also runs ESLint)
 - `npm run typecheck` — `tsc --noEmit`; `npm run lint` — ESLint ([eslint.config.mjs](eslint.config.mjs))
 - `npm test` — Vitest unit tests (`tests/unit/`); `npm run test:watch` — watch mode
-- `npm run test:e2e` — Playwright (`tests/e2e/`) against its own production build on port 3200 with
-  `BLOG_DATA_DIR=.data-e2e`. It rebuilds `.next/`, so don't run it alongside `npm run dev`; it fails if 3200 is busy.
-- `npm run gate` — typecheck, lint, unit tests and build; stops at the first failure.
-- Before a PR: `npm run gate` passes, plus `npm run test:e2e` for any UI or route change. CI
+- `npm run test:e2e` — Playwright (`tests/e2e/`) against its own production build in `.next-e2e/` on port 3200 with
+  `BLOG_DATA_DIR=.data-e2e` (safe next to `npm run dev`; fails if 3200 is busy). `E2E_SKIP_BUILD=1 npm run test:e2e`
+  reuses the last e2e build: only after changing nothing but `tests/`.
+- `npm run gate:fast` — typecheck, lint and unit tests (no build). `npm run gate` — `gate:fast` plus the build.
+- Before a PR: `npm run gate:fast` passes, plus `npm run test:e2e` (which builds) for any UI or route change; with no
+  UI or route change, run `npm run gate` instead so the build is checked. CI
   ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs `gate` and `e2e` on every PR; merge only when both are green.
 
 ## Architecture

@@ -34,9 +34,10 @@ small JSON-file store in `.data/`.
 |---|---|
 | `npm run dev` | dev server with hot reload, on `PORT` from `.env.local` |
 | `npm run build` then `npm run start` | production build, then serve it (`start` fails without a build) |
-| `npm run gate` | typecheck, lint, unit tests and build; must pass before a PR |
+| `npm run gate:fast` | typecheck, lint and unit tests (no build): the quick check while working |
+| `npm run gate` | `gate:fast` plus the production build; must pass before a PR |
 | `npm test` | Vitest unit tests (`tests/unit/`) |
-| `npm run test:e2e` | Playwright tests (`tests/e2e/`) on their own build, port 3200; don't run alongside `npm run dev` |
+| `npm run test:e2e` | Playwright tests (`tests/e2e/`) on their own build in `.next-e2e/`, port 3200; safe next to `npm run dev`. `E2E_SKIP_BUILD=1` reuses the last build |
 
 CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs `gate` and `e2e` on every pull request.
 

@@ -20,5 +20,5 @@ AC2 (from the brief).
 Editorial look, tokens only, shadcn first, motion rules (`.claude/rules/ui.md`), widths 320/768/1280, visible without JS.
 
 ## Done when
-- `npm run gate` exits 0.
+- `npm run gate:fast` exits 0.
 - The report lists what the tester should check per AC (states, widths, no-JS, reduced motion).

@@ -18,5 +18,5 @@ None: the reviewer writes only its report.
 AC1..n (from the brief): which ones this review checks by reading or in the browser.
 
 ## Done when
-- `npm run gate` exit code is in the report, and the browser check is done or its skip is explained.
+- `npm run gate:fast` exit code is in the report, and the browser check is done or its skip is explained.
 - Findings are marked must-fix / suggestion with `file:line`; "no must-fix" is said explicitly when true.

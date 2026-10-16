@@ -25,6 +25,18 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-017 · 2026-10-16 · One build per test round
+- **Decision:** the developer, builder and reviewer run `npm run gate:fast` (typecheck, lint, unit; no build). The
+  production build runs once per round inside the tester's `npm run test:e2e`, into its own `.next-e2e/`, and in CI.
+  `E2E_SKIP_BUILD=1` reuses that build when only `tests/` changed. E2E runs 2 workers locally and retries once on CI.
+  Shiki preloads only the languages the posts use.
+- **Why:** the user found the test process too slow. A sprint ran `next build` 7–8 times (every agent's `gate`, plus
+  e2e's own build), about 1.5–2 minutes each, and re-running one e2e test rebuilt too. The flaky timeouts at 6 workers
+  came from Shiki preloading every bundled grammar: the first post render on a cold server took 11.4s (0.87s now), so
+  parallel first loads crossed the 30s timeout. The e2e build in `.next/` also broke a running `npm run dev`. Measured
+  full e2e: 213s → 137s with a build, 66s without.
+- **Source:** the user, 2026-10-16.
+
 ### D-014 · 2026-10-14 · Project-level decisions get their own log
 - **Decision:** keep this file, `.design/decisions.md`, as the one place for decisions that outlive a sprint.
 - **Why:** decisions were spread across specs, sprint reports, the roadmap, `agent-system-status.md` and auto-memory,

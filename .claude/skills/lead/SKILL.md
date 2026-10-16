@@ -160,8 +160,11 @@ ask the user with the open findings.
 
 ### 6. Gate
 
-`npm run gate` exits 0, and `npm run test:e2e` exits 0 for any UI or route change. Every report states the command and
-its exit code; "it passes" without one is not a gate result.
+Each agent's report has its gate: `npm run gate:fast` for the developer, builder and reviewer; `gate:fast` plus
+`npm run test:e2e` (which builds) for the tester. After the last change, run `npm run gate:fast` yourself. Run
+`npm run test:e2e` again only if code changed after the tester's last run; `npm run gate` (with the build) only when
+there is no UI or route change and so no e2e run. CI runs the full `gate` and `e2e` on the PR either way. Every report
+states the command and its exit code; "it passes" without one is not a gate result.
 
 ### 7. Ship
 
