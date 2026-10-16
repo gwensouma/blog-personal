@@ -183,7 +183,14 @@ const processor = unified()
     content: { type: "text", value: "#" },
   })
   // Dual themes: colors are emitted as CSS variables, switched by the .dark class in globals.css.
-  .use(rehypeShiki, { themes: { light: "github-light", dark: "github-dark-default" }, defaultColor: false })
+  // Without `langs` Shiki preloads every bundled grammar (about 11s on the first post render of a cold
+  // server). Preload the ones the posts use; `lazy` loads any other fence language on first use.
+  .use(rehypeShiki, {
+    themes: { light: "github-light", dark: "github-dark-default" },
+    defaultColor: false,
+    langs: ["ts", "tsx", "bash"],
+    lazy: true,
+  })
   .use(rehypeStringify);
 
 /** Renders trusted Markdown (authored in content/posts) on the server to an HTML syntax

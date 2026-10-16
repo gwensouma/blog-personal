@@ -9,7 +9,7 @@ const compat = new FlatCompat({ baseDirectory: dirname(fileURLToPath(import.meta
 const PALETTE = String.raw`/(^|[\s:])(bg|text|border|ring|outline|fill|stroke|from|via|to|decoration|shadow|divide|accent|caret)-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}\b|-\[#[0-9a-fA-F]{3,8}\]/`;
 
 const eslintConfig = [
-  { ignores: [".next/**", "out/**", "node_modules/**", ".data/**", ".data-e2e/**", "test-results/**", "playwright-report/**", "blob-report/**", ".playwright-mcp/**", ".claude/**", "next-env.d.ts"] },
+  { ignores: [".next/**", ".next-e2e/**", "out/**", "node_modules/**", ".data/**", ".data-e2e/**", "test-results/**", "playwright-report/**", "blob-report/**", ".playwright-mcp/**", ".claude/**", "next-env.d.ts"] },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   // Project conventions from CLAUDE.md, enforced here instead of in prose.
   {

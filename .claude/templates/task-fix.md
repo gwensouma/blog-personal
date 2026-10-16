@@ -13,4 +13,4 @@ Source: `reports/<tester|reviewer>-r<m>.md`
 | F1 | | | |
 
 ## Done when
-- Every row is fixed or explained in the report, and `npm run gate` exits 0.
+- Every row is fixed or explained in the report, and `npm run gate:fast` exits 0 (the tester re-runs e2e).

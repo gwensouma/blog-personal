@@ -35,8 +35,12 @@ Each test asserts behaviour a user or caller can observe, not implementation det
 
 ## Running
 
-- `npm test` (unit) and `npm run test:e2e` (E2E), or the scripts the test setup defines. Run the full suite, not only
-  your new tests.
+- `npm run gate:fast` (typecheck, lint, unit) and `npm run test:e2e` (E2E; it builds into `.next-e2e/` first, about
+  1.5–2 minutes). Run the full suite, not only your new tests.
+- Re-running after changing only files under `tests/`: `E2E_SKIP_BUILD=1 npm run test:e2e` (optionally with a file or
+  `--last-failed`) reuses the build. After any source change (a fix round), run without it so the build is fresh.
+- E2E runs 2 workers locally (`playwright.config.ts`). Don't raise it to make a run faster: more workers on this
+  machine time out first page loads.
 - Start servers on a free port and stop only the PID you started. Never kill processes by image name; it kills the
   user's other Node processes.
 - A flaky test is a defect: fix the test (wait on state, not on time) or report the flakiness. Never retry until green.

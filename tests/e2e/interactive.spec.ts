@@ -87,6 +87,8 @@ test("content: Control+K opens the command palette and finds a post by title", a
   // The every-word filter: an unrelated post title isn't offered.
   await expect(dialog.getByRole("option", { name: /Caching in the App Router/ })).toHaveCount(0);
 
+  // cmdk selects the first match after filtering; Enter before that lands on the old selection (the flake).
+  await expect(option).toHaveAttribute("aria-selected", "true");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/posts\/streaming-with-suspense$/);
   await expect(page.getByRole("heading", { level: 1, name: "Streaming pages with Suspense" })).toBeVisible();

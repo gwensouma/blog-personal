@@ -29,8 +29,9 @@ belongs to the builder, so report a needed component change instead of redesigni
    `dangerouslySetInnerHTML`). Cap anything a stranger can grow. Name the abuse case you defended against in a comment
    only when it isn't obvious from the code.
 4. **Keep changes scoped** to the brief. Note unrelated problems in your report instead of fixing them.
-5. **Gate.** `npm run gate` (typecheck, lint, unit tests, build) passes
-   before you report. If a gate stays red after two honest attempts, stop and report the failure verbatim.
+5. **Gate.** `npm run gate:fast` (typecheck, lint, unit tests) passes before you report. The production build runs in
+   the tester's e2e and in CI; run `npm run gate` when you change config, routes or the server/client boundary.
+   If a gate stays red after two honest attempts, stop and report the failure verbatim.
 
 The lead owns git: never commit, push or merge. Ask the lead before adding any
 dependency.

@@ -27,13 +27,16 @@ Read your task file, the brief, the other reports in the sprint folder, and any 
 8. **Project rules** — TypeScript only, English-only comments and copy, no unrequested libraries.
 9. **File placement** — every new or moved file sits where CLAUDE.md's "Where does a new file go?" says; `app/` files stay thin; named exports except Next special files; `@/` imports.
 
-Run `npm run gate` (typecheck, lint, unit tests, build); any failure is a must-fix. Report the exit code.
+Run `npm run gate:fast` (typecheck, lint, unit tests); any failure is a must-fix. Report the exit code. The build and
+e2e are the tester's (their report has the exit code) and CI's.
 
 ## Checking in a real browser (Playwright)
 
 Static reading misses layout, contrast, focus and runtime bugs, so verify the affected pages in a browser with the `mcp__playwright__*` tools:
 
-1. Build, then start the production server on a free port in the background: `npx next start -p 3100`. Remember its PID (`netstat -ano | findstr :3100`). Never kill processes by image name (`taskkill /IM node.exe`) — it kills the user's other Node processes.
+1. Start the production server on a free port in the background, reusing the tester's e2e build (code is unchanged
+   since): `NEXT_DIST_DIR=.next-e2e npx next start -p 3100`. If `.next-e2e/` is missing, build it first with
+   `NEXT_DIST_DIR=.next-e2e npx next build`. Remember its PID (`netstat -ano | findstr :3100`). Never kill processes by image name (`taskkill /IM node.exe`) — it kills the user's other Node processes.
 2. For each affected route, at widths **320, 768 and 1280** (`browser_resize`):
    - `browser_snapshot` to check the accessibility tree: landmarks, heading order, link/button names, `aria-current`.
    - `browser_take_screenshot` to check layout, overflow and visual consistency. Use `browser_evaluate` for facts like `document.documentElement.scrollWidth > innerWidth` (horizontal scroll) or computed colors.
@@ -55,7 +58,7 @@ it links: together they are your whole assignment. Work only on what they list; 
 When done, write your report to the task's "Report to" path (the only file you may write; format: `.claude/templates/report.md`) and reply
 with one line: `<status> — <report path>`. The guard hook won't let you finish without the report file.
 
-In the report: the `npm run gate` exit code and the browser check you ran (or why it was skipped); any AC with no
+In the report: the `npm run gate:fast` exit code and the browser check you ran (or why it was skipped); any AC with no
 test, or a test that doesn't really check it; findings most severe first with `file:line`, what is wrong, why it
 matters and a concrete fix, each must-fix or suggestion, and "came back" when a finding returns. Say "no must-fix"
 explicitly when true. No praise, no restating the code.

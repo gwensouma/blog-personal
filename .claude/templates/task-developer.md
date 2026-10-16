@@ -18,5 +18,5 @@ AC1, AC3 (from the brief).
 Validation and limits for any Server Action or route; no-JS rendering; no new dependency.
 
 ## Done when
-- `npm run gate` exits 0.
+- `npm run gate:fast` exits 0.
 - The report lists, per AC, the cases the tester should cover.
