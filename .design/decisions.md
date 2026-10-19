@@ -25,6 +25,16 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-020 · 2026-10-19 · The builder merges into the developer; the HTML mockups are retired
+- **Decision:** one developer agent owns a feature end to end: `app/` (with `app/globals.css`), `lib/`, `types/` and
+  `components/`, design included (it preloads `hallmark`, `frontend-ui-engineering` and `shadcn`). The builder agent
+  and its task template are gone; a sprint is planner → developer → tester → reviewer. `.design/rsc-blog-landing.html`,
+  `Main.dc.html`, `Detail.dc.html` and `canvas.json` are deleted; `.design/blog-refactor.md` is the design reference.
+  This changes the builder part of D-006 (agent models) and D-017 (who runs `gate:fast`); the rest of both stands.
+- **Why:** the user asked for it. Data and UI of one feature were split across two agents and two handoffs, and the
+  mockups no longer matched the site (the palette had moved to petrol in D-015).
+- **Source:** the user, 2026-10-19.
+
 ### D-019 · 2026-10-19 · Frontmatter validation is hand-written
 - **Decision:** the frontmatter check (sprint 14) is a hand-written validator in `lib/`; no `zod` or other schema
   library is added.

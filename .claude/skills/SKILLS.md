@@ -5,9 +5,9 @@ This manifest is what a new machine needs to get them back. Project-owned skills
 
 | Skill | Used by | Source | License |
 |---|---|---|---|
-| `hallmark` (v1.1.0) | builder, reviewer | https://github.com/Nutlope/hallmark | see the repo |
-| `frontend-ui-engineering` | builder, reviewer | https://github.com/addyosmani/agent-skills | see the repo |
-| `shadcn` | builder, reviewer | https://github.com/shadcn-ui/ui (its `shadcn` skill folder) | MIT (repo) |
+| `hallmark` (v1.1.0) | developer, reviewer | https://github.com/Nutlope/hallmark | see the repo |
+| `frontend-ui-engineering` | developer, reviewer | https://github.com/addyosmani/agent-skills | see the repo |
+| `shadcn` | developer, reviewer | https://github.com/shadcn-ui/ui (its `shadcn` skill folder) | MIT (repo) |
 | `frontend-design` | none preloaded; available to the main session | Claude Code official plugin `frontend-design` (`claude-plugins-official` marketplace) | Apache-2.0 (`LICENSE.txt`) |
 
 ## Install

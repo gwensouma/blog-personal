@@ -16,8 +16,7 @@ matters lives only in chat.
 |---|---|---|---|
 | **lead** (you, main session) | roadmap, `close.md`, fix tasks, one-line fixes and docs; git and PRs | the user | chat, to the user |
 | [planner](../../agents/planner.md) | `.design/specs/`, `brief.md`, `tasks/*.md` | your prompt (mode `spec` or `tasks`) | its final message |
-| [developer](../../agents/developer.md) | `app/`, `lib/`, `types/`, config | `tasks/developer-r<n>.md` | `reports/developer-r<n>.md` |
-| [builder](../../agents/builder.md) | `components/`, `.design/<feature>.md` | `tasks/builder-r<n>.md` | `reports/builder-r<n>.md` |
+| [developer](../../agents/developer.md) | `app/` (incl. `globals.css`), `lib/`, `types/`, `components/`, config, `.design/<feature>.md` | `tasks/developer-r<n>.md` | `reports/developer-r<n>.md` |
 | [tester](../../agents/tester.md) | `tests/` | `tasks/tester-r<n>.md` | `reports/tester-r<n>.md` |
 | [reviewer](../../agents/reviewer.md) | nothing but its report | `tasks/reviewer-r<n>.md` | `reports/reviewer-r<n>.md` |
 
@@ -40,7 +39,7 @@ The user delegated merging to you and can take it back at any time.
 | Claude Code facts (agents, hooks, permissions, cost) | `.claude/skills/lead/claude-code-facts.md` | lead |
 | A feature's research and plan | `.design/specs/<feature>.md` | planner |
 | One sprint | `.design/sprints/<#>-<name>/` | see below |
-| Visual design decisions | `.design/<feature>.md`, `.design/blog-refactor.md` | builder |
+| Visual design decisions (the design reference; no HTML mockups) | `.design/blog-refactor.md`, `.design/<feature>.md` | developer |
 
 ```
 .design/sprints/<#>-<name>/
@@ -54,7 +53,7 @@ The user delegated merging to you and can take it back at any time.
 
 `.claude/hooks/guard-paths.mjs` (tests: `tests/unit/guard-hook.test.ts`) blocks, not just asks:
 
-- spawning developer, builder, tester or reviewer with any prompt other than the one line `Task: <path>`, naming an
+- spawning developer, tester or reviewer with any prompt other than the one line `Task: <path>`, naming an
   existing `tasks/<that-agent>-r<n>.md` that has its template's sections (`## Do`, `## Cover`, `## Fix`, …), a
   `Brief:` line, a `Report to:` line naming the matching report, and no unfilled placeholder such as `<branch>`;
 - spawning the next task while any task already dispatched in the same sprint has no report yet (the dispatch gate:
@@ -69,12 +68,11 @@ The user delegated merging to you and can take it back at any time.
 - a role agent's report without the template's shape: the `# Report: <agent> · round <n> · status: …` line, a
   `## Gate` section with `exit <code>` per command, and its role's sections (`## Files`, `## AC → test`,
   `## Findings`);
-- Write/Edit outside each agent's area: developer `app/`, `lib/`, `types/`, `content/`, `public/`, `assets/`, root
-  config files and `.design/<feature>.md`; builder `components/`, `app/globals.css`, `public/`, `assets/` and
-  `.design/<feature>.md`; tester `tests/`; reviewer its report only; planner specs, briefs and tasks. `.github/`,
-  `.claude/`, `CLAUDE.md`, `README.md`, the roadmap and `decisions.md` are yours alone;
-- helper agents (general-purpose, claude, Explore, …) editing anything in the project: they research, they don't
-  write, so code work can't bypass the task files;
+- Write/Edit outside each agent's area: developer `app/`, `lib/`, `types/`, `components/`, `content/`, `public/`,
+  `assets/`, root config files and `.design/<feature>.md`; tester `tests/`; reviewer its report only; planner specs,
+  briefs and tasks. `.github/`, `.claude/`, `CLAUDE.md`, `README.md`, the roadmap and `decisions.md` are yours alone;
+- helper agents (general-purpose, claude, Explore, …, and any unknown type such as the retired `builder`) editing
+  anything in the project: they research, they don't write, so code work can't bypass the task files;
 - only the tester adds `test.fixme`/`.skip`; nobody adds `.only`;
 - subagents running git writes (`push`, `commit`, `switch`, `checkout`, `rebase`, `merge`, `cherry-pick`, `revert`,
   `tag`, `reset --hard`, also after global options like `git -C . push`), `gh pr create|merge|close|ready|edit|review`,
@@ -97,7 +95,7 @@ something an agent legitimately needs, decide it yourself; change the hook only 
         │
  2. Prepare (planner: brief + tasks) ── branch + roadmap row
         │
- 3. Build (developer → builder) ── 4. Test (tester) ⇄ fix rounds ── 5. Review (reviewer) ⇄ fix rounds
+ 3. Build (developer)            ── 4. Test (tester) ⇄ fix rounds ── 5. Review (reviewer) ⇄ fix rounds
         │                                   (max 3)                          (max 3)
  6. Gate ── 7. Ship (close.md, PR) ── 8. Lead check ── 9. Merge on green CI
 ```
@@ -132,8 +130,8 @@ one, and the user only confirms it.
 1. Branch off fresh `origin/main`: `feat/<name>`, `fix/<name>` or `chore/<name>`, as in the roadmap row.
 2. Call the planner: `Mode: tasks`, the approved spec's path, `.design/sprints/<#>-<name>/` and `Branch: <branch>`. It writes `brief.md` and
    `tasks/<agent>-r1.md` for each agent the sprint needs.
-3. Read the brief and tasks. Check: every AC appears in a task, each task stays in its agent's area, the developer task
-   comes before the builder task when both exist. Send corrections back to the planner, not around it.
+3. Read the brief and tasks. Check: every AC appears in a task, each task stays in its agent's area, and a feature's
+   data and UI sit in one developer task unless it is too big. Send corrections back to the planner, not around it.
 4. Link the sprint folder from the roadmap row.
 
 ### 3. Build
@@ -160,7 +158,7 @@ ask the user with the open findings.
 
 ### 6. Gate
 
-Each agent's report has its gate: `npm run gate:fast` for the developer, builder and reviewer; `gate:fast` plus
+Each agent's report has its gate: `npm run gate:fast` for the developer and reviewer; `gate:fast` plus
 `npm run test:e2e` (which builds) for the tester. After the last change, run `npm run gate:fast` yourself. Run
 `npm run test:e2e` again only if code changed after the tester's last run; `npm run gate` (with the build) only when
 there is no UI or route change and so no e2e run. CI runs the full `gate` and `e2e` on the PR either way. Every report

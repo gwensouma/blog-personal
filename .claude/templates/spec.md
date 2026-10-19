@@ -40,4 +40,4 @@ A plan that goes against an entry in `.design/decisions.md` names it here (`D-<n
 ## Sprint split
 | Sprint | Branch | Scope | Owners |
 |---|---|---|---|
-| <#> | `feat/<name>` | | developer, builder, tester, reviewer |
+| <#> | `feat/<name>` | | developer, tester, reviewer |

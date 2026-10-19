@@ -1,6 +1,6 @@
 # Blog UI refactor: design decisions
 
-Genre: editorial (hallmark). It builds on Main.dc.html / Detail.dc.html and keeps the editorial palette (deep blue at first; petrol since D-015, the values below are current).
+Genre: editorial (hallmark). This file is the design reference (the earlier HTML mockups were retired on 2026-10-19); it keeps the editorial palette (deep blue at first; petrol since D-015, the values below are current).
 
 ## Tokens
 - Light: `--primary` #076b6f on white, `--muted` #f1f6f7, `--border` #dce3e4.
@@ -26,7 +26,7 @@ Genre: editorial (hallmark). It builds on Main.dc.html / Detail.dc.html and keep
   `relative z-10`.
 - Prose styles live on one component (`components/posts/post-body.tsx`) as arbitrary variants, not as a global `.prose`
   class (CLAUDE.md: no new hand-written CSS classes).
-- The like button is an outline pill (rounded-full) with a primary heart, per Detail.dc.html.
+- The like button is an outline pill (rounded-full) with a primary heart.
 
 ## Post covers (Phase 1: image foundation)
 Every post has a cover. If frontmatter sets `cover`, the real image is used. Otherwise every post shows the same

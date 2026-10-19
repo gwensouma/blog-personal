@@ -32,7 +32,7 @@ const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
-        // Rounded pill for standalone reactions (the like button), per .design/Detail.dc.html.
+        // Rounded pill for standalone reactions (the like button); see .design/blog-refactor.md.
         pill: "h-10 gap-2 rounded-full px-5 text-[0.9375rem] font-semibold has-data-[icon=inline-start]:pl-4",
       },
     },

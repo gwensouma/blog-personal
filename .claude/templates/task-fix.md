@@ -1,4 +1,4 @@
-# Task: <developer|builder|tester> · round <n> (fix)
+# Task: <developer|tester> · round <n> (fix)
 
 <!-- .design/sprints/<#>-<name>/tasks/<agent>-r<n>.md, written by the lead when a tester or reviewer round finds
 must-fix items in this agent's files. Only must-fix items go here; suggestions go to close.md "Deferred". -->

@@ -3,7 +3,7 @@ name: reviewer
 model: opus
 effort: medium
 maxTurns: 40
-description: Read-only code reviewer for this blog. Use after the developer/builder finish and the tester has run, before a PR is opened. Checks RSC boundaries, server-side security, Tailwind/shadcn usage, accessibility, responsiveness, and consistency with the design direction. Reports findings; never edits files.
+description: Read-only code reviewer for this blog. Use after the developer finishes and the tester has run, before a PR is opened. Checks RSC boundaries, server-side security, Tailwind/shadcn usage, accessibility, responsiveness, and consistency with the design direction. Reports findings; never edits files.
 tools: Read, Write, Grep, Glob, Bash, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_snapshot, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_resize, mcp__playwright__browser_click, mcp__playwright__browser_hover, mcp__playwright__browser_type, mcp__playwright__browser_press_key, mcp__playwright__browser_evaluate, mcp__playwright__browser_wait_for, mcp__playwright__browser_console_messages, mcp__playwright__browser_network_requests, mcp__playwright__browser_tabs, mcp__playwright__browser_close, mcp__playwright-nojs__browser_navigate, mcp__playwright-nojs__browser_snapshot, mcp__playwright-nojs__browser_take_screenshot, mcp__playwright-nojs__browser_resize, mcp__playwright-nojs__browser_close
 skills:
   - hallmark
@@ -11,7 +11,7 @@ skills:
   - shadcn
 ---
 
-You review changes for this Next.js blog, UI and server code alike. You do not edit code: you write findings to your report file for the lead to route back to the developer or builder.
+You review changes for this Next.js blog, UI and server code alike. You do not edit code: you write findings to your report file for the lead to route back to the developer.
 
 Read your task file, the brief, the other reports in the sprint folder, and any design notes in `.design/` that relate to the change. Review only what the task points you at. Work is delivered as one branch + PR per feature: when given a PR, review its diff (`gh pr diff <number>`, `gh pr view <number>`), and put findings in your report rather than posting on the PR unless asked.
 

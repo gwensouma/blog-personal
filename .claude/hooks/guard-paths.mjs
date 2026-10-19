@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // PreToolUse guard for the agent team. It enforces in code what the agent prompts only ask for:
-// - tester writes only under tests/, reviewer writes nothing, developer/builder don't touch tests/;
+// - tester writes only under tests/, reviewer writes nothing, the developer doesn't touch tests/;
 // - only the tester may add test.fixme / test.skip, and nobody may add .only;
 // - subagents never push, merge, open PRs, switch branches or rewrite history (the lead owns git);
 // - nobody kills processes by image name (taskkill /IM kills the user's other Node processes).
@@ -17,7 +17,7 @@ import { appendFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 // Role agents get their work from a task file and must report in a file. The planner writes the task files.
-const ROLE_AGENTS = new Set(["developer", "builder", "tester", "reviewer"]);
+const ROLE_AGENTS = new Set(["developer", "tester", "reviewer"]);
 const SUBAGENTS = new Set([...ROLE_AGENTS, "planner"]);
 
 // .design/sprints/<sprint>/tasks/<agent>-r<n>.md, with / or \ separators (doubled when JSON-escaped in a transcript).
@@ -29,18 +29,16 @@ const DISPATCH_PROMPT = /^Task:\s*`?[^\s`]+`?$/;
 // Sections each task and report must have, from .claude/templates/. Fix tasks (title ends "(fix)") need "## Fix".
 const TASK_SECTIONS = {
   developer: ["## Do", "## Files you may change", "## Acceptance criteria", "## Done when"],
-  builder: ["## Do", "## Files you may change", "## Acceptance criteria", "## Done when"],
   tester: ["## Cover", "## Files you may change", "## Done when"],
   reviewer: ["## Review", "## Acceptance criteria", "## Done when"],
 };
 const REPORT_SECTIONS = {
   developer: ["## Files", "## AC"],
-  builder: ["## Files", "## AC"],
   tester: ["## AC", "## Findings"],
   reviewer: ["## Findings"],
 };
-// Unfilled template placeholders: <n>, <#>-<name>, <branch>, <agent>, <m>, <developer|builder|tester>.
-const PLACEHOLDER = /<(?:n|m|#|branch|agent|developer\|builder\|tester|tester\|reviewer)>/;
+// Unfilled template placeholders: <n>, <#>-<name>, <branch>, <agent>, <m>, <developer|tester>.
+const PLACEHOLDER = /<(?:n|m|#|branch|agent|developer\|tester|tester\|reviewer)>/;
 
 const SKIP_PATTERNS =[/\btest\.fixme\s*\(/g, /\b(?:test|describe|it)\.skip\s*\(/g];
 const ONLY_PATTERN = /\b(?:test|describe|it)\.only\s*\(/g;
@@ -60,17 +58,12 @@ const GIT_OWNED_BY_LEAD = [
 const DESIGN_NOTE = /^\.design\/(?!roadmap|decisions)[a-z0-9-]+\.md$/; // e.g. .design/comments.md
 const AREAS = {
   developer: {
-    prefixes: ["app/", "lib/", "types/", "content/", "public/", "assets/"],
+    prefixes: ["app/", "lib/", "types/", "components/", "content/", "public/", "assets/"],
     files: [
       "next.config.ts", "tsconfig.json", "eslint.config.mjs", "postcss.config.mjs", "components.json",
       "package.json", "package-lock.json", ".env.example", "vitest.config.mts", "playwright.config.ts",
     ],
-    note: "app/, lib/, types/, content/, public/, assets/, root config files and .design/<feature>.md notes",
-  },
-  builder: {
-    prefixes: ["components/", "public/", "assets/"],
-    files: ["app/globals.css"],
-    note: "components/, app/globals.css, public/, assets/ and .design/<feature>.md notes",
+    note: "app/, lib/, types/, components/, content/, public/, assets/, root config files and .design/<feature>.md notes",
   },
   tester: { prefixes: ["tests/"], files: [], note: "tests/" },
 };
