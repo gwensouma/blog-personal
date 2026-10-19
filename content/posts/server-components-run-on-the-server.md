@@ -6,6 +6,9 @@ tags: [Server Components, Fundamentals]
 series: RSC Fundamentals
 seriesOrder: 1
 featured: true
+cover:
+  src: /images/posts/server-components-run-on-the-server.webp
+  alt: A server rack sending finished building blocks along a line to an empty browser frame
 ---
 
 A Server Component is a React component that renders **only on the server**. Its code is never sent to the browser as JavaScript, which unlocks a few things that used to need an API layer.

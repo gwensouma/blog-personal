@@ -5,6 +5,9 @@ excerpt: A "use client" component is still rendered to HTML on the server first,
 tags: [Client Components, Fundamentals, Hydration]
 series: RSC Fundamentals
 seriesOrder: 2
+cover:
+  src: /images/posts/client-components-render-twice.webp
+  alt: A solid card and its outlined echo offset behind it, joined by a thin line
 ---
 
 The name is misleading. A Client Component, marked with `"use client"`, is **also rendered on the server**. The difference is that its code is shipped to the browser so it can be hydrated and become interactive.

@@ -3,6 +3,9 @@ title: Streaming pages with Suspense
 date: 2026-07-28
 excerpt: Send the shell immediately and stream slow parts of the page as they resolve.
 tags: [Streaming, Suspense, Performance]
+cover:
+  src: /images/posts/streaming-with-suspense.webp
+  alt: A tall empty frame with one block already settled inside, a second sliding in, and a third still far off along a dotted arc
 ---
 
 With Server Components, a slow data source no longer blocks the whole page. Wrap the slow part in `Suspense` and React streams it in when it is ready.

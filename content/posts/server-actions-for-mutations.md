@@ -3,6 +3,9 @@ title: Server Actions for mutations
 date: 2026-06-14
 excerpt: Forms that post straight to a server function, with progressive enhancement for free.
 tags: [Server Actions, Forms]
+cover:
+  src: /images/posts/server-actions-for-mutations.webp
+  alt: A paper plane gliding along a thin line toward a solid block anchored at its far end
 ---
 
 Reading data is half the story. Server Actions cover the other half: functions that run on the server and can be called from a form or a Client Component.
