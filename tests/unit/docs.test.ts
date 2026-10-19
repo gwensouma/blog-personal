@@ -27,17 +27,17 @@ const DOCS: Record<string, { kind: Kind; maxLines?: number }> = {
   ".claude/templates/task-fix.md": { kind: "template", maxLines: 40 },
   ".claude/templates/task-reviewer.md": { kind: "template", maxLines: 40 },
   ".claude/templates/task-tester.md": { kind: "template", maxLines: 40 },
-  ".design/product.md": { kind: "living", maxLines: 100 },
-  ".design/roadmap.md": { kind: "index", maxLines: 60 },
-  ".design/decisions.md": { kind: "log" },
-  ".design/roadmap-archive.md": { kind: "log" },
+  "docs/product.md": { kind: "living", maxLines: 100 },
+  "docs/roadmap.md": { kind: "index", maxLines: 60 },
+  "docs/decisions.md": { kind: "log" },
+  "docs/roadmap-archive.md": { kind: "log" },
 };
 const ROADMAP_SECTIONS = ["Sprints", "Backlog", "Waiting on the user"];
 const INDEX_LINE_MAX = 220;
 
 const root = path.resolve(__dirname, "../..");
 // Records and machine-local folders: specs and sprints are frozen per feature; third-party skills are gitignored.
-const SKIP = new Set([".design/specs", ".design/sprints", ".claude/worktrees"]);
+const SKIP = new Set(["docs/specs", "docs/sprints", ".claude/worktrees"]);
 
 function markdownUnder(dir: string): string[] {
   const full = path.join(root, dir);
@@ -55,8 +55,8 @@ function markdownUnder(dir: string): string[] {
 const linesOf = (rel: string) => readFileSync(path.join(root, rel), "utf8").split(/\r?\n/);
 
 describe("doc registry", () => {
-  it("registers every doc in .design/ and .claude/", () => {
-    const unregistered = [...markdownUnder(".design"), ...markdownUnder(".claude")].filter((rel) => !(rel in DOCS));
+  it("registers every doc in docs/ and .claude/", () => {
+    const unregistered = [...markdownUnder("docs"), ...markdownUnder(".claude")].filter((rel) => !(rel in DOCS));
     expect(unregistered).toEqual([]);
   });
 
@@ -85,7 +85,7 @@ describe("doc registry", () => {
 });
 
 describe("roadmap index", () => {
-  const lines = linesOf(".design/roadmap.md");
+  const lines = linesOf("docs/roadmap.md");
 
   it("has only the Sprints, Backlog and Waiting on the user sections", () => {
     expect(lines.filter((line) => line.startsWith("## ")).map((line) => line.slice(3).trim())).toEqual(ROADMAP_SECTIONS);

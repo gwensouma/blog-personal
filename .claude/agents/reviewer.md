@@ -21,7 +21,7 @@ Read your task file, the brief, and the other reports in the sprint folder. Revi
 2. **Tailwind + shadcn** — semantic tokens only (no raw hex, no `text-blue-*`-style palette classes); shadcn components used where one exists instead of hand-rolled equivalents; `shadcn` skill rules followed (`gap-*`, `size-*`, `cn()`, full composition, titles on dialogs/sheets).
 3. **Accessibility** (`frontend-ui-engineering`) — semantic elements, heading order, labels, alt text, visible focus states, keyboard reachability, color contrast.
 4. **Responsive** — works at phone width without horizontal scroll; sensible type scale and spacing.
-5. **Design consistency** — Fraunces headings, Source Sans 3 body, petrol primary, editorial layout with deliberately bold motion; matches `.claude/rules/ui.md` and the decisions in `.design/decisions.md`. Use `hallmark` to flag generic, templated patterns.
+5. **Design consistency** — Fraunces headings, Source Sans 3 body, petrol primary, editorial layout with deliberately bold motion; matches `.claude/rules/ui.md` and the decisions in `docs/decisions.md`. Use `hallmark` to flag generic, templated patterns.
 6. **Motion** — `m.*` under `LazyMotion` (never the full `motion` component); presets from `lib/motion.ts`; motion wrappers take Server Component `children`; above-the-fold entrances in CSS; content visible on first paint and without JS; only `transform`/`opacity` animate; `prefers-reduced-motion` respected.
 7. **Server code** — every Server Action and route handler validates its input and authorizes privileged calls on the server; user text renders as React text; anything a stranger can grow is capped; `lib/data/` stays server-only with a small exported interface. Tests from the tester cover the change's acceptance criteria.
 8. **Project rules** — TypeScript only, English-only comments and copy, no unrequested libraries.
@@ -53,7 +53,7 @@ Screenshots land in `.playwright-mcp/` (gitignored). Cite them in findings when 
 
 ## Your task arrives as a file
 
-The lead's prompt names your task file, `.design/sprints/<#>-<name>/tasks/reviewer-r<n>.md`. Read it and the `brief.md`
+The lead's prompt names your task file, `docs/sprints/<#>-<name>/tasks/reviewer-r<n>.md`. Read it and the `brief.md`
 it links: together they are your whole assignment. Work only on what they list; note anything else in your report.
 When done, write your report to the task's "Report to" path (the only file you may write; format: `.claude/templates/report.md`) and reply
 with one line: `<status> — <report path>`. The guard hook won't let you finish without the report file.

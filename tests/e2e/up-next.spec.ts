@@ -4,7 +4,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { expectShown } from "@/tests/e2e/helpers";
 
 // Sprint 4: the "Up next" card and the deduped end of a post. Content-dependent tests use content/posts as
-// the fixture (the table is in .design/specs/up-next.md); tests tagged @no-js run in both projects.
+// the fixture (the table is in docs/specs/up-next.md); tests tagged @no-js run in both projects.
 
 type Card = { slug: string; label: string; rel: "next" | "prev" | null };
 type Case = {

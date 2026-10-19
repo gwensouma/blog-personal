@@ -2,9 +2,9 @@
 
 A personal blog built to learn React Server Components: Next.js 15 App Router, React 19, TypeScript, Tailwind v4,
 shadcn/ui (`base-nova` on Base UI). Area rules load on demand from `.claude/rules/` (`ui.md`, `data.md`, `tests.md`).
-Team workflow: `/lead` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)); plan: [.design/roadmap.md](.design/roadmap.md);
-decisions and why: [.design/decisions.md](.design/decisions.md);
-what each page does today: [.design/product.md](.design/product.md) (read it before changing a page).
+Team workflow: `/lead` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)); plan: [docs/roadmap.md](docs/roadmap.md);
+decisions and why: [docs/decisions.md](docs/decisions.md);
+what each page does today: [docs/product.md](docs/product.md) (read it before changing a page).
 
 ## Project goals
 
@@ -67,12 +67,12 @@ Conventions (file names, `@/` imports and palette classes are also enforced by l
 
 ### Where does a doc go?
 
-Every doc has one kind, registered with a line budget in `tests/unit/docs.test.ts`; an unregistered `.md` in `.design/`
+Every doc has one kind, registered with a line budget in `tests/unit/docs.test.ts`; an unregistered `.md` in `docs/`
 or `.claude/` fails the gate, so a new doc is a deliberate choice, not a side effect.
-- **Living** (`CLAUDE.md`, `.claude/rules/`, agents, the lead skill, `.design/product.md`): how things are *now*.
+- **Living** (`CLAUDE.md`, `.claude/rules/`, agents, the lead skill, `docs/product.md`): how things are *now*.
   Rewrite the paragraph that changed; never append a dated or per-sprint section.
-- **Index** (`.design/roadmap.md`): one line per item, pointing elsewhere.
-- **Log** (`.design/decisions.md`, `.design/roadmap-archive.md`): append-only, newest first.
-- **Record** (`.design/specs/`, `.design/sprints/`): one feature or sprint; frozen once merged, read only on demand.
+- **Index** (`docs/roadmap.md`): one line per item, pointing elsewhere.
+- **Log** (`docs/decisions.md`, `docs/roadmap-archive.md`): append-only, newest first.
+- **Record** (`docs/specs/`, `docs/sprints/`): one feature or sprint; frozen once merged, read only on demand.
 - A feature's design or data notes belong in its spec or sprint report. A rule that outlives the feature goes into a
   living doc; its reason goes into `decisions.md`.

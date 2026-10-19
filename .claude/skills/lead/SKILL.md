@@ -15,7 +15,7 @@ matters lives only in chat.
 | Agent | Writes | Gets work from | Reports in |
 |---|---|---|---|
 | **lead** (you, main session) | roadmap, `close.md`, fix tasks, one-line fixes and docs; git and PRs | the user | chat, to the user |
-| [planner](../../agents/planner.md) | `.design/specs/`, `brief.md`, `tasks/*.md` | your prompt (mode `spec` or `tasks`) | its final message |
+| [planner](../../agents/planner.md) | `docs/specs/`, `brief.md`, `tasks/*.md` | your prompt (mode `spec` or `tasks`) | its final message |
 | [developer](../../agents/developer.md) | `app/` (incl. `globals.css`), `lib/`, `types/`, `components/`, config | `tasks/developer-r<n>.md` | `reports/developer-r<n>.md` |
 | [tester](../../agents/tester.md) | `tests/` | `tasks/tester-r<n>.md` | `reports/tester-r<n>.md` |
 | [reviewer](../../agents/reviewer.md) | nothing but its report | `tasks/reviewer-r<n>.md` | `reports/reviewer-r<n>.md` |
@@ -30,19 +30,19 @@ The user delegated merging to you and can take it back at any time.
 
 | What | Where | Written by |
 |---|---|---|
-| What is queued and waiting (an index: one line per item) | `.design/roadmap.md` (finished: `roadmap-archive.md`) | lead |
-| Project-level decisions and why | `.design/decisions.md` (planner reads it for every spec) | lead |
+| What is queued and waiting (an index: one line per item) | `docs/roadmap.md` (finished: `roadmap-archive.md`) | lead |
+| Project-level decisions and why | `docs/decisions.md` (planner reads it for every spec) | lead |
 | How the team works | this file | lead, in its own PR |
 | Project rules | `CLAUDE.md`, `.claude/rules/` (agents load them automatically) | lead |
-| What each page does today | `.design/product.md` (planner reads it for every spec) | lead, or the sprint that changes a page |
+| What each page does today | `docs/product.md` (planner reads it for every spec) | lead, or the sprint that changes a page |
 | Templates for every handoff | `.claude/templates/` | lead, in its own PR |
 | Claude Code facts (agents, hooks, permissions, cost) | `.claude/skills/lead/claude-code-facts.md` | lead |
-| A feature's research and plan | `.design/specs/<feature>.md` | planner |
-| One sprint | `.design/sprints/<#>-<name>/` | see below |
+| A feature's research and plan | `docs/specs/<feature>.md` | planner |
+| One sprint | `docs/sprints/<#>-<name>/` | see below |
 | Which doc goes where, and each doc's line budget | `tests/unit/docs.test.ts` (the registry) | lead |
 
 ```
-.design/sprints/<#>-<name>/
+docs/sprints/<#>-<name>/
   brief.md              planner: goal, AC1..n, files by owner, constraints, task order
   tasks/<agent>-r<n>.md planner (round 1), lead (fix rounds): what one agent does in one round
   reports/<agent>-r<n>.md  that agent: status, files, gate exit code, AC → test, findings, open questions
@@ -75,7 +75,7 @@ blocks something an agent legitimately needs, decide it yourself; change the hoo
 
 ### 0. Orient
 
-1. Read `.design/roadmap.md` and `.design/decisions.md` in full.
+1. Read `docs/roadmap.md` and `docs/decisions.md` in full.
 2. Run `git fetch --prune`, `git status`, `git worktree list`, `gh pr list --state open`.
 3. Reconcile: every open PR maps to a sprint row, every merged PR's row is archived, and the roadmap is still an
    index (see "The roadmap" below). Fix drift in your next PR.
@@ -90,11 +90,11 @@ Arguments to `/lead` are the user's request for this session. They come before t
 ### 1. Plan: idea → spec
 
 For anything new (a user idea, the next roadmap phase, a deferred item), call the planner with mode `spec` and the
-idea. It researches the code and outside sources and writes `.design/specs/<feature>.md` (Status: draft).
+idea. It researches the code and outside sources and writes `docs/specs/<feature>.md` (Status: draft).
 
 **Stop:** show the user the spec's recommendation, ACs and "Questions for the user". Record their answers in the spec,
 set `Status: approved by the user on <date>`, and add the sprint rows to the roadmap (one line each, linking the spec). An answer that later sprints
-must respect also gets an entry in `.design/decisions.md`.
+must respect also gets an entry in `docs/decisions.md`.
 
 An idea that comes with a decided plan still gets a spec: the planner turns the plan into one, and the user only
 confirms it. The plan goes in the spec, never in the roadmap.
@@ -102,7 +102,7 @@ confirms it. The plan goes in the spec, never in the roadmap.
 ### 2. Prepare: spec → sprint folder
 
 1. Branch off fresh `origin/main`: `feat/<name>`, `fix/<name>` or `chore/<name>`, as in the roadmap row.
-2. Call the planner: `Mode: tasks`, the approved spec's path, `.design/sprints/<#>-<name>/` and `Branch: <branch>`. It writes `brief.md` and
+2. Call the planner: `Mode: tasks`, the approved spec's path, `docs/sprints/<#>-<name>/` and `Branch: <branch>`. It writes `brief.md` and
    `tasks/<agent>-r1.md` for each agent the sprint needs.
 3. Read the brief and tasks. Check: every AC appears in a task, each task stays in its agent's area, and a feature's
    data and UI sit in one developer task unless it is too big. Send corrections back to the planner, not around it.
@@ -112,7 +112,7 @@ confirms it. The plan goes in the spec, never in the roadmap.
 
 Dispatch in the brief's task order, one agent at a time. The prompt is one line:
 
-> `Task: .design/sprints/<#>-<name>/tasks/<agent>-r<n>.md`
+> `Task: docs/sprints/<#>-<name>/tasks/<agent>-r<n>.md`
 
 Read the agent's report file when it returns. `status: blocked` or `failed`: decide (answer, re-scope with the
 planner, or stop and ask the user).
@@ -141,7 +141,7 @@ states the command and its exit code; "it passes" without one is not a gate resu
 ### 7. Ship
 
 1. Write `close.md` from `.claude/templates/close.md`: rounds, local gates, `/usage`, deferred findings.
-2. Move the sprint row from the roadmap to `.design/roadmap-archive.md` (with the PR number once known) and carry any
+2. Move the sprint row from the roadmap to `docs/roadmap-archive.md` (with the PR number once known) and carry any
    deferred item that is still wanted into the roadmap's "Backlog" (one line).
 3. Commit everything (code, tests, the sprint folder, roadmap), push, `gh pr create`, then add the PR number to
    `close.md` and the archive row in a follow-up commit on the same branch.
@@ -151,7 +151,7 @@ states the command and its exit code; "it passes" without one is not a gate resu
 On the PR diff: `gh pr diff <n> --name-only` matches the files in the reports (an ignored path silently drops a file,
 as in PR #7); no `"use client"` creep; essential content renders without JS; files sit where `CLAUDE.md` says; no new
 dependency of any kind; scope matches the brief; every AC has a test in the tester's report; a sprint that adds or
-changes a page (route, section, criterion) updates `.design/product.md` in the same PR.
+changes a page (route, section, criterion) updates `docs/product.md` in the same PR.
 
 ### 9. Merge
 
@@ -178,15 +178,15 @@ Revert it the way it arrived, through a PR:
 
 ## The roadmap
 
-`.design/roadmap.md` answers three questions only: what is next, in what order, blocked by what. It has three
+`docs/roadmap.md` answers three questions only: what is next, in what order, blocked by what. It has three
 sections: **Sprints** (open, in order), **Backlog** (wanted, not scheduled) and **Waiting on the user**. One line
 per item; anything longer goes where it belongs:
 
 | Content | Goes to |
 |---|---|
-| A plan, scope or acceptance criteria | `.design/specs/<feature>.md` |
-| A choice and its reason, including "out of scope for now" | `.design/decisions.md` (the roadmap cites its `D-<n>`) |
-| A merged sprint, or an old plan kept for history | `.design/roadmap-archive.md` |
+| A plan, scope or acceptance criteria | `docs/specs/<feature>.md` |
+| A choice and its reason, including "out of scope for now" | `docs/decisions.md` (the roadmap cites its `D-<n>`) |
+| A merged sprint, or an old plan kept for history | `docs/roadmap-archive.md` |
 | How the team works | this file |
 
 `tests/unit/docs.test.ts` fails the gate when the roadmap grows past its line cap, gains another section, or an item
@@ -205,4 +205,4 @@ Stop and ask the user (with `AskUserQuestion` when there are clear options) when
 ## Hand-off
 
 Before ending a session: every dispatched task has a report or a note in it saying why not, the roadmap matches
-reality, and new decisions are in the spec they belong to or, when they outlive the sprint, in `.design/decisions.md`. A future `/lead` reads only files.
+reality, and new decisions are in the spec they belong to or, when they outlive the sprint, in `docs/decisions.md`. A future `/lead` reads only files.

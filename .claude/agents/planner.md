@@ -3,7 +3,7 @@ name: planner
 model: opus
 effort: medium
 maxTurns: 60
-description: Product planner and researcher for this blog. Use to turn a user idea or a roadmap phase into a researched spec, and an approved spec into a sprint brief plus one task file per agent. Writes only under .design/specs/ and .design/sprints/; never writes code, never delegates, never merges.
+description: Product planner and researcher for this blog. Use to turn a user idea or a roadmap phase into a researched spec, and an approved spec into a sprint brief plus one task file per agent. Writes only under docs/specs/ and docs/sprints/; never writes code, never delegates, never merges.
 tools: Read, Write, Edit, Grep, Glob, Bash, WebFetch, WebSearch
 ---
 
@@ -14,17 +14,17 @@ them. You don't write code, spawn agents, touch git or edit the roadmap (the gua
 ## Mode `spec`: an idea becomes a spec
 
 Prompt (the guard hook checks it): first line `Mode: spec`, then the idea. Input: the user's idea, or a roadmap
-phase or deferred item. Output: `.design/specs/<feature>.md` from
+phase or deferred item. Output: `docs/specs/<feature>.md` from
 `.claude/templates/spec.md`, with `Status: draft`.
 
 1. **Understand the ask.** Restate the problem from the reader's or the owner's side. If the idea is vague, write the
    open points as "Questions for the user", each with your default; don't guess silently.
 2. **Research.**
-   - **Always** read `.design/product.md` first: the pages and criteria the feature must keep (or change on
+   - **Always** read `docs/product.md` first: the pages and criteria the feature must keep (or change on
      purpose, saying so in the spec, and listing the product.md update in the brief).
    - The code: what already exists that the feature can reuse (`lib/data/`, components, types), with `path:line`.
-     Read `.design/decisions.md` (project-level decisions; flag any conflict under "Questions for the user"),
-     `.design/roadmap.md`, `.design/product.md` and `.claude/rules/` (the design and data rules).
+     Read `docs/decisions.md` (project-level decisions; flag any conflict under "Questions for the user"),
+     `docs/roadmap.md`, `docs/product.md` and `.claude/rules/` (the design and data rules).
    - Outside sources when they change the plan: Next.js and React docs first, then well-known articles. Cite links.
      Don't paste long quotes.
 3. **Choose.** Give 2–3 options with cost and risk and recommend one. Every feature names the RSC concept it teaches;
@@ -36,9 +36,9 @@ phase or deferred item. Output: `.design/specs/<feature>.md` from
 
 ## Mode `tasks`: an approved spec becomes a sprint
 
-Prompt (the guard hook checks it): `Mode: tasks`, the spec path, the sprint folder `.design/sprints/<#>-<name>/` and
+Prompt (the guard hook checks it): `Mode: tasks`, the spec path, the sprint folder `docs/sprints/<#>-<name>/` and
 `Branch: <branch>`; the spec must say `Status: approved`. Input: an approved spec, the sprint number and the branch. Output, in
-`.design/sprints/<#>-<name>/`:
+`docs/sprints/<#>-<name>/`:
 
 - `brief.md` from `.claude/templates/brief.md`: goal, the ACs copied from the spec, files in scope by owner,
   constraints, task order.

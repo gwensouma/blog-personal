@@ -8,7 +8,7 @@ paths:
 # UI rules
 
 The design reference: these rules plus the code they point to. Keep new UI consistent with them unless the user
-changes direction; a direction change is a decision (`.design/decisions.md`) and an edit to this file.
+changes direction; a direction change is a decision (`docs/decisions.md`) and an edit to this file.
 
 ## Look
 - Editorial genre: Fraunces headings (`font-heading`: wordmark, h1–h3, blockquotes, footer headings; roman, no

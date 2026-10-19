@@ -1,9 +1,9 @@
 # Task: tester · round <n>
 
-<!-- .design/sprints/<#>-<name>/tasks/tester-r<n>.md -->
+<!-- docs/sprints/<#>-<name>/tasks/tester-r<n>.md -->
 
-Brief: `.design/sprints/<#>-<name>/brief.md` · Branch: `<branch>`
-Report to: `.design/sprints/<#>-<name>/reports/tester-r<n>.md` (format: `.claude/templates/report.md`)
+Brief: `docs/sprints/<#>-<name>/brief.md` · Branch: `<branch>`
+Report to: `docs/sprints/<#>-<name>/reports/tester-r<n>.md` (format: `.claude/templates/report.md`)
 Read first: the developer reports of this sprint (`reports/`).
 
 ## Cover

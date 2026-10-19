@@ -25,21 +25,29 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-023 · 2026-10-19 · `.design/` becomes `docs/`
+- **Decision:** the workflow docs (product, roadmap, decisions, archive, specs, sprints) live in `docs/`. Living, index
+  and log docs name the new paths; merged specs and sprint folders keep their old text as records. The guard hook
+  accepted both roots for the move and then drops `.design/`.
+- **Why:** `.design/` started as the mockup and design-note folder; after D-020 and D-022 it held no design files at
+  all, so the name misled, and a dot folder reads as hidden to people and some tools.
+- **Source:** the user, 2026-10-19.
+
 ### D-022 · 2026-10-19 · One doc registry; feature design notes retired
-- **Decision:** every doc in `.design/` and `.claude/` (outside specs and sprint folders) is registered in
+- **Decision:** every doc in `docs/` and `.claude/` (outside specs and sprint folders) is registered in
   `tests/unit/docs.test.ts` with a kind (living, index, log, reference, template) and a line budget; an unregistered
   doc, a doc over budget, or a date or per-sprint section in a living doc fails the gate. "Where does a doc go?" in
-  `CLAUDE.md` states the kinds. `.design/blog-refactor.md`, `search.md`, `archive.md` and `popular-posts.md` are
+  `CLAUDE.md` states the kinds. `docs/blog-refactor.md`, `search.md`, `archive.md` and `popular-posts.md` are
   deleted: their lasting rules moved to `.claude/rules/ui.md`, reasons to D-011/D-015/D-016/D-018, and the rest is
   history (last full copies at commit `08019c1`). Feature design notes now go in the spec or the sprint report, not in
-  `.design/<feature>.md`. The guard hook's detail moved from the lead skill to `.claude/skills/lead/guard-hook.md`.
+  `docs/<feature>.md`. The guard hook's detail moved from the lead skill to `.claude/skills/lead/guard-hook.md`.
 - **Why:** the user saw docs from before the workflow that no sprint used yet that still cost context: the developer
   read all 532 lines of `blog-refactor.md` before UI work, and parts were wrong (it still said the home stays on
   skeletons without JS, fixed in sprint 8). D-021 fixed one file; this fixes the pattern for all of them.
 - **Source:** the user, 2026-10-19.
 
 ### D-021 · 2026-10-19 · The roadmap is an index, capped by a test
-- **Decision:** `.design/roadmap.md` holds only Sprints, Backlog and Waiting on the user, one line per item. Plans go
+- **Decision:** `docs/roadmap.md` holds only Sprints, Backlog and Waiting on the user, one line per item. Plans go
   to specs, reasons here, history to `roadmap-archive.md` (the old feature map and phase tables moved there; the
   "Phase D plan" moved to `specs/comments.md`). `tests/unit/conventions.test.ts` fails the gate past 60 lines, on any
   other section, or on a list item that wraps.
@@ -51,8 +59,8 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 ### D-020 · 2026-10-19 · The builder merges into the developer; the HTML mockups are retired
 - **Decision:** one developer agent owns a feature end to end: `app/` (with `app/globals.css`), `lib/`, `types/` and
   `components/`, design included (it preloads `hallmark`, `frontend-ui-engineering` and `shadcn`). The builder agent
-  and its task template are gone; a sprint is planner → developer → tester → reviewer. `.design/rsc-blog-landing.html`,
-  `Main.dc.html`, `Detail.dc.html` and `canvas.json` are deleted; `.design/blog-refactor.md` is the design reference.
+  and its task template are gone; a sprint is planner → developer → tester → reviewer. `docs/rsc-blog-landing.html`,
+  `Main.dc.html`, `Detail.dc.html` and `canvas.json` are deleted; `docs/blog-refactor.md` is the design reference.
   This changes the builder part of D-006 (agent models) and D-017 (who runs `gate:fast`); the rest of both stands.
 - **Why:** the user asked for it. Data and UI of one feature were split across two agents and two handoffs, and the
   mockups no longer matched the site (the palette had moved to petrol in D-015).
@@ -105,7 +113,7 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 - **Source:** the user asked for a researched alternative and accepted the recommendation, 2026-10-14.
 
 ### D-014 · 2026-10-14 · Project-level decisions get their own log
-- **Decision:** keep this file, `.design/decisions.md`, as the one place for decisions that outlive a sprint.
+- **Decision:** keep this file, `docs/decisions.md`, as the one place for decisions that outlive a sprint.
 - **Why:** decisions were spread across specs, sprint reports, the roadmap, `agent-system-status.md` and auto-memory,
   so the next sprint couldn't see them.
 - **Source:** the user, 2026-10-14.

@@ -36,7 +36,7 @@ You own `app/` (pages, data wiring, `app/globals.css`), `lib/`, `types/` and `co
    (the site follows its *editorial* genre) and stay consistent with `.claude/rules/ui.md`: Fraunces headings,
    Source Sans 3 body, petrol `primary`, generous whitespace, hairline rules. Motion is deliberately **bold** (D-003).
    Design choices for this feature go in your report's Summary (the sprint folder keeps them). A change of design
-   direction is the user's call: report it as an open question, don't write it to `.design/`.
+   direction is the user's call: report it as an open question, don't write it to `docs/`.
 5. **UI: build with the stack.**
    - Tailwind v4 utilities; theme tokens live in `app/globals.css` (`:root` + `@theme inline`). Semantic tokens only
      (`bg-background`, `text-muted-foreground`, `text-primary`, `border-border`), never raw hex or palette classes.
@@ -58,7 +58,7 @@ before adding any dependency (beyond Tailwind/shadcn, `motion`, `lucide-react` a
 
 ## Your task arrives as a file
 
-The lead's prompt names your task file, `.design/sprints/<#>-<name>/tasks/developer-r<n>.md`. Read it and the `brief.md`
+The lead's prompt names your task file, `docs/sprints/<#>-<name>/tasks/developer-r<n>.md`. Read it and the `brief.md`
 it links: together they are your whole assignment. Work only on what they list; note anything else in your report.
 When done, write your report to the task's "Report to" path (format: `.claude/templates/report.md`) and reply
 with one line: `<status> — <report path>`. The guard hook won't let you finish without the report file.

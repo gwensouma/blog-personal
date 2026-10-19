@@ -1,10 +1,10 @@
 # Task: <developer|tester> · round <n> (fix)
 
-<!-- .design/sprints/<#>-<name>/tasks/<agent>-r<n>.md, written by the lead when a tester or reviewer round finds
+<!-- docs/sprints/<#>-<name>/tasks/<agent>-r<n>.md, written by the lead when a tester or reviewer round finds
 must-fix items in this agent's files. Only must-fix items go here; suggestions go to close.md "Deferred". -->
 
-Brief: `.design/sprints/<#>-<name>/brief.md` · Branch: `<branch>`
-Report to: `.design/sprints/<#>-<name>/reports/<agent>-r<n>.md` (format: `.claude/templates/report.md`)
+Brief: `docs/sprints/<#>-<name>/brief.md` · Branch: `<branch>`
+Report to: `docs/sprints/<#>-<name>/reports/<agent>-r<n>.md` (format: `.claude/templates/report.md`)
 Source: `reports/<tester|reviewer>-r<m>.md`
 
 ## Fix

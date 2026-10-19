@@ -1,9 +1,9 @@
 # Task: developer · round <n>
 
-<!-- .design/sprints/<#>-<name>/tasks/developer-r<n>.md. Self-contained: the developer reads this and the brief only. -->
+<!-- docs/sprints/<#>-<name>/tasks/developer-r<n>.md. Self-contained: the developer reads this and the brief only. -->
 
-Brief: `.design/sprints/<#>-<name>/brief.md` · Branch: `<branch>` (already checked out by the lead)
-Report to: `.design/sprints/<#>-<name>/reports/developer-r<n>.md` (format: `.claude/templates/report.md`)
+Brief: `docs/sprints/<#>-<name>/brief.md` · Branch: `<branch>` (already checked out by the lead)
+Report to: `docs/sprints/<#>-<name>/reports/developer-r<n>.md` (format: `.claude/templates/report.md`)
 
 ## Do
 Concrete steps, in order. Name the functions, routes and types to add or change. For UI: what to design and build,
