@@ -29,7 +29,6 @@ Wanted, not scheduled. A row becomes a sprint through a spec.
 - `/now` and `/uses` pages (wait for the user's own content)
 - MDX components in posts (ask the user first)
 - Harness: verify in a fresh session that the planner's `WebFetch`/`WebSearch` load and a foreground subagent honors `SubagentStop`
-- Harness: drop `.design/<feature>.md` from the developer's area in `guard-paths.mjs` (own PR, D-022)
 - Archive: a year jump index once posts span 4+ years
 - Harness: agent evals (seeded-bug patches with expected reviewer findings); WSL2 + `/sandbox` (open question in decisions.md)
 
