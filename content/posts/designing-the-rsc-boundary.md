@@ -3,6 +3,9 @@ title: Designing the server/client boundary
 date: 2025-12-09
 excerpt: A practical checklist for deciding which components need "use client".
 tags: [Architecture, Client Components, Server Components]
+cover:
+  src: /images/posts/designing-the-rsc-boundary.webp
+  alt: A thin vertical line with many solid shapes gathered on one side and two small, lighter shapes on the other
 ---
 
 Most components in a content site do not need to be interactive. Start every component as a Server Component and ask a few questions before adding `"use client"`.

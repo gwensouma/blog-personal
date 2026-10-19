@@ -5,6 +5,9 @@ excerpt: Only the Client Component parts ship JavaScript. Here is how to measure
 tags: [Performance, Server Components]
 series: RSC Fundamentals
 seriesOrder: 3
+cover:
+  src: /images/posts/rsc-shrinks-your-bundle.webp
+  alt: A large heavy parcel beside a small light one, the removed pieces drifting away as faint outlines
 ---
 
 Every Server Component is a component whose JavaScript never reaches the user. On a content-heavy site that adds up quickly.

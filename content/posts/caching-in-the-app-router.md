@@ -3,6 +3,9 @@ title: Caching in the App Router, untangled
 date: 2026-05-02
 excerpt: Request memoization, the data cache and the full route cache, explained with one blog page.
 tags: [Caching, App Router, Performance]
+cover:
+  src: /images/posts/caching-in-the-app-router.webp
+  alt: Three nested open boxes with a single thin thread passing straight through all of them
 ---
 
 The App Router has several caching layers. They are easier to reason about when you follow a single request.
