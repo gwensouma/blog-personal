@@ -30,7 +30,7 @@ The user delegated merging to you and can take it back at any time.
 
 | What | Where | Written by |
 |---|---|---|
-| What is queued and deferred | `.design/roadmap.md` (finished: `roadmap-archive.md`) | lead |
+| What is queued and waiting (an index: one line per item) | `.design/roadmap.md` (finished: `roadmap-archive.md`) | lead |
 | Project-level decisions and why | `.design/decisions.md` (planner reads it for every spec) | lead |
 | How the team works | this file | lead, in its own PR |
 | Project rules | `CLAUDE.md`, `.claude/rules/` (agents load them automatically) | lead |
@@ -104,7 +104,8 @@ something an agent legitimately needs, decide it yourself; change the hook only 
 
 1. Read `.design/roadmap.md` and `.design/decisions.md` in full.
 2. Run `git fetch --prune`, `git status`, `git worktree list`, `gh pr list --state open`.
-3. Reconcile: every open PR maps to a sprint row, every merged PR's row is archived. Fix drift in your next PR.
+3. Reconcile: every open PR maps to a sprint row, every merged PR's row is archived, and the roadmap is still an
+   index (see "The roadmap" below). Fix drift in your next PR.
 4. For a sprint in progress, list its folder: the newest task without a report is where to pick up.
 5. `ListAgents`: if another live session works on this repo, coordinate with `SendMessage` (one writer per tree).
 
@@ -119,11 +120,11 @@ For anything new (a user idea, the next roadmap phase, a deferred item), call th
 idea. It researches the code and outside sources and writes `.design/specs/<feature>.md` (Status: draft).
 
 **Stop:** show the user the spec's recommendation, ACs and "Questions for the user". Record their answers in the spec,
-set `Status: approved by the user on <date>`, and add the sprint rows to the roadmap. An answer that later sprints
+set `Status: approved by the user on <date>`, and add the sprint rows to the roadmap (one line each, linking the spec). An answer that later sprints
 must respect also gets an entry in `.design/decisions.md`.
 
-A roadmap row that already has a decided plan (e.g. "Phase D plan") still gets a spec: the planner turns the plan into
-one, and the user only confirms it.
+An idea that comes with a decided plan still gets a spec: the planner turns the plan into one, and the user only
+confirms it. The plan goes in the spec, never in the roadmap.
 
 ### 2. Prepare: spec → sprint folder
 
@@ -168,7 +169,7 @@ states the command and its exit code; "it passes" without one is not a gate resu
 
 1. Write `close.md` from `.claude/templates/close.md`: rounds, local gates, `/usage`, deferred findings.
 2. Move the sprint row from the roadmap to `.design/roadmap-archive.md` (with the PR number once known) and carry any
-   deferred item that is still wanted into the roadmap's "Deferred".
+   deferred item that is still wanted into the roadmap's "Backlog" (one line).
 3. Commit everything (code, tests, the sprint folder, roadmap), push, `gh pr create`, then add the PR number to
    `close.md` and the archive row in a follow-up commit on the same branch.
 
@@ -201,6 +202,21 @@ Revert it the way it arrived, through a PR:
 2. Push, `gh pr create`, wait for green CI, merge. Never push to `main` directly and never force-push.
 3. Reopen the roadmap row and note the revert in the sprint's `close.md` on the revert branch. Redo the work on a new
    branch; to reuse the reverted commits, revert the revert there first.
+
+## The roadmap
+
+`.design/roadmap.md` answers three questions only: what is next, in what order, blocked by what. It has three
+sections: **Sprints** (open, in order), **Backlog** (wanted, not scheduled) and **Waiting on the user**. One line
+per item; anything longer goes where it belongs:
+
+| Content | Goes to |
+|---|---|
+| A plan, scope or acceptance criteria | `.design/specs/<feature>.md` |
+| A choice and its reason, including "out of scope for now" | `.design/decisions.md` (the roadmap cites its `D-<n>`) |
+| A merged sprint, or an old plan kept for history | `.design/roadmap-archive.md` |
+| How the team works | this file |
+
+`tests/unit/conventions.test.ts` fails the gate when the roadmap grows past its line cap or gains another section.
 
 ## Stop points
 

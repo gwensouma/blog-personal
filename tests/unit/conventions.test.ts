@@ -1,4 +1,4 @@
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -37,5 +37,25 @@ describe("project conventions", () => {
   it("has no index.ts barrel files", () => {
     const bad = entries.filter((e) => /^index\.tsx?$/.test(e.name)).map((e) => e.rel);
     expect(bad).toEqual([]);
+  });
+});
+
+// The roadmap is an index (lead SKILL.md, "The roadmap"): plans go to specs, reasons to decisions.md, history to the
+// archive. These checks stop it from growing back into a plan document.
+describe("roadmap", () => {
+  const lines = readFileSync(path.join(root, ".design/roadmap.md"), "utf8").split(/\r?\n/);
+
+  it("stays short", () => {
+    expect(lines.length).toBeLessThanOrEqual(60);
+  });
+
+  it("has only the Sprints, Backlog and Waiting on the user sections", () => {
+    const sections = lines.filter((line) => line.startsWith("## ")).map((line) => line.slice(3).trim());
+    expect(sections).toEqual(["Sprints", "Backlog", "Waiting on the user"]);
+  });
+
+  it("keeps every list item on one line", () => {
+    const continued = lines.filter((line, i) => /^\s+\S/.test(line) && /^\s*- /.test(lines[i - 1] ?? ""));
+    expect(continued).toEqual([]);
   });
 });
