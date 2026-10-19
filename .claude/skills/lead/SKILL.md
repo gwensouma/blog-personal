@@ -16,7 +16,7 @@ matters lives only in chat.
 |---|---|---|---|
 | **lead** (you, main session) | roadmap, `close.md`, fix tasks, one-line fixes and docs; git and PRs | the user | chat, to the user |
 | [planner](../../agents/planner.md) | `.design/specs/`, `brief.md`, `tasks/*.md` | your prompt (mode `spec` or `tasks`) | its final message |
-| [developer](../../agents/developer.md) | `app/` (incl. `globals.css`), `lib/`, `types/`, `components/`, config, `.design/<feature>.md` | `tasks/developer-r<n>.md` | `reports/developer-r<n>.md` |
+| [developer](../../agents/developer.md) | `app/` (incl. `globals.css`), `lib/`, `types/`, `components/`, config | `tasks/developer-r<n>.md` | `reports/developer-r<n>.md` |
 | [tester](../../agents/tester.md) | `tests/` | `tasks/tester-r<n>.md` | `reports/tester-r<n>.md` |
 | [reviewer](../../agents/reviewer.md) | nothing but its report | `tasks/reviewer-r<n>.md` | `reports/reviewer-r<n>.md` |
 
@@ -39,7 +39,7 @@ The user delegated merging to you and can take it back at any time.
 | Claude Code facts (agents, hooks, permissions, cost) | `.claude/skills/lead/claude-code-facts.md` | lead |
 | A feature's research and plan | `.design/specs/<feature>.md` | planner |
 | One sprint | `.design/sprints/<#>-<name>/` | see below |
-| Visual design decisions (the design reference; no HTML mockups) | `.design/blog-refactor.md`, `.design/<feature>.md` | developer |
+| Which doc goes where, and each doc's line budget | `tests/unit/docs.test.ts` (the registry) | lead |
 
 ```
 .design/sprints/<#>-<name>/
@@ -51,40 +51,13 @@ The user delegated merging to you and can take it back at any time.
 
 ## Enforced by the guard hook
 
-`.claude/hooks/guard-paths.mjs` (tests: `tests/unit/guard-hook.test.ts`) blocks, not just asks:
+`.claude/hooks/guard-paths.mjs` (tests: `tests/unit/guard-hook.test.ts`) keeps each agent in its area, holds dispatch to
+the one-line `Task: <path>` prompt, blocks the next task while a dispatched one has no report, checks report shape,
+and blocks git writes from subagents. The full list, and what it can't see: [guard-hook.md](guard-hook.md).
 
-- spawning developer, tester or reviewer with any prompt other than the one line `Task: <path>`, naming an
-  existing `tasks/<that-agent>-r<n>.md` that has its template's sections (`## Do`, `## Cover`, `## Fix`, …), a
-  `Brief:` line, a `Report to:` line naming the matching report, and no unfilled placeholder such as `<branch>`;
-- spawning the next task while any task already dispatched in the same sprint has no report yet (the dispatch gate:
-  a missing report stops the sprint, so continue that agent until it writes one). The hook records each dispatch in
-  the sprint's `dispatched.txt`, so tasks the planner wrote ahead don't block;
-- you writing `close.md` while any task of that sprint has no report (this catches the last agent of a sprint,
-  which no later dispatch would);
-- a foreground role agent finishing before its report exists. Background agents can finish past this block (checked
-  live on 2026-10-13), which is why the two gates above exist;
-- a planner prompt that doesn't start with `Mode: spec` or `Mode: tasks`, and a `Mode: tasks` prompt without an
-  existing spec that says `Status: approved`, the sprint folder and `Branch: <branch>`;
-- a role agent's report without the template's shape: the `# Report: <agent> · round <n> · status: …` line, a
-  `## Gate` section with `exit <code>` per command, and its role's sections (`## Files`, `## AC → test`,
-  `## Findings`);
-- Write/Edit outside each agent's area: developer `app/`, `lib/`, `types/`, `components/`, `content/`, `public/`,
-  `assets/`, root config files and `.design/<feature>.md`; tester `tests/`; reviewer its report only; planner specs,
-  briefs and tasks. `.github/`, `.claude/`, `CLAUDE.md`, `README.md`, the roadmap and `decisions.md` are yours alone;
-- helper agents (general-purpose, claude, Explore, …, and any unknown type such as the retired `builder`) editing
-  anything in the project: they research, they don't write, so code work can't bypass the task files;
-- only the tester adds `test.fixme`/`.skip`; nobody adds `.only`;
-- subagents running git writes (`push`, `commit`, `switch`, `checkout`, `rebase`, `merge`, `cherry-pick`, `revert`,
-  `tag`, `reset --hard`, also after global options like `git -C . push`), `gh pr create|merge|close|ready|edit|review`,
-  or `gh api` with a non-GET method or fields;
-- anyone killing processes by image name.
-
-What it can't see: files written from a shell (`echo > file`, a script), whether a stated exit code is true, and
-whether a section says anything useful. So the backstops
-stay manual. After every agent turn run
-`git status --porcelain`: a change outside that agent's area is a defect to revert and report. Read the gate line in
-every report before you dispatch the next task. If the hook blocks
-something an agent legitimately needs, decide it yourself; change the hook only in its own PR.
+The backstops stay manual: after every agent turn run `git status --porcelain` (a change outside that agent's area is a
+defect to revert and report), and read the gate line in every report before you dispatch the next task. If the hook
+blocks something an agent legitimately needs, decide it yourself; change the hook only in its own PR.
 
 ## The flow, top to bottom
 
@@ -183,7 +156,7 @@ changes a page (route, section, criterion) updates `.design/product.md` in the s
 ### 9. Merge
 
 `gh pr merge <n> --merge` once CI is green (`gh pr checks <n> --watch`: `gate` and `e2e` pass). GitHub enforces this:
-`main` is protected (set 2026-10-13) with `gate` and `e2e` as required checks in strict mode, admins included, no
+`main` is protected (D-010) with `gate` and `e2e` as required checks in strict mode, admins included, no
 force pushes or deletions. Strict means the PR must be up to date with `main`: if `main` moved, rebase (or
 `gh pr update-branch <n>`), push, and wait for the new checks. No human review is required; the user delegated
 merging to you. Then fast-forward local `main`. The merge commit is the record of the merge; nothing is committed to
@@ -216,7 +189,8 @@ per item; anything longer goes where it belongs:
 | A merged sprint, or an old plan kept for history | `.design/roadmap-archive.md` |
 | How the team works | this file |
 
-`tests/unit/conventions.test.ts` fails the gate when the roadmap grows past its line cap or gains another section.
+`tests/unit/docs.test.ts` fails the gate when the roadmap grows past its line cap, gains another section, or an item
+wraps or runs long. The same registry caps every other doc ("Where does a doc go?" in `CLAUDE.md`).
 
 ## Stop points
 

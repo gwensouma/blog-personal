@@ -55,7 +55,7 @@ const settle =
 // lib/cover-variant.ts, shared with the OG card. Every thumbnail keeps a
 // post-specific main mark ("No. xx" or the tag): below 12rem the centered `mark`
 // layout swaps to the tag (or number) layout.
-// Everything stays inside the primary hue. Rationale: .design/blog-refactor.md.
+// Everything stays inside the primary hue (D-015).
 
 const toneClass: Record<CoverTone, { field: string; glow: string; grain: string; text: string }> = {
   deep: {

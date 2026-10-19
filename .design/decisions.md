@@ -25,6 +25,19 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-022 · 2026-10-19 · One doc registry; feature design notes retired
+- **Decision:** every doc in `.design/` and `.claude/` (outside specs and sprint folders) is registered in
+  `tests/unit/docs.test.ts` with a kind (living, index, log, reference, template) and a line budget; an unregistered
+  doc, a doc over budget, or a date or per-sprint section in a living doc fails the gate. "Where does a doc go?" in
+  `CLAUDE.md` states the kinds. `.design/blog-refactor.md`, `search.md`, `archive.md` and `popular-posts.md` are
+  deleted: their lasting rules moved to `.claude/rules/ui.md`, reasons to D-011/D-015/D-016/D-018, and the rest is
+  history (last full copies at commit `08019c1`). Feature design notes now go in the spec or the sprint report, not in
+  `.design/<feature>.md`. The guard hook's detail moved from the lead skill to `.claude/skills/lead/guard-hook.md`.
+- **Why:** the user saw docs from before the workflow that no sprint used yet that still cost context: the developer
+  read all 532 lines of `blog-refactor.md` before UI work, and parts were wrong (it still said the home stays on
+  skeletons without JS, fixed in sprint 8). D-021 fixed one file; this fixes the pattern for all of them.
+- **Source:** the user, 2026-10-19.
+
 ### D-021 · 2026-10-19 · The roadmap is an index, capped by a test
 - **Decision:** `.design/roadmap.md` holds only Sprints, Backlog and Waiting on the user, one line per item. Plans go
   to specs, reasons here, history to `roadmap-archive.md` (the old feature map and phase tables moved there; the
@@ -167,7 +180,7 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 - **Decision:** bold, noticeable motion on top of the editorial design, animating only `transform`/`opacity`, never
   hiding first paint, and respecting `prefers-reduced-motion`.
 - **Why:** the user asked for it in Phase 3.
-- **Source:** the user; rules in [blog-refactor.md](blog-refactor.md) "Motion (Phase 3)". Date not recorded.
+- **Source:** the user; rules in `.claude/rules/ui.md` "Motion" (were in `blog-refactor.md` until D-022). Date not recorded.
 
 ### D-002 · AI features postponed
 - **Decision:** build nothing in `lib/ai/` yet, but keep the data layer easy to swap.

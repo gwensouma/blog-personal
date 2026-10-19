@@ -6,14 +6,14 @@ How the team works: `.claude/skills/lead/SKILL.md` · Why: [decisions.md](decisi
 Repo: https://github.com/gwensouma/blog-personal (branch `main`). Last updated: 2026-10-19.
 
 **One line per item.** Details go where they belong: a plan in `.design/specs/`, a reason in `decisions.md`, history
-in the archive. An item that needs a second line needs a spec. `tests/unit/conventions.test.ts` caps this file.
+in the archive. An item that needs a second line needs a spec. `tests/unit/docs.test.ts` caps this file.
 
 ## Sprints
 Open sprints in order; one branch and one PR each. Merged rows move to the archive.
 
 | # | Branch | Scope | Spec | Blocked by |
 |---|---|---|---|---|
-| 9 | `feat/comments` | D: comments, visible at once (D-007) | [comments](specs/comments.md) (draft from before D-020, still names the builder; Q1–Q2 open) | — |
+| 9 | `feat/comments` | D: comments, visible at once (D-007) | [comments](specs/comments.md) (draft from before D-020/D-022: planner refreshes it; Q1–Q2 open) | — |
 | 10 | `feat/comments-admin` | D: `/admin` with a password, hide/unhide comments | [comments](specs/comments.md) "Sprint 10 plan" | 9 |
 | 11 | `feat/static-post` | `/posts/[slug]` static (ISR) again; no views without JS (D-018) | — | 10 |
 | 12 | `fix/a11y-pass` | button-styled links drop `role="button"`; `/search` empty-state title becomes a heading | — | — |
@@ -29,8 +29,10 @@ Wanted, not scheduled. A row becomes a sprint through a spec.
 - `/now` and `/uses` pages (wait for the user's own content)
 - MDX components in posts (ask the user first)
 - Harness: verify in a fresh session that the planner's `WebFetch`/`WebSearch` load and a foreground subagent honors `SubagentStop`
+- Harness: drop `.design/<feature>.md` from the developer's area in `guard-paths.mjs` (own PR, D-022)
+- Archive: a year jump index once posts span 4+ years
 - Harness: agent evals (seeded-bug patches with expected reviewer findings); WSL2 + `/sandbox` (open question in decisions.md)
 
 ## Waiting on the user
-- Permissions the lead can't grant itself: add `playwright-nojs` to `.mcp.json` and `enabledMcpjsonServers`, allow `mcp__playwright-nojs` and `Edit(/<area>/**)` for app, lib, types, components, content, public, assets, tests, .design in `.claude/settings.json` (until then the reviewer checks no-JS with curl)
+- Permissions the lead can't grant itself: `playwright-nojs` in `.mcp.json`, `Edit(/<area>/**)` per agent area (list: `claude-code-facts.md`)
 - Spec 9: answer Q1–Q2 in [specs/comments.md](specs/comments.md) and approve it

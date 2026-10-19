@@ -19,6 +19,9 @@ paths:
 - `lib/actions/<entity>.ts` holds `"use server"` actions: validate input, then call `lib/data/`. Treat every action
   and route handler as a public endpoint: validate types, lengths and existence, authorize privileged calls on the
   server, cap anything a stranger can grow, and render user text as React text (no `dangerouslySetInnerHTML`).
+- Accepted abuse limits: likes are anonymous and cookie-based (a scripted client can inflate them; sign the cookie
+  or add accounts if counts ever matter); the newsletter answers new and known addresses alike (no membership
+  probing) and caps the list at 5,000. Any new store key a stranger can grow gets a hard cap like these.
 - Absolute URLs (RSS, sitemap, OG, JSON-LD) come from `NEXT_PUBLIC_SITE_URL` (see `.env.example`).
 - `lib/markdown.ts` turns Markdown into hast (rendered to React by `post-body`) plus an HTML string (remark/rehype +
   Shiki), and computes the TOC and reading time.

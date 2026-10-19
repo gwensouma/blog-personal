@@ -2,7 +2,7 @@
 
 <!-- Written by the planner to .design/sprints/<#>-<name>/brief.md from an approved spec. Every task links here. -->
 
-Branch: `<feat|fix|chore>/<name>` · Spec: `.design/specs/<feature>.md` · Roadmap row: <#> · Design note: `.design/<feature>.md` or none
+Branch: `<feat|fix|chore>/<name>` · Spec: `.design/specs/<feature>.md` · Roadmap row: <#>
 
 ## Goal
 One or two sentences.

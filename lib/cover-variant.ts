@@ -8,7 +8,6 @@
 //   composition alternates number/tag (i mod 2) and tone cycles (i mod 3), so
 //   neighbours differ in both as rendered, whatever was filtered out of the list.
 // - The glow corner comes from a slug hash.
-// Rationale: .design/blog-refactor.md ("Default cover variations").
 
 export type CoverComposition = "number" | "tag" | "mark";
 export type CoverTone = "deep" | "soft" | "ink";

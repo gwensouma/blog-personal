@@ -135,7 +135,7 @@ test.describe("without JavaScript", { tag: "@no-js" }, () => {
     await expectShown(page.getByRole("link", { name: /Meta\s*1 post$/ }));
   });
 
-  // "Most read" isn't asserted because the e2e build sees an empty store (.design/popular-posts.md, caveat 2).
+  // "Most read" isn't asserted because the e2e build sees an empty store (the ISR home ships no "Most read" until views exist).
   test("content: home / shows every section without JS", async ({ page }) => {
     await page.goto("/");
 

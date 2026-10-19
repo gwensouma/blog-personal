@@ -64,3 +64,15 @@ Conventions (file names, `@/` imports and palette classes are also enforced by l
 - Imports use the `@/` alias. No `index.ts` barrels, no folder for a single file (except rule 4).
 - Non-route folders inside `app/` are private (`_name/`), but prefer `components/` or `lib/`.
 - Out of scope: micro-frontends or splitting into services.
+
+### Where does a doc go?
+
+Every doc has one kind, registered with a line budget in `tests/unit/docs.test.ts`; an unregistered `.md` in `.design/`
+or `.claude/` fails the gate, so a new doc is a deliberate choice, not a side effect.
+- **Living** (`CLAUDE.md`, `.claude/rules/`, agents, the lead skill, `.design/product.md`): how things are *now*.
+  Rewrite the paragraph that changed; never append a dated or per-sprint section.
+- **Index** (`.design/roadmap.md`): one line per item, pointing elsewhere.
+- **Log** (`.design/decisions.md`, `.design/roadmap-archive.md`): append-only, newest first.
+- **Record** (`.design/specs/`, `.design/sprints/`): one feature or sprint; frozen once merged, read only on demand.
+- A feature's design or data notes belong in its spec or sprint report. A rule that outlives the feature goes into a
+  living doc; its reason goes into `decisions.md`.

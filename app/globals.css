@@ -110,7 +110,7 @@
   --color-callout-caution: var(--callout-caution);
 }
 
-/* Motion tokens (mirrored as JS presets in lib/motion.ts). See .design/blog-refactor.md "Motion". */
+/* Motion tokens (mirrored as JS presets in lib/motion.ts). Rules: .claude/rules/ui.md "Motion". */
 @theme {
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-expo: cubic-bezier(0.7, 0, 0.84, 0);
