@@ -287,7 +287,8 @@ test.describe("Up next card, keyboard and motion", () => {
     expect(await inRegion(page), "Tab leaves the card").toBe(false);
   });
 
-  const coverContent = (page: Page) => card(page).locator('> div > [aria-hidden="true"]').first();
+  // The zooming element: the real cover <img>, or the default cover's aria-hidden div.
+  const coverContent = (page: Page) => card(page).locator('> div > :is(img, div[aria-hidden="true"])').first();
   const chip = (page: Page) => card(page).locator("span.size-10");
   const styleOf = (page: Page, which: "card" | "cover" | "chip", prop: "translate" | "scale") =>
     (which === "card" ? card(page) : which === "cover" ? coverContent(page) : chip(page)).evaluate((el, p) => getComputedStyle(el).getPropertyValue(p), prop);
