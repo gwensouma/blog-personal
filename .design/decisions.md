@@ -25,6 +25,16 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-021 · 2026-10-19 · The roadmap is an index, capped by a test
+- **Decision:** `.design/roadmap.md` holds only Sprints, Backlog and Waiting on the user, one line per item. Plans go
+  to specs, reasons here, history to `roadmap-archive.md` (the old feature map and phase tables moved there; the
+  "Phase D plan" moved to `specs/comments.md`). `tests/unit/conventions.test.ts` fails the gate past 60 lines, on any
+  other section, or on a list item that wraps.
+- **Why:** the roadmap had grown to 143 lines mixing queue, plans, decisions and history, like a monolithic
+  `CLAUDE.md`; it had also drifted (finished features still listed, a merged sprint missing). A written rule alone
+  had not stopped it, so the gate enforces it.
+- **Source:** the user, 2026-10-19.
+
 ### D-020 · 2026-10-19 · The builder merges into the developer; the HTML mockups are retired
 - **Decision:** one developer agent owns a feature end to end: `app/` (with `app/globals.css`), `lib/`, `types/` and
   `components/`, design included (it preloads `hallmark`, `frontend-ui-engineering` and `shadcn`). The builder agent
@@ -132,7 +142,8 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 - **Decision:** comments are visible immediately; the owner hides them from `/admin`. Name only, no accounts and no
   auth library. `/admin` is protected by a password in `.env`. A flat list, no replies.
 - **Why:** not recorded.
-- **Source:** the user, 2026-10-12. Full plan: roadmap "Phase D plan" (sprints 9 and 10).
+- **Source:** the user, 2026-10-12. Full plan: roadmap "Phase D plan" (sprints 9 and 10), moved to
+  [specs/comments.md](specs/comments.md) on 2026-10-19.
 
 ### D-006 · 2026-10-12 · Agent models, effort and loop caps
 - **Decision:** developer, builder and reviewer run `opus`, the tester `sonnet`, all at `effort: medium`, each bounded
