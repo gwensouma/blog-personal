@@ -6,7 +6,7 @@ import { hasSeriesMarker } from "@/components/posts/post-series";
 import { formatReadingTime } from "@/lib/format";
 import type { UpNext as UpNextPick } from "@/types/post";
 
-/** Why the post is suggested, in a few words (one line per reason in .design/blog-refactor.md, "Up next"). */
+/** Why the post is suggested, in a few words (the reasons are decided in lib/post-ending.ts). */
 function reasonLabel({ post, reason }: UpNextPick): string {
   const series = post.series;
   switch (reason) {

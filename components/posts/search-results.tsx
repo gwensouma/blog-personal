@@ -11,7 +11,7 @@ import type { SearchOutcome } from "@/types/post";
 
 // Results for /search: empty prompt, no-results state, or the matching posts with
 // query matches marked. Rendered inline (not behind <Suspense>) so results are in
-// the initial HTML and work without JavaScript; see .design/search.md.
+// the initial HTML and work without JavaScript; see D-011.
 export function SearchResults({ outcome }: { outcome: SearchOutcome }) {
   const { query, tag, hits, facets } = outcome;
 

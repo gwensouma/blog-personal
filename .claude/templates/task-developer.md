@@ -11,7 +11,6 @@ the data each component receives, and the states to cover (empty, long text, loa
 
 ## Files you may change
 - `app/...`, `lib/...`, `types/...`, `components/...`
-- `.design/<feature>.md` for design decisions that change direction
 
 ## Acceptance criteria this task serves
 AC1, AC3 (from the brief).

@@ -12,7 +12,7 @@ import { getPostStats, recordView } from "@/lib/data/engagement";
 // cookie read opts the whole route into dynamic rendering. Next 15 stable has no
 // Partial Prerendering, so /posts/[slug] is now rendered per request instead of being
 // prerendered at build time. generateStaticParams + dynamicParams = false still turn
-// unknown slugs into 404s. See .design/blog-refactor.md, "Features (Phase 4)".
+// unknown slugs into 404s (D-016, D-018).
 
 /** "123 views". Also records this page load as a view, after the response is sent. */
 export async function PostViews({ slug }: { slug: string }) {

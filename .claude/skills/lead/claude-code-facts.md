@@ -55,3 +55,12 @@ There is **no per-subagent dollar cap** in Claude Code: no frontmatter field, no
 
 Hooks can't read a running cost total, so they can't enforce a budget either.
 
+
+## Permissions the user adds by hand
+
+The auto-mode classifier blocks the lead from editing its own permissions, so the user adds these (roadmap "Waiting
+on the user"): the `playwright-nojs` server in `.mcp.json` (config: `.claude/playwright-nojs.json`) and in
+`enabledMcpjsonServers`; `mcp__playwright-nojs` in `permissions.allow`; and `Edit(/app/**)`, `Edit(/lib/**)`,
+`Edit(/types/**)`, `Edit(/components/**)`, `Edit(/content/**)`, `Edit(/public/**)`, `Edit(/assets/**)`,
+`Edit(/tests/**)`, `Edit(/.design/**)` in `.claude/settings.json`, so subagents stop asking for every write (the hook
+still keeps each agent in its area). Until then the reviewer checks no-JS with curl.

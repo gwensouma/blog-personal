@@ -61,6 +61,6 @@ A personal learning journal about React Server Components, built with them: post
 
 - Accounts, sign-in, or more than one author.
 - AI features (`lib/ai/`), a database or CMS, deploying or hosting: postponed by the user (see the roadmap).
-- Comments: planned (roadmap Phase D), not built.
+- Comments: planned (roadmap), not built.
 - Client-side data fetching or a state library: Server Components and URL params instead.
 - Analytics beyond the post view counter.

@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 // Pure data (no React runtime; only a type import).
 // CSS-only effects use the matching tokens in app/globals.css
 // (ease-out-expo, ease-in-expo, ease-in-out-expo, ease-spring, animate-drift).
-// Rationale and the CSS-vs-JS split live in .design/blog-refactor.md ("Motion").
+// The CSS-vs-JS split is in .claude/rules/ui.md ("Motion").
 
 /** Cubic-bezier easings, same values as the CSS `--ease-*-expo` tokens. */
 export const ease = {
