@@ -25,6 +25,20 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-019 · 2026-10-19 · Frontmatter validation is hand-written
+- **Decision:** the frontmatter check (sprint 14) is a hand-written validator in `lib/`; no `zod` or other schema
+  library is added.
+- **Why:** the default in the planner's 2026-10-16 plan; it avoids a new dependency for a small, fixed schema.
+- **Source:** the user accepted the default, 2026-10-19.
+
+### D-018 · 2026-10-19 · The post page goes static again; no views without JS
+- **Decision:** sprint 11 makes `/posts/[slug]` static (ISR) again. The like button reads the "liked" cookie itself
+  instead of the page reading it during render, and views are recorded outside render by a small client call, so a
+  visit with JS off no longer counts a view. This is the "bigger fix" D-016 left open.
+- **Why:** the like cookie is what makes the route render per request; on a cached page, `revalidatePath` (comments)
+  and `draftMode()` (sprint 15) show their real value. Views are non-essential, so losing no-JS views is acceptable.
+- **Source:** the user accepted the planner's defaults, 2026-10-19.
+
 ### D-017 · 2026-10-16 · One build per test round
 - **Decision:** the developer, builder and reviewer run `npm run gate:fast` (typecheck, lint, unit; no build). The
   production build runs once per round inside the tester's `npm run test:e2e`, into its own `.next-e2e/`, and in CI.

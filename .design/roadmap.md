@@ -4,7 +4,7 @@ Owner: the lead session (start it with `/lead`). How the team works lives in `.c
 says only *what* is queued and deferred; decisions and their reasons are in [decisions.md](decisions.md). Finished
 sprints and plans: [roadmap-archive.md](roadmap-archive.md).
 Repo: https://github.com/gwensouma/blog-personal (branch `main`).
-Last updated: 2026-10-16.
+Last updated: 2026-10-19.
 
 ## Out of scope for now
 - **AI features** (`lib/ai/`): postponed by the user. Keep the data layer extensible; build nothing yet.
@@ -57,7 +57,7 @@ Each feature names the RSC concept it teaches, because that is the point of the 
 ## Phase D: Community
 | Feature | What | RSC lesson |
 |---|---|---|
-| Comments | name + body, stored in the JSON store, held for moderation (shown after approval), honeypot + length caps | Server Actions, `useOptimistic`, `revalidatePath` |
+| Comments | name + body, stored in the JSON store, visible at once and hidden from `/admin` (D-007), honeypot + length caps | Server Actions, `useOptimistic`, `revalidatePath` |
 
 ## Phase E: Discovery
 | Feature | What | RSC lesson |
@@ -75,7 +75,8 @@ if a feature needs it.
 
 ## Sprints (from 2026-10-11)
 Each line is one branch and one PR, planned by the planner (`.design/specs/`, `.design/sprints/<#>-<name>/`).
-Open sprints only; merged ones move to the archive. Order: 9 → 10 (the Ctrl+K flake was fixed in PR #28). Sprint 8 (merged) was the first full
+Open sprints only; merged ones move to the archive. Order: 9 → 10 → 11 → 12 → C (13–15) (the Ctrl+K flake was fixed
+in PR #28; sprints 11–15 come from the planner's 2026-10-16 plan, defaults accepted by the user on 2026-10-19). Sprint 8 (merged) was the first full
 run of the file handoff; its lessons are in `.design/sprints/8-home-no-js/close.md`. The dev container waits on
 branch `chore/devcontainer` (D-012 in [decisions.md](decisions.md)).
 
@@ -83,10 +84,13 @@ branch `chore/devcontainer` (D-012 in [decisions.md](decisions.md)).
 |---|---|---|---|
 | 9 | `feat/comments` | D: comments, visible immediately (see "Phase D plan") | — |
 | 10 | `feat/comments-admin` | D: /admin with password, hide/unhide comments | sprint 9 |
+| 11 | `feat/static-post` | `/posts/[slug]` static (ISR) again: the like button reads the "liked" cookie itself, views are recorded outside render, so no view is counted without JS (D-018) | sprint 10 |
+| 12 | `fix/a11y-pass` | button-styled links ("View all posts" and others) drop `role="button"` (sprint 8 tester and reviewer); the `/search` empty-state title becomes a heading (sprint T tester). Its own PR | — |
+| 13 | `feat/post-source-seam` | C: `PostSource` interface in `lib/data/posts.ts`, the Markdown impl behind it | — |
+| 14 | `feat/frontmatter-validation` | C: frontmatter schema check at load time, hand-written, no zod (D-019) | — |
+| 15 | `feat/draft-preview` | C: `draft: true` posts behind `draftMode()` via a secret route | sprint 11 |
 
-Deferred: button-styled links ("View all posts" and others) render with `role="button"` (sprint 8 tester and reviewer;
-an a11y pass of its own). The `/search` empty-state title is a `<div>`, not a heading (a11y suggestion from the sprint T tester; fix it
-with the next search touch). Also deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
+Deferred inside B and E: **image zoom** (no post has body images yet), **/stats**, **/now**, **/uses** (they need
 the user's own content).
 
 ## Agent harness: open items
