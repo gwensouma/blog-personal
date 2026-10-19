@@ -1,0 +1,1 @@
+docs/sprints/17-hero-backdrop/tasks/developer-r1.md
