@@ -20,11 +20,11 @@ import path from "node:path";
 const ROLE_AGENTS = new Set(["developer", "tester", "reviewer"]);
 const SUBAGENTS = new Set([...ROLE_AGENTS, "planner"]);
 
-// The workflow docs live in docs/ (formerly .design/; both roots are accepted while the move lands).
+// The workflow docs live in docs/ (D-023).
 // docs/sprints/<sprint>/tasks/<agent>-r<n>.md, with / or \ separators (doubled when JSON-escaped in a transcript).
-const TASK_PATH = /(?<![\w.-])(\.design|docs)[\\/]+sprints[\\/]+([^\\/\s`'"]+)[\\/]+tasks[\\/]+([a-z]+)-r(\d+)\.md/g;
-const SPEC_PATH = /(?<![\w.-])(?:\.design|docs)[\\/]+specs[\\/]+[a-z0-9-]+\.md/;
-const SPRINT_DIR = /(?<![\w.-])(?:\.design|docs)[\\/]+sprints[\\/]+\d+-[a-z0-9-]+/;
+const TASK_PATH = /(?<![\w.-])(docs)[\\/]+sprints[\\/]+([^\\/\s`'"]+)[\\/]+tasks[\\/]+([a-z]+)-r(\d+)\.md/g;
+const SPEC_PATH = /(?<![\w.-])docs[\\/]+specs[\\/]+[a-z0-9-]+\.md/;
+const SPRINT_DIR = /(?<![\w.-])docs[\\/]+sprints[\\/]+\d+-[a-z0-9-]+/;
 
 // The whole dispatch prompt of a role agent: "Task: <path>", optionally in backticks.
 const DISPATCH_PROMPT = /^Task:\s*`?[^\s`]+`?$/;
@@ -96,8 +96,8 @@ function isUnderTests(rel) {
 
 /** What a path under docs/sprints/ is: brief, close, task or report (with its agent), other, or null. */
 function sprintFile(rel) {
-  if (!/^(?:\.design|docs)\/sprints\//.test(rel)) return null;
-  const m = /^(?:\.design|docs)\/sprints\/[^/]+\/(?:(brief|close)\.md|(tasks|reports)\/([a-z]+)-r\d+\.md)$/.exec(rel);
+  if (!rel.startsWith("docs/sprints/")) return null;
+  const m = /^docs\/sprints\/[^/]+\/(?:(brief|close)\.md|(tasks|reports)\/([a-z]+)-r\d+\.md)$/.exec(rel);
   if (!m) return { kind: "other" };
   if (m[1]) return { kind: m[1] };
   return { kind: m[2] === "tasks" ? "task" : "report", agent: m[3] };
@@ -220,7 +220,7 @@ function decide(event, projectDir) {
     return `${rel} is the ${sprint.kind === "close" ? "lead's" : "planner's or the lead's"} to write; ${agent} writes only its own report.`;
   }
   if (agent === "planner") {
-    if (/^(?:\.design|docs)\/specs\//.test(rel)) return null;
+    if (rel.startsWith("docs/specs/")) return null;
     return `The planner writes specs (docs/specs/), briefs and tasks (docs/sprints/), not ${rel}. Put code changes in a task.`;
   }
   if (agent === "reviewer") {

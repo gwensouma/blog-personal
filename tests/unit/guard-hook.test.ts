@@ -115,14 +115,12 @@ describe("guard-paths hook: areas and helpers", () => {
     expect(write("developer", "app/globals.css").code).toBe(0);
     expect(write("developer", "components/posts/up-next.tsx").code).toBe(0);
     expect(write("developer", "next.config.ts").code).toBe(0);
-    expect(write("developer", ".design/comments.md").code).toBe(2); // feature notes go in the spec or report (D-022)
-    expect(write("developer", "docs/comments.md").code).toBe(2);
+    expect(write("developer", "docs/comments.md").code).toBe(2); // feature notes go in the spec or report (D-022)
     expect(write("developer", "CLAUDE.md").code).toBe(2);
     expect(write("developer", ".github/workflows/ci.yml").code).toBe(2);
     expect(write("developer", ".claude/hooks/guard-paths.mjs").code).toBe(2);
-    expect(write("developer", ".design/roadmap.md").code).toBe(2);
-    expect(write("developer", ".design/decisions.md").code).toBe(2);
     expect(write("developer", "docs/roadmap.md").code).toBe(2);
+    expect(write("developer", "docs/decisions.md").code).toBe(2);
   });
 
   it("treats the retired builder as a helper, so it can't write", () => {
@@ -155,7 +153,7 @@ const SECTIONS: Record<string, string[]> = {
   tester: ["## Cover", "## Files you may change", "## Done when"],
   reviewer: ["## Review", "## Done when"],
 };
-function taskText(agent: string, round = 1, sprintDir = ".design/sprints/8-home-no-js") {
+function taskText(agent: string, round = 1, sprintDir = "docs/sprints/8-home-no-js") {
   return [
     `# Task: ${agent} · round ${round}`,
     `<!-- ${sprintDir}/tasks/<agent>-r<n>.md -->`,
@@ -178,11 +176,10 @@ function reportText(agent: string, gateLine = "- `npm run gate` → exit 0") {
   ].join("\n\n");
 }
 
-// docs/ is the workflow root; .design/ is accepted until the move lands.
-describe.each(["docs", ".design"])("guard-paths hook: file handoff (%s/)", (root) => {
+describe("guard-paths hook: file handoff", () => {
   // A throwaway project with one sprint, so task and report files can exist or not.
   const project = mkdtempSync(path.join(tmpdir(), "guard-hook-"));
-  const sprint = `${root}/sprints/8-home-no-js`;
+  const sprint = "docs/sprints/8-home-no-js";
   const task = `${sprint}/tasks/developer-r1.md`;
   const report = `${sprint}/reports/developer-r1.md`;
   mkdirSync(path.join(project, sprint, "tasks"), { recursive: true });
@@ -206,6 +203,7 @@ describe.each(["docs", ".design"])("guard-paths hook: file handoff (%s/)", (root
     expect(spawn("developer", "Remove the Suspense boundaries on the home page.").code).toBe(2);
     expect(spawn("developer", `Task: ${sprint}/tasks/developer-r2.md`).code).toBe(2);
     expect(spawn("tester", `Task: ${task}`).code).toBe(2); // someone else's task
+    expect(spawn("developer", `Task: .${task.replace("docs/", "design/")}`).code).toBe(2); // the old root (D-023)
   });
 
   it("holds the next dispatch until every dispatched task in the sprint has its report", () => {
@@ -263,7 +261,7 @@ describe.each(["docs", ".design"])("guard-paths hook: file handoff (%s/)", (root
   });
 
   it("keeps the planner to specs, briefs and tasks", () => {
-    expect(writeIn("planner", `${root}/specs/comments.md`).code).toBe(0);
+    expect(writeIn("planner", "docs/specs/comments.md").code).toBe(0);
     expect(writeIn("planner", `${sprint}/brief.md`).code).toBe(0);
     expect(writeIn("planner", `${sprint}/tasks/tester-r1.md`).code).toBe(0);
     expect(writeIn("planner", `${sprint}/close.md`).code).toBe(2);
@@ -287,7 +285,7 @@ describe.each(["docs", ".design"])("guard-paths hook: file handoff (%s/)", (root
 
 describe("guard-paths hook: handoff format", () => {
   const project = mkdtempSync(path.join(tmpdir(), "guard-format-"));
-  const sprint = ".design/sprints/9-format";
+  const sprint = "docs/sprints/9-format";
   mkdirSync(path.join(project, sprint, "tasks"), { recursive: true });
   mkdirSync(path.join(project, sprint, "reports"), { recursive: true });
   afterAll(() => rmSync(project, { recursive: true, force: true }));
@@ -368,13 +366,13 @@ describe("guard-paths hook: handoff format", () => {
 
 describe("guard-paths hook: planner prompt", () => {
   const project = mkdtempSync(path.join(tmpdir(), "guard-planner-"));
-  const spec = ".design/specs/up-next.md";
-  mkdirSync(path.join(project, ".design/specs"), { recursive: true });
+  const spec = "docs/specs/up-next.md";
+  mkdirSync(path.join(project, "docs/specs"), { recursive: true });
   afterAll(() => rmSync(project, { recursive: true, force: true }));
 
   const spawn = (prompt: string) =>
     run({ tool_name: "Agent", tool_input: { subagent_type: "planner", prompt, description: "x" } }, project);
-  const tasksPrompt = `Mode: tasks\nSpec: ${spec}\nFolder: .design/sprints/4-up-next/\nBranch: feat/up-next`;
+  const tasksPrompt = `Mode: tasks\nSpec: ${spec}\nFolder: docs/sprints/4-up-next/\nBranch: feat/up-next`;
 
   it("needs the mode on the first line", () => {
     expect(spawn("Mode: spec\nIdea: comments").code).toBe(0);
@@ -390,10 +388,10 @@ describe("guard-paths hook: planner prompt", () => {
     expect(spawn(tasksPrompt.replace("Branch: feat/up-next", "")).stderr).toContain("Branch:");
   });
 
-  it("accepts the docs/ root for the spec and the sprint folder", () => {
-    mkdirSync(path.join(project, "docs/specs"), { recursive: true });
-    writeFileSync(path.join(project, "docs/specs/up-next.md"), "# Spec: up-next\n\nStatus: approved by the user on 2026-10-19\n");
-    expect(spawn(tasksPrompt.replaceAll(".design/", "docs/")).code).toBe(0);
-    expect(spawn(tasksPrompt.replaceAll(".design/", "mydocs/")).stderr).toContain("existing spec");
+  it("reads the spec only from docs/, not the old .design/ root (D-023)", () => {
+    mkdirSync(path.join(project, ".design/specs"), { recursive: true });
+    writeFileSync(path.join(project, ".design/specs/up-next.md"), "# Spec: up-next\n\nStatus: approved by the user on 2026-10-19\n");
+    expect(spawn(tasksPrompt.replaceAll("docs/", ".design/")).stderr).toContain("existing spec");
+    expect(spawn(tasksPrompt.replaceAll("docs/", "mydocs/")).stderr).toContain("existing spec");
   });
 });
