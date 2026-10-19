@@ -44,10 +44,11 @@ Prompt (the guard hook checks it): `Mode: tasks`, the spec path, the sprint fold
   constraints, task order.
 - `tasks/<agent>-r1.md` for each agent the sprint needs, from `.claude/templates/task-<agent>.md`. Each task is
   self-contained: concrete steps, the files that agent may change (its own area only: developer `app/`, `lib/`,
-  `types/`; builder `components/`; tester `tests/`), the ACs it serves, and its "Report to" path.
+  `types/`, `components/`; tester `tests/`), the ACs it serves, and its "Report to" path.
 
-Route by folder: `app/` → developer, `components/` → builder, `tests/` → tester. When a sprint needs both developer
-and builder, the developer's task comes first and names the data the builder will receive.
+Route by folder: `app/`, `lib/`, `types/` and `components/` → developer, `tests/` → tester. A feature with data and UI
+is one developer task (data first, then the components that render it); split it into two developer rounds only when
+one task would be too big for its `maxTurns`.
 
 ## Report back
 

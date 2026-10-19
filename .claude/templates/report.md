@@ -6,7 +6,7 @@
 Task: `tasks/<agent>-r<n>.md`
 
 ## Summary
-2–5 bullets: what was done (developer/builder), tested (tester), checked (reviewer), or researched (planner).
+2–5 bullets: what was done (developer), tested (tester), checked (reviewer), or researched (planner).
 
 ## Files
 Changed paths (none for the reviewer).

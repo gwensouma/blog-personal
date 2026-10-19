@@ -52,11 +52,10 @@ describe("guard-paths hook: file ownership", () => {
     expect(write("reviewer", "tests/unit/x.test.ts").code).toBe(2);
   });
 
-  it("keeps developer and builder out of tests/", () => {
+  it("keeps the developer out of tests/", () => {
     expect(write("developer", "tests/unit/posts.test.ts").code).toBe(2);
-    expect(write("builder", "tests/e2e/no-js.spec.ts").code).toBe(2);
+    expect(write("developer", "tests/e2e/no-js.spec.ts").code).toBe(2);
     expect(write("developer", "lib/data/posts.ts").code).toBe(0);
-    expect(write("builder", "components/posts/up-next.tsx").code).toBe(0);
   });
 
   it("does not police files outside the project", () => {
@@ -97,7 +96,7 @@ describe("guard-paths hook: shell commands", () => {
 
   it("keeps git history and PRs with the lead", () => {
     expect(bash("developer", "git push origin feat/x").code).toBe(2);
-    expect(bash("builder", "git switch main").code).toBe(2);
+    expect(bash("developer", "git switch main").code).toBe(2);
     expect(bash("tester", "gh pr merge 10 --merge").code).toBe(2);
     expect(bash("developer", "npm run gate && git checkout -- lib").code).toBe(2);
     expect(bash("developer", "git status && git diff").code).toBe(0);
@@ -111,23 +110,23 @@ describe("guard-paths hook: shell commands", () => {
 });
 
 describe("guard-paths hook: areas and helpers", () => {
-  it("keeps the developer in app/, lib/, types/, content/ and root config", () => {
+  it("keeps the developer in app/, lib/, types/, components/, content/, root config and design notes", () => {
     expect(write("developer", "app/(blog)/page.tsx").code).toBe(0);
+    expect(write("developer", "app/globals.css").code).toBe(0);
+    expect(write("developer", "components/posts/up-next.tsx").code).toBe(0);
     expect(write("developer", "next.config.ts").code).toBe(0);
     expect(write("developer", ".design/comments.md").code).toBe(0);
-    expect(write("developer", "components/posts/up-next.tsx").code).toBe(2);
+    expect(write("developer", ".design/blog-refactor.md").code).toBe(0);
+    expect(write("developer", "CLAUDE.md").code).toBe(2);
     expect(write("developer", ".github/workflows/ci.yml").code).toBe(2);
     expect(write("developer", ".claude/hooks/guard-paths.mjs").code).toBe(2);
     expect(write("developer", ".design/roadmap.md").code).toBe(2);
     expect(write("developer", ".design/decisions.md").code).toBe(2);
   });
 
-  it("keeps the builder in components/, globals.css and design notes", () => {
-    expect(write("builder", "app/globals.css").code).toBe(0);
-    expect(write("builder", ".design/blog-refactor.md").code).toBe(0);
-    expect(write("builder", "app/(blog)/page.tsx").code).toBe(2);
-    expect(write("builder", "lib/data/posts.ts").code).toBe(2);
-    expect(write("builder", "CLAUDE.md").code).toBe(2);
+  it("treats the retired builder as a helper, so it can't write", () => {
+    expect(write("builder", "components/posts/up-next.tsx").code).toBe(2);
+    expect(write("builder", "app/globals.css").code).toBe(2);
   });
 
   it("doesn't let helper agents edit the project", () => {
@@ -152,7 +151,6 @@ describe("guard-paths hook: areas and helpers", () => {
 // A task file filled in from its template (.claude/templates/task-<agent>.md).
 const SECTIONS: Record<string, string[]> = {
   developer: ["## Do", "## Files you may change", "## Acceptance criteria this task serves", "## Done when"],
-  builder: ["## Do", "## Files you may change", "## Acceptance criteria this task serves", "## Done when"],
   tester: ["## Cover", "## Files you may change", "## Done when"],
   reviewer: ["## Review", "## Done when"],
 };
@@ -205,7 +203,7 @@ describe("guard-paths hook: file handoff", () => {
     expect(spawn("developer", `Task: ${task.replaceAll("/", "\\")}`).code).toBe(0);
     expect(spawn("developer", "Remove the Suspense boundaries on the home page.").code).toBe(2);
     expect(spawn("developer", `Task: ${sprint}/tasks/developer-r2.md`).code).toBe(2);
-    expect(spawn("builder", `Task: ${task}`).code).toBe(2); // someone else's task
+    expect(spawn("tester", `Task: ${task}`).code).toBe(2); // someone else's task
   });
 
   it("holds the next dispatch until every dispatched task in the sprint has its report", () => {
@@ -223,7 +221,7 @@ describe("guard-paths hook: file handoff", () => {
 
   it("doesn't wait on tasks written ahead but not yet dispatched", () => {
     const fresh = mkdtempSync(path.join(tmpdir(), "guard-ahead-"));
-    for (const agent of ["developer", "builder", "tester", "reviewer"]) {
+    for (const agent of ["developer", "tester", "reviewer"]) {
       mkdirSync(path.join(fresh, sprint, "tasks"), { recursive: true });
       writeFileSync(path.join(fresh, sprint, "tasks", `${agent}-r1.md`), taskText(agent));
     }
@@ -231,10 +229,10 @@ describe("guard-paths hook: file handoff", () => {
       run({ tool_name: "Agent", tool_input: { subagent_type: agent, prompt: `Task: ${sprint}/tasks/${agent}-r1.md` } }, fresh);
     expect(spawnIn("developer").code).toBe(0);
     expect(spawnIn("developer").code).toBe(0); // re-dispatching the same task is fine
-    expect(spawnIn("builder").stderr).toContain("developer-r1.md");
+    expect(spawnIn("tester").stderr).toContain("developer-r1.md");
     mkdirSync(path.join(fresh, sprint, "reports"), { recursive: true });
     writeFileSync(path.join(fresh, sprint, "reports", "developer-r1.md"), reportText("developer"));
-    expect(spawnIn("builder").code).toBe(0);
+    expect(spawnIn("tester").code).toBe(0);
     rmSync(fresh, { recursive: true, force: true });
   });
 
@@ -325,20 +323,20 @@ describe("guard-paths hook: handoff format", () => {
   });
 
   it("checks fix tasks against the fix template", () => {
-    const task = `${sprint}/tasks/builder-r2.md`;
+    const task = `${sprint}/tasks/developer-r2.md`;
     const header = [
-      "# Task: builder · round 2 (fix)",
+      "# Task: developer · round 2 (fix)",
       `Brief: \`${sprint}/brief.md\``,
-      `Report to: \`${sprint}/reports/builder-r2.md\``,
+      `Report to: \`${sprint}/reports/developer-r2.md\``,
     ];
-    putTask("builder-r2.md", [...header, "## Fix", "| F1 | x | a.tsx:1 | y |", "## Done when", "- gate"].join("\n"));
-    expect(spawn("builder", `Task: ${task}`).stderr).toContain("Source:");
+    putTask("developer-r2.md", [...header, "## Fix", "| F1 | x | a.tsx:1 | y |", "## Done when", "- gate"].join("\n"));
+    expect(spawn("developer", `Task: ${task}`).stderr).toContain("Source:");
     putTask(
-      "builder-r2.md",
+      "developer-r2.md",
       [...header, "Source: `reports/reviewer-r1.md`", "## Fix", "| F1 |", "## Done when", "- gate"].join("\n"),
     );
-    expect(spawn("builder", `Task: ${task}`).code).toBe(0);
-    clearTask("builder-r2.md");
+    expect(spawn("developer", `Task: ${task}`).code).toBe(0);
+    clearTask("developer-r2.md");
   });
 
   it("blocks a report without its status line, gate exit codes or sections", () => {

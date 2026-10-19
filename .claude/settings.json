@@ -31,7 +31,7 @@
     ],
     "SubagentStop": [
       {
-        "matcher": "developer|builder|tester|reviewer",
+        "matcher": "developer|tester|reviewer",
         "hooks": [
           {
             "type": "command",
