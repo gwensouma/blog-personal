@@ -5,7 +5,7 @@ How the team works: `.claude/skills/lead/SKILL.md` · Why: [decisions.md](decisi
 · Out of scope for now: AI (D-002), deploy (D-008), DB/CMS (D-001), agent teams (D-013), dev container (D-012).
 Repo: https://github.com/gwensouma/blog-personal (branch `main`). Last updated: 2026-10-19.
 
-**One line per item.** Details go where they belong: a plan in `.design/specs/`, a reason in `decisions.md`, history
+**One line per item.** Details go where they belong: a plan in `docs/specs/`, a reason in `decisions.md`, history
 in the archive. An item that needs a second line needs a spec. `tests/unit/docs.test.ts` caps this file.
 
 ## Sprints

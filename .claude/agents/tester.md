@@ -47,7 +47,7 @@ Each test asserts behaviour a user or caller can observe, not implementation det
 
 ## Your task arrives as a file
 
-The lead's prompt names your task file, `.design/sprints/<#>-<name>/tasks/tester-r<n>.md`. Read it and the `brief.md`
+The lead's prompt names your task file, `docs/sprints/<#>-<name>/tasks/tester-r<n>.md`. Read it and the `brief.md`
 it links: together they are your whole assignment. Work only on what they list; note anything else in your report.
 When done, write your report to the task's "Report to" path (format: `.claude/templates/report.md`) and reply
 with one line: `<status> — <report path>`. The guard hook won't let you finish without the report file.

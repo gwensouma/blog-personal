@@ -1,7 +1,7 @@
 # Claude Code facts the lead relies on
 
 Reference for changing the agent harness (agents, hooks, permissions, cost). Moved from the retired
-`.design/agent-system-status.md` (git history has the 2026-10-12 audit and the eight-step plan it drove). Checked
+`docs/agent-system-status.md` (git history has the 2026-10-12 audit and the eight-step plan it drove). Checked
 against the Claude Code docs on 2026-10-12; re-check exact key spellings before writing config.
 
 ## Docs facts
@@ -62,5 +62,5 @@ The auto-mode classifier blocks the lead from editing its own permissions, so th
 on the user"): the `playwright-nojs` server in `.mcp.json` (config: `.claude/playwright-nojs.json`) and in
 `enabledMcpjsonServers`; `mcp__playwright-nojs` in `permissions.allow`; and `Edit(/app/**)`, `Edit(/lib/**)`,
 `Edit(/types/**)`, `Edit(/components/**)`, `Edit(/content/**)`, `Edit(/public/**)`, `Edit(/assets/**)`,
-`Edit(/tests/**)`, `Edit(/.design/**)` in `.claude/settings.json`, so subagents stop asking for every write (the hook
+`Edit(/tests/**)`, `Edit(/docs/**)` in `.claude/settings.json`, so subagents stop asking for every write (the hook
 still keeps each agent in its area). Until then the reviewer checks no-JS with curl.

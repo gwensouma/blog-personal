@@ -1,9 +1,9 @@
 # Task: reviewer · round <n>
 
-<!-- .design/sprints/<#>-<name>/tasks/reviewer-r<n>.md -->
+<!-- docs/sprints/<#>-<name>/tasks/reviewer-r<n>.md -->
 
-Brief: `.design/sprints/<#>-<name>/brief.md` · Branch: `<branch>`
-Report to: `.design/sprints/<#>-<name>/reports/reviewer-r<n>.md` (format: `.claude/templates/report.md`)
+Brief: `docs/sprints/<#>-<name>/brief.md` · Branch: `<branch>`
+Report to: `docs/sprints/<#>-<name>/reports/reviewer-r<n>.md` (format: `.claude/templates/report.md`)
 
 ## Review
 - Diff: `git diff origin/main...HEAD` (or `gh pr diff <n>` once the PR exists).

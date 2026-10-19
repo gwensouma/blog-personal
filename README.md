@@ -22,9 +22,9 @@ small JSON-file store in `.data/`.
    If it fails to connect, the reviewer falls back to a static review and says so.
 8. **Trust the workspace** when Claude Code asks: the `PreToolUse` hook in `.claude/hooks/guard-paths.mjs` enforces
    which agent may edit what.
-9. **Start a session with `/lead`.** The lead reads [.design/roadmap.md](.design/roadmap.md) and runs the sprint loop
+9. **Start a session with `/lead`.** The lead reads [docs/roadmap.md](docs/roadmap.md) and runs the sprint loop
    with the planner, developer, tester and reviewer agents; every task and report is a file under
-   `.design/sprints/` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)).
+   `docs/sprints/` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)).
 10. **Spend limit:** agents are bounded by `maxTurns`, not dollars. Set a monthly limit on your account (Console
     workspace limit for an API key, or `/usage-credits` on a subscription).
 
@@ -45,4 +45,4 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs `gate` and `e2e` 
 
 - [CLAUDE.md](CLAUDE.md): project goals, architecture and where each new file goes.
 - [.claude/rules/](.claude/rules/): UI, data and test rules.
-- [.design/](.design/): roadmap, sprint records and design decisions.
+- [docs/](docs/): roadmap, sprint records and design decisions.

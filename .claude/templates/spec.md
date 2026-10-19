@@ -1,6 +1,6 @@
 # Spec: <feature>
 
-<!-- Written by the planner to .design/specs/<feature>.md. The user approves it before any task is written.
+<!-- Written by the planner to docs/specs/<feature>.md. The user approves it before any task is written.
 Delete the comments when filling it in. -->
 
 Status: draft | approved by the user on <date> · Roadmap: phase <B–E>, sprint <#> · Author: planner
@@ -26,7 +26,7 @@ Recommendation: <A/B> because …
 ## Questions for the user
 1. A question whose answer changes the plan, with the planner's default.
 
-A plan that goes against an entry in `.design/decisions.md` names it here (`D-<n>`) and asks.
+A plan that goes against an entry in `docs/decisions.md` names it here (`D-<n>`) and asks.
 
 ## Scope
 - In: …

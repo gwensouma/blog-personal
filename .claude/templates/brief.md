@@ -1,8 +1,8 @@
 # Sprint <#>: <title>
 
-<!-- Written by the planner to .design/sprints/<#>-<name>/brief.md from an approved spec. Every task links here. -->
+<!-- Written by the planner to docs/sprints/<#>-<name>/brief.md from an approved spec. Every task links here. -->
 
-Branch: `<feat|fix|chore>/<name>` · Spec: `.design/specs/<feature>.md` · Roadmap row: <#>
+Branch: `<feat|fix|chore>/<name>` · Spec: `docs/specs/<feature>.md` · Roadmap row: <#>
 
 ## Goal
 One or two sentences.

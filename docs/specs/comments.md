@@ -57,7 +57,7 @@ component lands where the real one will appear.
 ## Questions for the user
 1. **Which `X-Forwarded-For` entry with `TRUST_PROXY=1`?** The plan says left-most, but the left-most entry is whatever
    the client sent when the proxy appends (nginx `$proxy_add_x_forwarded_for`), so a spammer rotates it freely.
-   Default: the **right-most** entry (the address your one trusted proxy saw), documented in `.design/comments.md`.
+   Default: the **right-most** entry (the address your one trusted proxy saw), documented in `docs/comments.md`.
 2. **Per-IP limit** (the plan gives none): default **5 comments per 10 minutes per address**.
 3. **Duplicate resubmit:** a no-JS reload re-POSTs the form. Default: the same name and body on the same post within
    10 minutes is answered as a success without storing a second copy.
@@ -66,7 +66,7 @@ component lands where the real one will appear.
 
 ## Scope
 - In: `types/comment.ts`, `lib/data/comments.ts`, `lib/actions/comments.ts`, a pure input helper, the comments
-  section on the post page, the count in the post meta, unit and e2e tests, `.design/comments.md`, product.md update.
+  section on the post page, the count in the post meta, unit and e2e tests, `docs/comments.md`, product.md update.
 - Out (sprint 10): `/admin`, login, hide/unhide, `ADMIN_*` env. Also out: replies, Markdown or links in comments,
   editing or deleting by the commenter, email notifications, comment counts on lists (Q4).
 
@@ -136,7 +136,7 @@ component lands where the real one will appear.
 | developer | `types/comment.ts`, `lib/comment-input.ts`, `lib/data/comments.ts`, `lib/actions/comments.ts`, `app/(blog)/posts/[slug]/page.tsx` |
 | builder | `components/comments/comment-section.tsx`, `comment-list.tsx`, `comment-form.tsx`; `components/posts/post-article.tsx` (section + count), `components/posts/post-meta.tsx` if the count needs a second slot |
 | tester | `tests/unit/comment-input.test.ts`, `tests/unit/comments.test.ts`, `tests/e2e/comments.spec.ts` (JS and `@no-js`) |
-| lead | `.design/product.md` (post page; drop "Comments" from non-goals), `.design/comments.md` (from the developer's report: limits, rate-limit and XFF trade-off), `.env.example` (`TRUST_PROXY` is now read; `ADMIN_*` stay "planned") |
+| lead | `docs/product.md` (post page; drop "Comments" from non-goals), `docs/comments.md` (from the developer's report: limits, rate-limit and XFF trade-off), `.env.example` (`TRUST_PROXY` is now read; `ADMIN_*` stay "planned") |
 
 The developer goes first and hands the builder `getComments(slug): Promise<Comment[]>`, the `comments` prop on
 `PostArticle`, `addCommentAction` and `CommentFormState`.
@@ -166,7 +166,7 @@ accounts and no auth library. Admin is protected by a **password in `.env`**. A 
 - The body is plain React text with line breaks kept: no Markdown, no HTML, no auto-links. `CommentList` is an RSC
   rendered inline (essential content, so no Suspense). `CommentForm` is the only client leaf (`useActionState` +
   `useOptimistic`), posts without JS, and puts errors in `role="alert"`. Files go in `components/comments/`. Show the
-  count in the post meta. Notes go in `.design/comments.md`.
+  count in the post meta. Notes go in `docs/comments.md`.
 
 ### Sprint 10: `feat/comments-admin`
 - `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` (and `TRUST_PROXY`) go in `.env.example`. If either secret is unset,
