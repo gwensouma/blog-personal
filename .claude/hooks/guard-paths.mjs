@@ -5,9 +5,9 @@
 // - subagents never push, merge, open PRs, switch branches or rewrite history (the lead owns git);
 // - nobody kills processes by image name (taskkill /IM kills the user's other Node processes).
 // - work is handed over in files: a role agent is spawned only with the one-line prompt "Task: <path>" naming an
-//   existing task file (.design/sprints/<sprint>/tasks/<agent>-r<n>.md) that has its template's sections, the planner
+//   existing task file (docs/sprints/<sprint>/tasks/<agent>-r<n>.md) that has its template's sections, the planner
 //   alone writes specs, briefs and tasks, and each agent may write its own report
-//   (.design/sprints/<sprint>/reports/<agent>-r<n>.md), in the report template's shape, and no other.
+//   (docs/sprints/<sprint>/reports/<agent>-r<n>.md), in the report template's shape, and no other.
 // Events: PreToolUse (Write/Edit/MultiEdit/NotebookEdit, Bash/PowerShell, Agent) and SubagentStop (a role agent may
 // not stop before its report exists).
 // Input: the hook JSON on stdin. Output: exit 2 with a reason on stderr blocks; exit 0 allows.
@@ -20,8 +20,11 @@ import path from "node:path";
 const ROLE_AGENTS = new Set(["developer", "tester", "reviewer"]);
 const SUBAGENTS = new Set([...ROLE_AGENTS, "planner"]);
 
-// .design/sprints/<sprint>/tasks/<agent>-r<n>.md, with / or \ separators (doubled when JSON-escaped in a transcript).
-const TASK_PATH = /\.design[\\/]+sprints[\\/]+([^\\/\s`'"]+)[\\/]+tasks[\\/]+([a-z]+)-r(\d+)\.md/g;
+// The workflow docs live in docs/ (formerly .design/; both roots are accepted while the move lands).
+// docs/sprints/<sprint>/tasks/<agent>-r<n>.md, with / or \ separators (doubled when JSON-escaped in a transcript).
+const TASK_PATH = /(?<![\w.-])(\.design|docs)[\\/]+sprints[\\/]+([^\\/\s`'"]+)[\\/]+tasks[\\/]+([a-z]+)-r(\d+)\.md/g;
+const SPEC_PATH = /(?<![\w.-])(?:\.design|docs)[\\/]+specs[\\/]+[a-z0-9-]+\.md/;
+const SPRINT_DIR = /(?<![\w.-])(?:\.design|docs)[\\/]+sprints[\\/]+\d+-[a-z0-9-]+/;
 
 // The whole dispatch prompt of a role agent: "Task: <path>", optionally in backticks.
 const DISPATCH_PROMPT = /^Task:\s*`?[^\s`]+`?$/;
@@ -55,7 +58,6 @@ const GIT_OWNED_BY_LEAD = [
 ];
 
 // Where each writing agent may write (project-relative paths). The lead (main session) is not restricted here.
-const DESIGN_NOTE = /^\.design\/(?!roadmap|decisions)[a-z0-9-]+\.md$/; // e.g. .design/comments.md
 const AREAS = {
   developer: {
     prefixes: ["app/", "lib/", "types/", "components/", "content/", "public/", "assets/"],
@@ -63,7 +65,7 @@ const AREAS = {
       "next.config.ts", "tsconfig.json", "eslint.config.mjs", "postcss.config.mjs", "components.json",
       "package.json", "package-lock.json", ".env.example", "vitest.config.mts", "playwright.config.ts",
     ],
-    note: "app/, lib/, types/, components/, content/, public/, assets/, root config files and .design/<feature>.md notes",
+    note: "app/, lib/, types/, components/, content/, public/, assets/, root config files",
   },
   tester: { prefixes: ["tests/"], files: [], note: "tests/" },
 };
@@ -71,8 +73,7 @@ const AREAS = {
 function inArea(agent, rel) {
   const area = AREAS[agent];
   if (!area) return false;
-  if (area.files.includes(rel) || area.prefixes.some((p) => rel.startsWith(p))) return true;
-  return agent !== "tester" && DESIGN_NOTE.test(rel);
+  return area.files.includes(rel) || area.prefixes.some((p) => rel.startsWith(p));
 }
 // Only in command position (start of the line or after ; & | or a subshell paren), so text that merely
 // mentions it, e.g. inside an echo or a heredoc sentence, is not blocked.
@@ -93,10 +94,10 @@ function isUnderTests(rel) {
   return rel.toLowerCase().startsWith("tests/");
 }
 
-/** What a path under .design/sprints/ is: brief, close, task or report (with its agent), other, or null. */
+/** What a path under docs/sprints/ is: brief, close, task or report (with its agent), other, or null. */
 function sprintFile(rel) {
-  if (!rel.startsWith(".design/sprints/")) return null;
-  const m = /^\.design\/sprints\/[^/]+\/(?:(brief|close)\.md|(tasks|reports)\/([a-z]+)-r\d+\.md)$/.exec(rel);
+  if (!/^(?:\.design|docs)\/sprints\//.test(rel)) return null;
+  const m = /^(?:\.design|docs)\/sprints\/[^/]+\/(?:(brief|close)\.md|(tasks|reports)\/([a-z]+)-r\d+\.md)$/.exec(rel);
   if (!m) return { kind: "other" };
   if (m[1]) return { kind: m[1] };
   return { kind: m[2] === "tasks" ? "task" : "report", agent: m[3] };
@@ -105,10 +106,10 @@ function sprintFile(rel) {
 /** Task files named in a text, in order of appearance. */
 function taskRefs(text) {
   return [...text.matchAll(TASK_PATH)].map((m) => ({
-    agent: m[2],
-    sprintDir: `.design/sprints/${m[1]}`,
-    rel: `.design/sprints/${m[1]}/tasks/${m[2]}-r${m[3]}.md`,
-    report: `.design/sprints/${m[1]}/reports/${m[2]}-r${m[3]}.md`,
+    agent: m[3],
+    sprintDir: `${m[1]}/sprints/${m[2]}`,
+    rel: `${m[1]}/sprints/${m[2]}/tasks/${m[3]}-r${m[4]}.md`,
+    report: `${m[1]}/sprints/${m[2]}/reports/${m[3]}-r${m[4]}.md`,
   }));
 }
 
@@ -147,7 +148,7 @@ function decide(event, projectDir) {
     if (!ROLE_AGENTS.has(target)) return null;
     const own = taskRefs(input.prompt ?? "").filter((t) => t.agent === target);
     if (own.length === 0) {
-      return `Hand ${target} its work as a file: write .design/sprints/<sprint>/tasks/${target}-r<n>.md from .claude/templates/ and put that path in the prompt.`;
+      return `Hand ${target} its work as a file: write docs/sprints/<sprint>/tasks/${target}-r<n>.md from .claude/templates/ and put that path in the prompt.`;
     }
     const missing = own.filter((t) => !existsSync(path.resolve(projectDir, t.rel)));
     if (missing.length > 0) return `Task file not found: ${missing.map((t) => t.rel).join(", ")}. Write it first.`;
@@ -219,8 +220,8 @@ function decide(event, projectDir) {
     return `${rel} is the ${sprint.kind === "close" ? "lead's" : "planner's or the lead's"} to write; ${agent} writes only its own report.`;
   }
   if (agent === "planner") {
-    if (rel.startsWith(".design/specs/")) return null;
-    return `The planner writes specs (.design/specs/), briefs and tasks (.design/sprints/), not ${rel}. Put code changes in a task.`;
+    if (/^(?:\.design|docs)\/specs\//.test(rel)) return null;
+    return `The planner writes specs (docs/specs/), briefs and tasks (docs/sprints/), not ${rel}. Put code changes in a task.`;
   }
   if (agent === "reviewer") {
     return "The reviewer is read-only. Write findings to your report file instead of editing.";
@@ -267,15 +268,15 @@ function plannerPromptProblem(prompt, projectDir) {
   const mode = /^Mode:\s*(spec|tasks)\b/.exec(prompt.trim())?.[1];
   if (!mode) return 'Start the planner\'s prompt with "Mode: spec" or "Mode: tasks" (see .claude/agents/planner.md).';
   if (mode === "spec") return null;
-  const spec = /\.design[\\/]+specs[\\/]+[a-z0-9-]+\.md/.exec(prompt)?.[0].replaceAll("\\", "/");
+  const spec = SPEC_PATH.exec(prompt)?.[0].replaceAll("\\", "/");
   if (!spec || !existsSync(path.resolve(projectDir, spec))) {
-    return "Mode tasks needs an existing spec: name .design/specs/<feature>.md in the prompt.";
+    return "Mode tasks needs an existing spec: name docs/specs/<feature>.md in the prompt.";
   }
   if (!/^Status:\s*approved\b/m.test(readFileSync(path.resolve(projectDir, spec), "utf8"))) {
     return `${spec} is not approved yet ("Status: approved …"). The user (or the lead, when the user waives it) approves the spec before tasks are written.`;
   }
-  if (!/\.design[\\/]+sprints[\\/]+\d+-[a-z0-9-]+/.test(prompt) || !/\bBranch:\s*`?[\w./-]+/.test(prompt)) {
-    return "Mode tasks needs the sprint folder (.design/sprints/<#>-<name>/) and \"Branch: <branch>\" in the prompt.";
+  if (!SPRINT_DIR.test(prompt) || !/\bBranch:\s*`?[\w./-]+/.test(prompt)) {
+    return "Mode tasks needs the sprint folder (docs/sprints/<#>-<name>/) and \"Branch: <branch>\" in the prompt.";
   }
   return null;
 }

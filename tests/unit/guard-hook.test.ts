@@ -110,18 +110,19 @@ describe("guard-paths hook: shell commands", () => {
 });
 
 describe("guard-paths hook: areas and helpers", () => {
-  it("keeps the developer in app/, lib/, types/, components/, content/, root config and design notes", () => {
+  it("keeps the developer in app/, lib/, types/, components/, content/ and root config", () => {
     expect(write("developer", "app/(blog)/page.tsx").code).toBe(0);
     expect(write("developer", "app/globals.css").code).toBe(0);
     expect(write("developer", "components/posts/up-next.tsx").code).toBe(0);
     expect(write("developer", "next.config.ts").code).toBe(0);
-    expect(write("developer", ".design/comments.md").code).toBe(0);
-    expect(write("developer", ".design/blog-refactor.md").code).toBe(0);
+    expect(write("developer", ".design/comments.md").code).toBe(2); // feature notes go in the spec or report (D-022)
+    expect(write("developer", "docs/comments.md").code).toBe(2);
     expect(write("developer", "CLAUDE.md").code).toBe(2);
     expect(write("developer", ".github/workflows/ci.yml").code).toBe(2);
     expect(write("developer", ".claude/hooks/guard-paths.mjs").code).toBe(2);
     expect(write("developer", ".design/roadmap.md").code).toBe(2);
     expect(write("developer", ".design/decisions.md").code).toBe(2);
+    expect(write("developer", "docs/roadmap.md").code).toBe(2);
   });
 
   it("treats the retired builder as a helper, so it can't write", () => {
@@ -177,15 +178,16 @@ function reportText(agent: string, gateLine = "- `npm run gate` → exit 0") {
   ].join("\n\n");
 }
 
-describe("guard-paths hook: file handoff", () => {
+// docs/ is the workflow root; .design/ is accepted until the move lands.
+describe.each(["docs", ".design"])("guard-paths hook: file handoff (%s/)", (root) => {
   // A throwaway project with one sprint, so task and report files can exist or not.
   const project = mkdtempSync(path.join(tmpdir(), "guard-hook-"));
-  const sprint = ".design/sprints/8-home-no-js";
+  const sprint = `${root}/sprints/8-home-no-js`;
   const task = `${sprint}/tasks/developer-r1.md`;
   const report = `${sprint}/reports/developer-r1.md`;
   mkdirSync(path.join(project, sprint, "tasks"), { recursive: true });
   mkdirSync(path.join(project, sprint, "reports"), { recursive: true });
-  writeFileSync(path.join(project, task), taskText("developer"));
+  writeFileSync(path.join(project, task), taskText("developer", 1, sprint));
   afterAll(() => rmSync(project, { recursive: true, force: true }));
 
   const spawn = (subagent_type: string, prompt: string) =>
@@ -208,7 +210,7 @@ describe("guard-paths hook: file handoff", () => {
 
   it("holds the next dispatch until every dispatched task in the sprint has its report", () => {
     const testerTask = `${sprint}/tasks/tester-r1.md`;
-    writeFileSync(path.join(project, testerTask), taskText("tester"));
+    writeFileSync(path.join(project, testerTask), taskText("tester", 1, sprint));
     expect(spawn("developer", `Task: ${task}`).code).toBe(0); // dispatched, so now it must report first
     const waiting = spawn("tester", `Task: ${testerTask}`);
     expect(waiting.code).toBe(2);
@@ -223,7 +225,7 @@ describe("guard-paths hook: file handoff", () => {
     const fresh = mkdtempSync(path.join(tmpdir(), "guard-ahead-"));
     for (const agent of ["developer", "tester", "reviewer"]) {
       mkdirSync(path.join(fresh, sprint, "tasks"), { recursive: true });
-      writeFileSync(path.join(fresh, sprint, "tasks", `${agent}-r1.md`), taskText(agent));
+      writeFileSync(path.join(fresh, sprint, "tasks", `${agent}-r1.md`), taskText(agent, 1, sprint));
     }
     const spawnIn = (agent: string) =>
       run({ tool_name: "Agent", tool_input: { subagent_type: agent, prompt: `Task: ${sprint}/tasks/${agent}-r1.md` } }, fresh);
@@ -261,7 +263,7 @@ describe("guard-paths hook: file handoff", () => {
   });
 
   it("keeps the planner to specs, briefs and tasks", () => {
-    expect(writeIn("planner", ".design/specs/comments.md").code).toBe(0);
+    expect(writeIn("planner", `${root}/specs/comments.md`).code).toBe(0);
     expect(writeIn("planner", `${sprint}/brief.md`).code).toBe(0);
     expect(writeIn("planner", `${sprint}/tasks/tester-r1.md`).code).toBe(0);
     expect(writeIn("planner", `${sprint}/close.md`).code).toBe(2);
@@ -386,5 +388,12 @@ describe("guard-paths hook: planner prompt", () => {
     writeFileSync(path.join(project, spec), "# Spec: up-next\n\nStatus: approved by the user on 2026-10-14\n");
     expect(spawn(tasksPrompt).code).toBe(0);
     expect(spawn(tasksPrompt.replace("Branch: feat/up-next", "")).stderr).toContain("Branch:");
+  });
+
+  it("accepts the docs/ root for the spec and the sprint folder", () => {
+    mkdirSync(path.join(project, "docs/specs"), { recursive: true });
+    writeFileSync(path.join(project, "docs/specs/up-next.md"), "# Spec: up-next\n\nStatus: approved by the user on 2026-10-19\n");
+    expect(spawn(tasksPrompt.replaceAll(".design/", "docs/")).code).toBe(0);
+    expect(spawn(tasksPrompt.replaceAll(".design/", "mydocs/")).stderr).toContain("existing spec");
   });
 });

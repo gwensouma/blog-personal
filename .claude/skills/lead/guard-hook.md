@@ -23,7 +23,7 @@ Reference for the lead: read it when the hook blocks something or before changin
   `## Gate` section with `exit <code>` per command, and its role's sections (`## Files`, `## AC → test`,
   `## Findings`);
 - Write/Edit outside each agent's area: developer `app/`, `lib/`, `types/`, `components/`, `content/`, `public/`,
-  `assets/`, root config files and `.design/<feature>.md`; tester `tests/`; reviewer its report only; planner specs,
+  `assets/` and root config files; tester `tests/`; reviewer its report only; planner specs,
   briefs and tasks. `.github/`, `.claude/`, `CLAUDE.md`, `README.md`, the roadmap and `decisions.md` are yours alone;
 - helper agents (general-purpose, claude, Explore, …, and any unknown type such as the retired `builder`) editing
   anything in the project: they research, they don't write, so code work can't bypass the task files;
