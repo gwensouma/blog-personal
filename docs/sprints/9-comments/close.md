@@ -5,7 +5,7 @@
 - Rounds: developer 2, tester 2/3, reviewer 2/3
 - Local gate: `npm run gate:fast` exit 0 (254 tests, lead, after the last change); `npm run test:e2e` exit 0
   (fresh build, 55 passed, tester round 2; no code changed after it)
-- PR: #<n> · CI at merge time: gate <pass>, e2e <pass>
+- PR: #38 · CI at merge time: gate pass, e2e pass (required checks; merge is blocked otherwise)
 - Usage: `/usage` not available to the lead mid-session; agent runs: planner ×2, developer ×2, tester ×2, reviewer ×2
 
 ## Deferred

@@ -9,7 +9,7 @@ Newest first. Read this for history; plan from the roadmap.
 |---|---|---|---|
 | — ✅ | `feat/perf-and-palette` | Post navigation speed (opt-in `BLOG_LATENCY_MS`, memoised Markdown; D-016) and the petrol palette (D-015). Lead-run, no sprint folder. PR #27 | — |
 | — ✅ | `chore/faster-tests` | One build per test round (`gate:fast`, e2e in `.next-e2e/`, `E2E_SKIP_BUILD`), Shiki preloads only used languages, Ctrl+K flake fixed (D-017). Lead-run, no sprint folder. PR #28 | — |
-| 9 ✅ | `feat/comments` | D: comments on the post page, visible at once; Server Action + `useOptimistic`, works without JS; abuse limits D-024 ([spec](specs/comments.md), [sprint folder](sprints/9-comments/)). PR #<n> | — |
+| 9 ✅ | `feat/comments` | D: comments on the post page, visible at once; Server Action + `useOptimistic`, works without JS; abuse limits D-024 ([spec](specs/comments.md), [sprint folder](sprints/9-comments/)). PR #38 | — |
 | 16 ✅ | `chore/post-covers` | Real covers on all eight posts; e2e `coverContent` locator handles a real `<img>`, `expectShown` polls past entrance animations ([sprint folder](sprints/16-post-covers/)). PR #31 | — |
 | 4 ✅ | `feat/up-next` | B: Up next card at the end of a post (next series part, else related, else newer/older); deduped ending; rules in `lib/post-ending.ts` ([spec](specs/up-next.md), [sprint folder](sprints/4-up-next/)). PR #10 | — |
 | 8 ✅ | `fix/home-no-js` | Home renders featured, latest, topics and the cover deck inline (no `<Suspense>` on ISR `/`); no-JS home test un-parked; first full run of the file handoff ([sprint folder](sprints/8-home-no-js/)). PR #22 | — |
