@@ -21,7 +21,9 @@ paths:
   server, cap anything a stranger can grow, and render user text as React text (no `dangerouslySetInnerHTML`).
 - Accepted abuse limits: likes are anonymous and cookie-based (a scripted client can inflate them; sign the cookie
   or add accounts if counts ever matter); the newsletter answers new and known addresses alike (no membership
-  probing) and caps the list at 5,000. Any new store key a stranger can grow gets a hard cap like these.
+  probing) and caps the list at 5,000; comments cap at 500 per post and are rate-limited per client address
+  (`lib/client-address.ts`: the right-most `X-Forwarded-For` entry, only with `TRUST_PROXY=1`) or site-wide (D-024).
+  Any new store key a stranger can grow gets a hard cap like these.
 - Absolute URLs (RSS, sitemap, OG, JSON-LD) come from `NEXT_PUBLIC_SITE_URL` (see `.env.example`).
 - `lib/markdown.ts` turns Markdown into hast (rendered to React by `post-body`) plus an HTML string (remark/rehype +
   Shiki), and computes the TOC and reading time.

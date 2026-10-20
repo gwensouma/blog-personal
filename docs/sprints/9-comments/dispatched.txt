@@ -1,0 +1,6 @@
+docs/sprints/9-comments/tasks/developer-r1.md
+docs/sprints/9-comments/tasks/tester-r1.md
+docs/sprints/9-comments/tasks/reviewer-r1.md
+docs/sprints/9-comments/tasks/developer-r2.md
+docs/sprints/9-comments/tasks/tester-r2.md
+docs/sprints/9-comments/tasks/reviewer-r2.md

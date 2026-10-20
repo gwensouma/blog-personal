@@ -13,8 +13,7 @@ Open sprints in order; one branch and one PR each. Merged rows move to the archi
 
 | # | Branch | Scope | Spec | Blocked by |
 |---|---|---|---|---|
-| 9 | `feat/comments` | D: comments, visible at once (D-007) | [comments](specs/comments.md) (approved 2026-10-20) | — |
-| 10 | `feat/comments-admin` | D: `/admin` with a password, hide/unhide comments | [comments](specs/comments.md) "Sprint 10 plan" | 9 |
+| 10 | `feat/comments-admin` | D: `/admin` with a password, hide/unhide comments | [comments](specs/comments.md) "Sprint 10 plan" | — |
 | 11 | `feat/static-post` | `/posts/[slug]` static (ISR) again; no views without JS (D-018) | — | 10 |
 | 12 | `fix/a11y-pass` | button-styled links drop `role="button"`; `/search` empty-state title becomes a heading | — | — |
 | 13 | `feat/post-source-seam` | C: `PostSource` interface in `lib/data/posts.ts`, Markdown impl behind it (D-001) | — | — |
@@ -24,6 +23,7 @@ Open sprints in order; one branch and one PR each. Merged rows move to the archi
 ## Backlog
 Wanted, not scheduled. A row becomes a sprint through a spec.
 
+- Comments follow-ups: cap the error echo, split `CommentEntry`, `Input` height ([sprint 9 close](sprints/9-comments/close.md))
 - Image zoom on body images (a client leaf; waits for a post with body images)
 - `/stats` page (views and likes per post; dynamic rendering vs caching)
 - `/now` and `/uses` pages (wait for the user's own content)
