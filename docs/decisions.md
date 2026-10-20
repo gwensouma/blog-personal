@@ -25,6 +25,15 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-024 · 2026-10-20 · Comment abuse limits and the client address
+- **Decision:** with `TRUST_PROXY=1`, the client address is the **right-most** `X-Forwarded-For` entry (the one the
+  trusted proxy saw), never the left-most; without it, or with no header, limits are site-wide. Comments: 5 per 10
+  minutes per address, 30 per 10 minutes site-wide otherwise, 500 per post, and a same-name-and-body resubmit within
+  10 minutes answers success without storing a copy. The comment count shows only on the post page.
+- **Why:** an appending proxy puts the client's own claim on the left, so a spammer could rotate it; the count stays
+  off ISR list pages to avoid extra revalidation. Sprint 10's login throttle uses the same client address.
+- **Source:** the user accepted the planner's defaults, 2026-10-20 ([specs/comments.md](specs/comments.md)).
+
 ### D-023 · 2026-10-19 · `.design/` becomes `docs/`
 - **Decision:** the workflow docs (product, roadmap, decisions, archive, specs, sprints) live in `docs/`. Living, index
   and log docs name the new paths; merged specs and sprint folders keep their old text as records. The guard hook
