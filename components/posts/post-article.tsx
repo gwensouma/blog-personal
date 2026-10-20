@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
+import { CommentSection } from "@/components/comments/comment-section";
 import { ReadingColumn } from "@/components/reading-column";
 import { Reveal } from "@/components/motion/reveal";
 import { ScrollProgress } from "@/components/motion/scroll-progress";
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { linkSweepClassName } from "@/lib/motion";
 import { absoluteUrl, site } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import type { Comment } from "@/types/comment";
 import type { Post, PostEnding, PostSeries } from "@/types/post";
 
 type PostArticleProps = {
@@ -28,15 +30,18 @@ type PostArticleProps = {
   series: PostSeries | null;
   /** The end-of-post links, already deduped by getPostEnding (lib/data/posts.ts). */
   ending: PostEnding;
+  /** Visible comments, oldest first (getComments). */
+  comments: Comment[];
 };
 
 // Server Component: renders a full post. Client leaves: LikeButton, the
-// copy-link and code-copy buttons, the newsletter form, the TOC scroll-spy, the
+// copy-link and code-copy buttons, the comment and newsletter forms, the TOC scroll-spy, the
 // reading progress bar and the scroll-reveal wrappers (which only pass
 // server-rendered children through).
 // The view count and the like button are per-visitor data behind their own
 // <Suspense>: the article streams first and they fill in (see post-engagement.tsx).
-export function PostArticle({ post, series, ending }: PostArticleProps) {
+// Comments are essential content: the count in the meta and the section render inline, no boundary.
+export function PostArticle({ post, series, ending, comments }: PostArticleProps) {
   const hasToc = post.toc.length > 0;
   // A one-part "series" has nothing to navigate to yet.
   const shownSeries = series && series.parts.length > 1 ? series : null;
@@ -58,6 +63,13 @@ export function PostArticle({ post, series, ending }: PostArticleProps) {
               <Suspense fallback={<PostViewsSkeleton />}>
                 <PostViews slug={post.slug} />
               </Suspense>
+              <span aria-hidden="true">·</span>
+              <a
+                href="#comments"
+                className="rounded-sm tabular-nums underline-offset-4 outline-none transition-colors duration-200 hover:text-primary hover:underline focus-visible:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none"
+              >
+                {`${comments.length.toLocaleString("en-US")} ${comments.length === 1 ? "comment" : "comments"}`}
+              </a>
             </PostMeta>
             <h1 className="font-heading text-4xl leading-tight font-semibold text-balance [overflow-wrap:anywhere] sm:text-5xl">
               {post.title}
@@ -125,8 +137,10 @@ export function PostArticle({ post, series, ending }: PostArticleProps) {
       </div>
 
       <ReadingColumn className="flex flex-col gap-16">
-        {/* One reading path: the single recommended next read first, then the newsletter, then more to
-            browse. getPostEnding already deduped these: a post appears at most once below. */}
+        {/* One reading path: the conversation about this post, then the single recommended next read,
+            the newsletter, then more to browse. getPostEnding already deduped these: a post appears at
+            most once below. */}
+        <CommentSection slug={post.slug} comments={comments} />
         <UpNext upNext={upNext} />
         <NewsletterSection />
         {/* Skip the wrapper when both slots are empty, so it doesn't leave an extra gap. */}

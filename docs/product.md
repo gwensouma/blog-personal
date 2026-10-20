@@ -8,7 +8,7 @@ page in a browser with JavaScript disabled.
 ## What it is
 
 A personal learning journal about React Server Components, built with them: posts are Markdown files in
-`content/posts/`, and likes, views and newsletter sign-ups go to a small JSON-file store. One author, no accounts.
+`content/posts/`, and likes, views, comments and newsletter sign-ups go to a small JSON-file store. One author, no accounts.
 
 ## Readers
 
@@ -33,8 +33,11 @@ A personal learning journal about React Server Components, built with them: post
 - Ends with likes and views, share links, an **Up next** card (the next series part, else the most related post,
   else the newer or older post), the newsletter, prev/next and related posts; a post appears at most once in this
   ending. When in a series: the series box at the top and a series nav back to the previous part (none on part 1).
+- A **Comments** section after the article and before Up next: readers post a name and a plain-text body (no
+  account); a comment shows at once, oldest first, and the meta shows the count ("3 comments") linking to it.
+  Lengths, a per-post cap and rate limits are enforced on the server.
 - An unknown slug is a 404. No JS: the body, series box and nav, the Up next card, related posts and prev/next
-  are visible; like, copy buttons and the TOC highlight need JS.
+  are visible, and comments post (full-page POST) and show; like, copy buttons and the TOC highlight need JS.
 
 ### Tags `/tags` and `/tags/[tag]`
 - `/tags` lists every tag with its post count, most used first.
@@ -61,6 +64,5 @@ A personal learning journal about React Server Components, built with them: post
 
 - Accounts, sign-in, or more than one author.
 - AI features (`lib/ai/`), a database or CMS, deploying or hosting: postponed by the user (see the roadmap).
-- Comments: planned (roadmap), not built.
 - Client-side data fetching or a state library: Server Components and URL params instead.
 - Analytics beyond the post view counter.
