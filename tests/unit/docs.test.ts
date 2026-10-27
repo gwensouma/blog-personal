@@ -97,3 +97,24 @@ describe("roadmap index", () => {
     expect({ wrapped, long }).toEqual({ wrapped: [], long: [] });
   });
 });
+
+describe("sprint folders", () => {
+  const sprintsDir = path.join(root, "docs/sprints");
+  const folders = readdirSync(sprintsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+  const numbers = (rel: string, row: RegExp) =>
+    new Set(linesOf(rel).flatMap((line) => line.match(row)?.[1] ?? []));
+
+  // A sprint folder is either open (a roadmap row) or closed (close.md plus an archive row), so a sprint run outside
+  // the roadmap can't merge without its close.
+  it("keeps every sprint folder on the roadmap or closed and archived", () => {
+    const open = numbers("docs/roadmap.md", /^\| (\d+) \|/);
+    const archived = numbers("docs/roadmap-archive.md", /^\| (\d+) ✅ \|/);
+    const unclosed = folders.filter((folder) => {
+      const n = folder.split("-")[0];
+      return !open.has(n) && !(archived.has(n) && existsSync(path.join(sprintsDir, folder, "close.md")));
+    });
+    expect(unclosed).toEqual([]);
+  });
+});
