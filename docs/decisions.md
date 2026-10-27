@@ -25,6 +25,19 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-026 · 2026-10-27 · Harness work first; sprint folders must close
+- **Decision:** after D-025 the queue is reordered: verifying the subagent hooks and an agent-evals spec come before
+  the comments admin; sprint 11 no longer waits for sprint 10, 14 waits for 13 (same file), 15 waits for 11 and 14
+  (`draft` belongs in the schema). Sprint 12 is lead-run. The comments follow-ups from sprint 9 ride with sprint 10.
+  `tests/unit/docs.test.ts` now fails any sprint folder that is neither on the roadmap nor closed (`close.md` and an
+  archive row), and `close.md` records finding counts instead of `/usage`.
+- **Why:** with the team as the subject, the evals make every later sprint comparable, and they rely on hooks nobody
+  has verified. Sprint 17 merged (PR #37) with no roadmap row, no `close.md` and no archive row: the close step could
+  be skipped, so the gate now enforces it (its `close.md` was written late from the developer report). `/usage` was
+  never available to the lead mid-session.
+- **Source:** the user approved a review of sprints 10–15 after D-025, 2026-10-27. The sandbox question stays
+  open until the evals spec.
+
 ### D-025 · 2026-10-27 · The project's goal moves from learning RSC to learning agentic workflows
 - **Decision:** the blog is no longer a vehicle for learning React Server Components; it is the testbed for the
   `/lead` agent team, which is what the user is now learning. Specs drop the "RSC lesson" section and the planner no

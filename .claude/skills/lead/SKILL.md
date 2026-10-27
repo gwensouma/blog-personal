@@ -140,7 +140,7 @@ states the command and its exit code; "it passes" without one is not a gate resu
 
 ### 7. Ship
 
-1. Write `close.md` from `.claude/templates/close.md`: rounds, local gates, `/usage`, deferred findings.
+1. Write `close.md` from `.claude/templates/close.md`: rounds, local gates, finding counts, deferred findings.
 2. Move the sprint row from the roadmap to `docs/roadmap-archive.md` (with the PR number once known) and carry any
    deferred item that is still wanted into the roadmap's "Backlog" (one line).
 3. Commit everything (code, tests, the sprint folder, roadmap), push, `gh pr create`, then add the PR number to
@@ -162,7 +162,8 @@ force pushes or deletions. Strict means the PR must be up to date with `main`: i
 merging to you. Then fast-forward local `main`. The merge commit is the record of the merge; nothing is committed to
 `main` afterwards.
 
-Done per sprint: PR merged, sprint folder complete (brief, every task with its report, close), row archived.
+Done per sprint: PR merged, sprint folder complete (brief, every task with its report, close), row archived. The gate
+fails a sprint folder that is neither on the roadmap nor closed and archived, so even ad-hoc work gets a roadmap row.
 
 Sprints run **one at a time** in the main working tree. Parallel worktrees are off until the guard hook is verified
 there: it resolves paths against the project root, so a worktree path may escape its checks.
