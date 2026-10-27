@@ -1,7 +1,7 @@
-# Personal blog: a React Server Components learning project
+# Personal blog: an agentic-workflow testbed
 
-A personal blog built to learn React Server Components with Next.js 15 (App Router), React 19, TypeScript,
-Tailwind v4 and shadcn/ui. Posts are Markdown files in `content/posts/`; likes, views and newsletter sign-ups go to a
+A personal blog built with Next.js 15 (App Router), React 19, TypeScript, Tailwind v4 and shadcn/ui, developed by a
+Claude Code agent team (`/lead`) as a way to learn agentic workflows. Posts are Markdown files in `content/posts/`; likes, views and newsletter sign-ups go to a
 small JSON-file store in `.data/`.
 
 ## Setup

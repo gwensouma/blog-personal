@@ -1,14 +1,14 @@
 # CLAUDE.md
 
-A personal blog built to learn React Server Components: Next.js 15 App Router, React 19, TypeScript, Tailwind v4,
-shadcn/ui (`base-nova` on Base UI). Area rules load on demand from `.claude/rules/` (`ui.md`, `data.md`, `tests.md`).
+A personal blog, now the testbed for learning agentic workflows (the `/lead` team below is the subject; D-025):
+Next.js 15 App Router, React 19, TypeScript, Tailwind v4, shadcn/ui (`base-nova` on Base UI). Area rules load on demand from `.claude/rules/` (`ui.md`, `data.md`, `tests.md`).
 Team workflow: `/lead` ([.claude/skills/lead/SKILL.md](.claude/skills/lead/SKILL.md)); plan: [docs/roadmap.md](docs/roadmap.md);
 decisions and why: [docs/decisions.md](docs/decisions.md);
 what each page does today: [docs/product.md](docs/product.md) (read it before changing a page).
 
 ## Project goals
 
-- **RSC is the point.** Server Components by default; push `"use client"` down to the smallest leaf (like
+- **Server first.** Server Components by default; push `"use client"` down to the smallest leaf (like
   [components/posts/like-button.tsx](components/posts/like-button.tsx)). Fetch on the server, not in effects.
   Essential content renders without JS: `<Suspense>` only around non-essential or JS-dependent content.
 - **TypeScript only** (`.ts`/`.tsx`). **English only** in comments and UI copy; translate Vietnamese comments you touch.
