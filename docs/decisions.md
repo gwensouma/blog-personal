@@ -25,6 +25,14 @@ Decisions the user hasn't made yet. Ask before the work that needs the answer.
 
 ## Log
 
+### D-025 · 2026-10-27 · The project's goal moves from learning RSC to learning agentic workflows
+- **Decision:** the blog is no longer a vehicle for learning React Server Components; it is the testbed for the
+  `/lead` agent team, which is what the user is now learning. Specs drop the "RSC lesson" section and the planner no
+  longer ranks features by what they teach. The server-first code rules in `CLAUDE.md` stay as engineering rules.
+- **Why:** the user's focus changed; docs that framed every feature as an RSC lesson steered agents by a stale goal.
+  Merged specs and the archive keep their RSC wording as history.
+- **Source:** the user, 2026-10-27.
+
 ### D-024 · 2026-10-20 · Comment abuse limits and the client address
 - **Decision:** with `TRUST_PROXY=1`, the client address is the **right-most** `X-Forwarded-For` entry (the one the
   trusted proxy saw), never the left-most; without it, or with no header, limits are site-wide. Comments: 5 per 10

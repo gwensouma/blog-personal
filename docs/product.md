@@ -7,7 +7,7 @@ page in a browser with JavaScript disabled.
 
 ## What it is
 
-A personal learning journal about React Server Components, built with them: posts are Markdown files in
+A personal blog: posts are Markdown files in
 `content/posts/`, and likes, views, comments and newsletter sign-ups go to a small JSON-file store. One author, no accounts.
 
 ## Readers

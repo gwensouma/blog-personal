@@ -8,9 +8,6 @@ Status: draft | approved by the user on <date> · Roadmap: phase <B–E>, sprint
 ## Problem
 What the reader or the owner can't do today, in 2–4 sentences.
 
-## RSC lesson
-The React Server Components concept this feature teaches (the point of the project).
-
 ## Research
 - What exists in the code: files, functions, patterns to reuse (`path:line`).
 - Outside sources consulted (docs, articles), with links, and what they changed in the plan.
