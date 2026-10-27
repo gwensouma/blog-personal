@@ -54,9 +54,15 @@ function EmptyMedia({
   )
 }
 
-function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
+// `as` makes the title a real heading where the empty state stands in for content
+// that would carry one (a post list's titles).
+function EmptyTitle({
+  className,
+  as: Comp = "div",
+  ...props
+}: React.ComponentProps<"div"> & { as?: "div" | "h2" | "h3" }) {
   return (
-    <div
+    <Comp
       data-slot="empty-title"
       className={cn(
         "font-heading text-sm font-medium tracking-tight",

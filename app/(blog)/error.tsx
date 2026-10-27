@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { ReadingColumn } from "@/components/reading-column";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 // Error boundaries must be Client Components: they receive a reset() callback to retry rendering.
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -21,9 +21,9 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         <Button size="lg" onClick={() => reset()}>
           Try again
         </Button>
-        <Button variant="outline" size="lg" nativeButton={false} render={<Link href="/" />}>
+        <Link href="/" className={buttonVariants({ variant: "outline", size: "lg" })}>
           Back to home
-        </Button>
+        </Link>
       </div>
     </ReadingColumn>
   );

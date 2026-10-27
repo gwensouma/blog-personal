@@ -3,7 +3,7 @@ import { SearchIcon } from "lucide-react";
 import { StaggerList } from "@/components/motion/stagger";
 import { PostList } from "@/components/posts/post-list";
 import { PostListItem } from "@/components/posts/post-list-item";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { searchHref } from "@/lib/search";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ export function SearchResults({ outcome }: { outcome: SearchOutcome }) {
           <EmptyMedia variant="icon">
             <SearchIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle className="text-base">Search the journal</EmptyTitle>
+          <EmptyTitle as="h2" className="text-base">Search the journal</EmptyTitle>
           <EmptyDescription>Type a word or phrase above. Titles, summaries, tags and full post text are all searched.</EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -62,13 +62,13 @@ export function SearchResults({ outcome }: { outcome: SearchOutcome }) {
           }
           emptyAction={
             tag && facets.length > 0 ? (
-              <Button variant="outline" nativeButton={false} render={<Link href={searchHref(query)} />}>
+              <Link href={searchHref(query)} className={buttonVariants({ variant: "outline" })}>
                 Clear the topic filter
-              </Button>
+              </Link>
             ) : (
-              <Button variant="outline" nativeButton={false} render={<Link href="/posts" />}>
+              <Link href="/posts" className={buttonVariants({ variant: "outline" })}>
                 Browse the archive
-              </Button>
+              </Link>
             )
           }
         />

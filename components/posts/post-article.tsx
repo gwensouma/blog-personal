@@ -17,7 +17,7 @@ import { PostTags } from "@/components/posts/post-tags";
 import { PostToc } from "@/components/posts/post-toc";
 import { RelatedPosts } from "@/components/posts/related-posts";
 import { UpNext } from "@/components/posts/up-next";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { linkSweepClassName } from "@/lib/motion";
 import { absoluteUrl, site } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -53,10 +53,10 @@ export function PostArticle({ post, series, ending, comments }: PostArticleProps
       {/* On xl screens the reading column stays centered and the TOC sits in the right gutter. */}
       <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,45rem)_minmax(0,1fr)] xl:gap-x-12">
         <article id="post-article" className="mx-auto w-full max-w-180 min-w-0 xl:col-start-2 xl:row-start-1 xl:max-w-none">
-          <Button variant="link" nativeButton={false} render={<Link href="/posts" />} className="mb-10 px-0">
+          <Link href="/posts" className={buttonVariants({ variant: "link", className: "mb-10 px-0" })}>
             <ArrowLeftIcon data-icon="inline-start" aria-hidden="true" />
             All posts
-          </Button>
+          </Link>
 
           <header className="flex flex-col gap-5 border-b border-border pb-10">
             <PostMeta post={post} showUpdated>

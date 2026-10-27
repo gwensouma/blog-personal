@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { RssIcon } from "lucide-react";
 import { AuthorAvatar } from "@/components/authors/author-avatar";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { site } from "@/lib/site";
 import type { AuthorAvatar as AuthorAvatarData } from "@/types/author";
 
@@ -54,21 +54,22 @@ export function AuthorAbout({ avatar }: { avatar: AuthorAvatarData | null }) {
         <ul className="flex flex-wrap gap-2">
           {site.social.map((link) => (
             <li key={link.href}>
-              <Button
-                variant="outline"
-                nativeButton={false}
-                render={<a href={link.href} target="_blank" rel="me noopener noreferrer" />}
+              <a
+                href={link.href}
+                target="_blank"
+                rel="me noopener noreferrer"
+                className={buttonVariants({ variant: "outline" })}
               >
                 {link.label}
                 <span className="sr-only"> (opens in a new tab)</span>
-              </Button>
+              </a>
             </li>
           ))}
           <li>
-            <Button variant="outline" nativeButton={false} render={<a href="/feed.xml" />}>
+            <a href="/feed.xml" className={buttonVariants({ variant: "outline" })}>
               <RssIcon data-icon="inline-start" aria-hidden="true" />
               RSS feed
-            </Button>
+            </a>
           </li>
         </ul>
       </section>

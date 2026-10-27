@@ -5,7 +5,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { ReadingColumn } from "@/components/reading-column";
 import { PageHeader } from "@/components/page-header";
 import { PostList } from "@/components/posts/post-list";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { getAllTags, getPosts, getTag } from "@/lib/data/posts";
 
 // Only tags from generateStaticParams exist; anything else is a real 404.
@@ -35,10 +35,10 @@ export default async function TagPage({ params }: TagPageProps) {
 
   return (
     <ReadingColumn>
-      <Button variant="link" nativeButton={false} render={<Link href="/tags" />} className="mb-8 px-0">
+      <Link href="/tags" className={buttonVariants({ variant: "link", className: "mb-8 px-0" })}>
         <ArrowLeftIcon data-icon="inline-start" aria-hidden="true" />
         All tags
-      </Button>
+      </Link>
       <PageHeader
         title={tag.name}
         description={`${tag.count} ${tag.count === 1 ? "post" : "posts"} tagged ${tag.name}, newest first.`}

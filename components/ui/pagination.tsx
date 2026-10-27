@@ -2,7 +2,8 @@ import * as React from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
-import { Button } from "@/components/ui/button"
+import { type VariantProps } from "class-variance-authority"
+import { buttonVariants } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
@@ -36,9 +37,11 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 
 type PaginationLinkProps = {
   isActive?: boolean
-} & Pick<React.ComponentProps<typeof Button>, "size"> &
+} & Pick<VariantProps<typeof buttonVariants>, "size"> &
   React.ComponentProps<typeof Link>
 
+// A plain Link styled as a button (not <Button render>), so it keeps the link
+// role instead of getting role="button".
 function PaginationLink({
   className,
   isActive,
@@ -46,19 +49,12 @@ function PaginationLink({
   ...props
 }: PaginationLinkProps) {
   return (
-    <Button
-      variant={isActive ? "outline" : "ghost"}
-      size={size}
-      className={cn(className)}
-      nativeButton={false}
-      render={
-        <Link
-          aria-current={isActive ? "page" : undefined}
-          data-slot="pagination-link"
-          data-active={isActive}
-          {...props}
-        />
-      }
+    <Link
+      aria-current={isActive ? "page" : undefined}
+      data-slot="pagination-link"
+      data-active={isActive}
+      className={buttonVariants({ variant: isActive ? "outline" : "ghost", size, className })}
+      {...props}
     />
   )
 }
