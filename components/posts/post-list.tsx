@@ -29,7 +29,7 @@ export function PostList({
           <EmptyMedia variant="icon">
             <FileTextIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle className="text-base">{emptyTitle}</EmptyTitle>
+          <EmptyTitle as={headingLevel ?? "h2"} className="text-base">{emptyTitle}</EmptyTitle>
           <EmptyDescription>{emptyDescription}</EmptyDescription>
         </EmptyHeader>
         {emptyAction ? <EmptyContent>{emptyAction}</EmptyContent> : null}

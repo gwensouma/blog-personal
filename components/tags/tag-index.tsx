@@ -12,7 +12,7 @@ export function TagIndex({ tags }: { tags: Tag[] }) {
           <EmptyMedia variant="icon">
             <TagsIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle className="text-base">No tags yet</EmptyTitle>
+          <EmptyTitle as="h2" className="text-base">No tags yet</EmptyTitle>
           <EmptyDescription>Tags appear here once posts are published with them.</EmptyDescription>
         </EmptyHeader>
       </Empty>

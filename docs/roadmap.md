@@ -13,7 +13,6 @@ Open sprints in order (D-026: harness first); one branch and one PR each. Merged
 
 | # | Branch | Scope | Spec | Blocked by |
 |---|---|---|---|---|
-| 12 | `fix/a11y-pass` | Lead-run: button-styled links drop `role="button"`; `/search` empty-state title becomes a heading | — | — |
 | 18 | `chore/verify-hooks` | Harness: in a fresh session, the planner's `WebFetch`/`WebSearch` load and a foreground subagent honors `SubagentStop` | — | — |
 | 19 | `feat/agent-evals` | Harness: agent evals (seeded-bug patches with the reviewer findings expected); spec first | — | 18, sandbox answer |
 | 10 | `feat/comments-admin` | `/admin` with a password, hide/unhide comments; plus sprint 9 deferred (error echo cap, `CommentEntry` split, `Input` height) | [comments](specs/comments.md) "Sprint 10 plan" | — |

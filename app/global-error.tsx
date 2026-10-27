@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import "@/app/globals.css";
 
 // Replaces the root layout when it fails, so it renders its own <html> and <body>.
@@ -25,9 +25,9 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
             </Button>
             {/* A full page load, not client navigation: the app shell itself failed. */}
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- intentional full reload */}
-            <Button variant="link" size="lg" nativeButton={false} render={<a href="/" />}>
+            <a href="/" className={buttonVariants({ variant: "link", size: "lg" })}>
               Go to the home page
-            </Button>
+            </a>
           </div>
         </main>
       </body>

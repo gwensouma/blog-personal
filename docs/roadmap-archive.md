@@ -7,6 +7,7 @@ Newest first. Read this for history; plan from the roadmap.
 
 | # | Branch | Scope | Blocked by |
 |---|---|---|---|
+| 12 ✅ | `fix/a11y-pass` | Button-styled links are plain links with `buttonVariants` (no `role="button"`; the header search trigger keeps it, it opens a dialog); empty-state titles are headings (`EmptyTitle as`). Lead-run, no sprint folder. PR #— | — |
 | — ✅ | `feat/perf-and-palette` | Post navigation speed (opt-in `BLOG_LATENCY_MS`, memoised Markdown; D-016) and the petrol palette (D-015). Lead-run, no sprint folder. PR #27 | — |
 | — ✅ | `chore/faster-tests` | One build per test round (`gate:fast`, e2e in `.next-e2e/`, `E2E_SKIP_BUILD`), Shiki preloads only used languages, Ctrl+K flake fixed (D-017). Lead-run, no sprint folder. PR #28 | — |
 | 9 ✅ | `feat/comments` | D: comments on the post page, visible at once; Server Action + `useOptimistic`, works without JS; abuse limits D-024 ([spec](specs/comments.md), [sprint folder](sprints/9-comments/)). PR #38 | — |

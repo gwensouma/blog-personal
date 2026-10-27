@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { PostList } from "@/components/posts/post-list";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { getFeaturedPost, getPosts } from "@/lib/data/posts";
 
 const LATEST_COUNT = 4;
@@ -29,14 +29,14 @@ export async function LatestPosts() {
       </Reveal>
       <PostList posts={latest} headingLevel="h3" />
       {posts.length > 0 ? (
-        <Button variant="link" nativeButton={false} render={<Link href="/posts" />} className="group/more self-start px-0">
+        <Link href="/posts" className={buttonVariants({ variant: "link", className: "group/more self-start px-0" })}>
           View all posts
           <ArrowRightIcon
             data-icon="inline-end"
             aria-hidden="true"
             className="transition-transform duration-300 ease-out-expo motion-safe:group-hover/more:translate-x-1 motion-safe:group-focus-visible/more:translate-x-1"
           />
-        </Button>
+        </Link>
       ) : null}
     </section>
   );
